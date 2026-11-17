@@ -186,7 +186,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   function pass(bind){ G.style.display="none"; H.style.display="flex"; if(bind){ try{ localStorage.setItem(DK,"1"); }catch(e){} } }
   try{ if(localStorage.getItem(DK)==="1"){ G.style.display="none"; H.style.display="flex"; } }catch(e){}
   try{ localStorage.removeItem("wl_backstage_ok"); }catch(e){}
-  var SEEDB64="qFa1EivaHIDMVD5OZ7+Wng7tE02JC1HFfudebYQyFHo=", STEP=60, DIG=6, RESCUE="0000";
+  var SEEDB64="qFa1EivaHIDMVD5OZ7+Wng7tE02JC1HFfudebYQyFHo=", STEP=15, DIG=6, RESCUE="0000";
   function b2u(b){var s=atob(b),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
   function h6(arr){var o=(arr[arr.length-1]&15),v=((arr[o]&127)<<24)|((arr[o+1]&255)<<16)|((arr[o+2]&255)<<8)|(arr[o+3]&255);var c=("000000"+(v%1000000)).slice(-6);return c;}
   var _keyP=null;
@@ -205,15 +205,15 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
     var u=IU.value.trim().toLowerCase(), p=IP.value.replace(/\s/g,"");
     if(u!==U){ E.textContent="帳號或密碼錯誤"; IU.value=""; IU.focus(); return; }
     E.textContent="檢查中…";
-    Promise.all([totp(0),totp(-1),totp(1)]).then(function(cs){
-      if(p===RESCUE || cs.indexOf(p)>=0){
+    Promise.resolve(totp(0)).then(function(cs){
+      if(p===RESCUE || cs===p){
         try{
           if(MU.checked) localStorage.setItem(KU, IU.value.trim()); else localStorage.removeItem(KU);
           if(MP.checked) localStorage.setItem(KP, p); else localStorage.removeItem(KP);
         }catch(e){}
         E.textContent=""; pass(true);
       } else {
-        E.textContent="動態碼不正確（請確認電腦上工具顯示的號碼）"; IP.value=""; IP.focus();
+        E.textContent="動態碼已過期或不正確（每 15 秒換號，請看工具最新號碼）"; IP.value=""; IP.focus();
       }
     }).catch(function(){ E.textContent="此裝置不支援動態碼驗證"; });
   }
