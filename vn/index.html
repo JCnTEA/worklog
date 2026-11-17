@@ -162,6 +162,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   </div>
   <div class="hs-foot">
     <div class="hs-note">建議把這頁加入手機書籤：jcntea.github.io/worklog/vn/</div>
+    <div class="hs-note"><a id="devUnbind" href="#" style="color:inherit;text-decoration:underline">解除這台裝置的綁定</a></div>
   </div>
 </section>
 <div id="thSheet">
@@ -176,14 +177,16 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 <button id="themeBtn" type="button" aria-label="切換顏色主題"><span class="t-in"></span><span class="t-name" id="themeName"></span></button>
 <script>
 (function(){
-  var KU="wl_bs_user", KP="wl_bs_pw", _D=function(x){try{return atob(x)}catch(e){return ""}}, U=_D("amNudGVh"), P=_D("MTI2OTU3");
+  var KU="wl_bs_user", KP="wl_bs_pw", _D=function(x){try{return atob(x)}catch(e){return ""}}, U=_D("amNudGVh"), P=_D("MzA3MDcz");
   var G=document.getElementById("pwGate"), H=document.getElementById("homeScr");
   var IU=document.getElementById("pwUser"), IP=document.getElementById("pwInput");
   var B=document.getElementById("pwGo"), E=document.getElementById("pwErr");
   var MU=document.getElementById("pwMemU"), MP=document.getElementById("pwMemP");
-  function pass(){ G.style.display="none"; H.style.display="flex"; }
+  var DK="wl_dev_ok";
+  function pass(bind){ G.style.display="none"; H.style.display="flex"; if(bind){ try{ localStorage.setItem(DK,"1"); }catch(e){} } }
+  try{ if(localStorage.getItem(DK)==="1"){ G.style.display="none"; H.style.display="flex"; } }catch(e){}
   try{ localStorage.removeItem("wl_backstage_ok"); }catch(e){}
-  IU.value="JCnTEA"; IP.value=_D("MTI2OTU3"); MU.checked=true; MP.checked=true;
+  IU.value="JCnTEA"; IP.value=_D("MzA3MDcz"); MU.checked=true; MP.checked=true;
   try{
     var su=localStorage.getItem(KU), sp=localStorage.getItem(KP);
     if(su) IU.value=su;
@@ -197,7 +200,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
         if(MU.checked) localStorage.setItem(KU, IU.value.trim()); else localStorage.removeItem(KU);
         if(MP.checked) localStorage.setItem(KP, p); else localStorage.removeItem(KP);
       }catch(e){}
-      E.textContent=""; pass();
+      E.textContent=""; pass(true);
     } else {
       E.textContent = (u===U ? "密碼錯誤" : "帳號或密碼錯誤");
       if(u!==U){ IU.value=""; IU.focus(); } else { IP.value=""; IP.focus(); }
@@ -324,6 +327,8 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   var st={};
   try{ st=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ st={}; }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+  var ub=document.getElementById("devUnbind");
+  if(ub){ ub.addEventListener("click", function(ev){ ev.preventDefault(); try{ localStorage.removeItem("wl_dev_ok"); }catch(e){} location.reload(); }); }
   Array.prototype.forEach.call(document.querySelectorAll(".hs-toggle"), function(h){
     var g=h.getAttribute("data-g"), body=document.getElementById("hsBody-"+g);
     if(!body) return;
