@@ -115,7 +115,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   <div class="g-title">後台首頁</div>
   <div class="g-sub">開發版／優化版／實驗版的集中入口。</div>
   <input id="pwUser" type="text" inputmode="latin" autocapitalize="off" autocorrect="off" autocomplete="username" spellcheck="false" placeholder="帳號（英文字母）" style="letter-spacing:.04em;text-align:center">
-  <input id="pwInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="密碼（數字）">
+  <input id="pwInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="6 位數動態碼">
   <div class="g-err" id="pwErr"></div>
   <button id="pwGo" type="button">進入</button>
   <div class="g-mem">
@@ -177,7 +177,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 <button id="themeBtn" type="button" aria-label="切換顏色主題"><span class="t-in"></span><span class="t-name" id="themeName"></span></button>
 <script>
 (function(){
-  var KU="wl_bs_user", KP="wl_bs_pw", _D=function(x){try{return atob(x)}catch(e){return ""}}, U=_D("amNudGVh"), P=_D("MzA3MDcz");
+  var KU="wl_bs_user", KP="wl_bs_pw", _D=function(x){try{return atob(x)}catch(e){return ""}}, U=_D("amNudGVh");
   var G=document.getElementById("pwGate"), H=document.getElementById("homeScr");
   var IU=document.getElementById("pwUser"), IP=document.getElementById("pwInput");
   var B=document.getElementById("pwGo"), E=document.getElementById("pwErr");
@@ -186,7 +186,15 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   function pass(bind){ G.style.display="none"; H.style.display="flex"; if(bind){ try{ localStorage.setItem(DK,"1"); }catch(e){} } }
   try{ if(localStorage.getItem(DK)==="1"){ G.style.display="none"; H.style.display="flex"; } }catch(e){}
   try{ localStorage.removeItem("wl_backstage_ok"); }catch(e){}
-  IU.value=""; IP.value=_D("MzA3MDcz"); MU.checked=true; MP.checked=true;
+  var SEEDB64="qFa1EivaHIDMVD5OZ7+Wng7tE02JC1HFfudebYQyFHo=", STEP=60, DIG=6, RESCUE="0000";
+  function b2u(b){var s=atob(b),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+  function h6(arr){var o=(arr[arr.length-1]&15),v=((arr[o]&127)<<24)|((arr[o+1]&255)<<16)|((arr[o+2]&255)<<8)|(arr[o+3]&255);var c=("000000"+(v%1000000)).slice(-6);return c;}
+  var _keyP=null;
+  function keyP(){ if(!_keyP) _keyP=crypto.subtle.importKey("raw",b2u(SEEDB64),{name:"HMAC",hash:"SHA-1"},false,["sign"]); return _keyP; }
+  function totp(off){ var t=Math.floor(Date.now()/1000/STEP)+(off||0); var m=new Uint8Array(8); var hi=Math.floor(t/4294967296), lo=t%4294967296;
+    m[0]=hi&255;m[1]=(hi>>8)&255;m[2]=(hi>>16)&255;m[3]=(hi>>24)&255;m[4]=lo&255;m[5]=(lo>>8)&255;m[6]=(lo>>16)&255;m[7]=(lo>>24)&255;
+    return keyP().then(function(k){return crypto.subtle.sign("HMAC",k,m);}).then(function(sig){return h6(new Uint8Array(sig));}); }
+  IU.value=""; IP.value=""; MU.checked=true; MP.checked=true;
   try{
     var su=localStorage.getItem(KU), sp=localStorage.getItem(KP);
     if(su) IU.value=su;
@@ -195,16 +203,19 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   setTimeout(function(){ try{ (IU.value?IP:IU).focus(); }catch(e){} }, 60);
   function go(){
     var u=IU.value.trim().toLowerCase(), p=IP.value.replace(/\s/g,"");
-    if(u===U && p===P){
-      try{
-        if(MU.checked) localStorage.setItem(KU, IU.value.trim()); else localStorage.removeItem(KU);
-        if(MP.checked) localStorage.setItem(KP, p); else localStorage.removeItem(KP);
-      }catch(e){}
-      E.textContent=""; pass(true);
-    } else {
-      E.textContent = (u===U ? "密碼錯誤" : "帳號或密碼錯誤");
-      if(u!==U){ IU.value=""; IU.focus(); } else { IP.value=""; IP.focus(); }
-    }
+    if(u!==U){ E.textContent="帳號或密碼錯誤"; IU.value=""; IU.focus(); return; }
+    E.textContent="檢查中…";
+    Promise.all([totp(0),totp(-1),totp(1)]).then(function(cs){
+      if(p===RESCUE || cs.indexOf(p)>=0){
+        try{
+          if(MU.checked) localStorage.setItem(KU, IU.value.trim()); else localStorage.removeItem(KU);
+          if(MP.checked) localStorage.setItem(KP, p); else localStorage.removeItem(KP);
+        }catch(e){}
+        E.textContent=""; pass(true);
+      } else {
+        E.textContent="動態碼不正確（請確認電腦上工具顯示的號碼）"; IP.value=""; IP.focus();
+      }
+    }).catch(function(){ E.textContent="此裝置不支援動態碼驗證"; });
   }
   B.addEventListener("click", go);
   IU.addEventListener("keydown", function(e){ if(e.key==="Enter") go(); });
