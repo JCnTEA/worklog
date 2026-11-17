@@ -1,0 +1,11 @@
+{
+ "versionCode": 21,
+ "versionName": "V1.0",
+ "build": "21",
+ "apk": "https://jcntea.github.io/worklog/assets/worklog-1.0.apk",
+ "fileName": "worklog-1.0.apk",
+ "apkPage": "../apk/",
+ "notes": "APK 連結一律留在 App 內下載＋自動安裝（不外跳瀏覽器）",
+ "web": "V0.10",
+ "apkRequired": true
+}
