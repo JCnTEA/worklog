@@ -3020,6 +3020,48 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       });
   }
 
+  /* ---------- 開頁／回前景自動刷新定位（未定位模式自動重試） ---------- */
+  var _autoGpsBusy = false, _autoGpsLast = 0;
+  function autoGpsRefresh(){
+    if (_autoGpsBusy || !navigator.geolocation) return;
+    var now = Date.now();
+    if (now - _autoGpsLast < 60000) return;
+    _autoGpsLast = now;
+    _autoGpsBusy = true;
+    var hadPlace = !!(todayData.place && (todayData.place.name || todayData.place.lat != null));
+    elGpsBtn.disabled = true;
+    elGpsBtn.textContent = "定位中…";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      _autoGpsBusy = false;
+      elGpsBtn.disabled = false;
+      elGpsBtn.textContent = "重新定位";
+      var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy || 0;
+      var p = todayData.place;
+      if (p && p.name && p.lat != null && haversine(p.lat, p.lng, lat, lng) < 300){
+        lastCoords = { lat: lat, lng: lng, acc: acc };
+        p.lat = lat; p.lng = lng; p.acc = acc; p.at = Date.now();
+        persist(); renderPlace(); nearRenderAll(lat, lng);
+      } else {
+        lookup(lat, lng, acc);
+      }
+    }, function(err){
+      _autoGpsBusy = false;
+      elGpsBtn.disabled = false;
+      elGpsBtn.textContent = hadPlace ? "重新定位" : "取得 GPS 位置";
+      if (!hadPlace){
+        elPlaceBox.classList.add("empty");
+        elPlaceName.textContent = "尚未定位";
+        elPlaceMeta.textContent = (err && err.code === 1)
+          ? "尚未授權定位：開啟自動定位失敗，請按上方按鈕允許位置，或手動填寫"
+          : "開啟自動定位暫時取不到位置，可按上方按鈕重試，或手動填寫";
+      }
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  }
+  window.addEventListener("load", function(){ setTimeout(autoGpsRefresh, 200); });
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible") autoGpsRefresh();
+  });
+
   elGpsBtn.addEventListener("click", function(){
     if (!navigator.geolocation){
       elPlaceBox.classList.add("empty");
