@@ -3477,7 +3477,7 @@ img,svg,canvas,video{max-width:100%}
   var NOTICE_KEY = "worklog.notice.announce.20261118";
   var NOTICE_DEF = {
     title: "版本異動公告 · 2026-11-18",
-    body: "主題 [[7 色＋相片背景]]，三頁同步\n圓鈕 [[固定右上角]]，不隨頁面移動\n後台首頁改滿版、App 圖示更新\n[[自動換版]] 與 [[自檢系統]] 上線\n舊樣式會自動換一次，資料不變"
+    body: "本次異動已完成上線：\n主題 [[7 色＋自訂相片背景]] 升級，\n首頁與主頁同步；\n主題鈕 [[固定於畫面右上角]]、\n版面比例修正、App 圖示更新，\n[[版本自動更新]] 與 [[自檢系統]] 上線。\n若仍顯示舊樣式，\n系統會 [[自動換版一次]]；\n資料與操作方式均未變動，\n造成不便，敬請見諒。"
   };
   function noticeCfg(){
     try{
@@ -4509,7 +4509,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118134105";
+  var MY_BUILD="20261118135315";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
