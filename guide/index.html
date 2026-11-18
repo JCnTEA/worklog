@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<base href="./guide.html">
+<base href="./">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>勤務記錄系統_教學網 V0.10</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -154,6 +154,12 @@ footer{padding:22px 0 0;color:var(--muted);font-size:12.5px}
 <meta name="apple-mobile-web-app-title" content="勤務日誌">
 <meta name="application-name" content="勤務日誌">
 <meta name="theme-color" content="#0B1220">
+<style id="selfcheckGuard">
+/* 自檢系統：版面防護（滿版、不得橫向溢出） */
+html,body{max-width:100vw;overflow-x:hidden}
+#homeScr,#homeScr *,#thSheet,#thSheet *,#themeBtn{box-sizing:border-box}
+img,svg,canvas,video{max-width:100%}
+</style>
 </head>
 <body>
 <script>
