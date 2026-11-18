@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="270" height="90" viewBox="0 0 270 90" role="img" aria-label="Download Android APK V1.7">
+  <rect x="1" y="1" width="268" height="88" rx="16" ry="16" fill="#0B0B0B" stroke="rgba(255,255,255,.12)" stroke-width="1.2"/>
+  <g transform="translate(20,26)">
+    <path d="M3 3 L10 11" stroke="#A4C639" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M37 3 L30 11" stroke="#A4C639" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="3" cy="3" r="2.2" fill="#A4C639"/>
+    <circle cx="37" cy="3" r="2.2" fill="#A4C639"/>
+    <path d="M2 17 Q2 6 20 6 Q38 6 38 17 L2 17 Z" fill="#A4C639"/>
+    <circle cx="13" cy="12.6" r="1.9" fill="#0B0B0B"/>
+    <circle cx="27" cy="12.6" r="1.9" fill="#0B0B0B"/>
+    <text x="20" y="34" text-anchor="middle" font-family="'Noto Sans','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#A4C639" letter-spacing="0.2">APK</text>
+  </g>
+  <text x="66" y="34" font-family="'Noto Sans','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="400" fill="#CFCFCF" letter-spacing="0.3">Download</text>
+  <text x="66" y="66" font-family="'Noto Sans','Helvetica Neue',Arial,sans-serif" font-size="27" font-weight="300" fill="#F4F4F4" letter-spacing="0.2">Android APK</text>
+  <text x="252" y="81" text-anchor="end" font-family="'Noto Sans','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700" fill="#9FD53B" letter-spacing="0.4">V1.7</text>
+</svg>
