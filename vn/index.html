@@ -157,7 +157,7 @@ img,svg,canvas,video{max-width:100%}
   <div class="hs-body" id="hsBody-app">
     <div class="hs-grid">
       <a class="hs-tile main" href="../apk/"><div class="hs-name">Android 版</div><div class="hs-meta">V1.0 · 正式版 App</div></a>
-      <a class="hs-tile" href="../assets/worklog-bn1.0.apk" download="worklog-bn1.0.apk"><div class="hs-name">後台 App</div><div class="hs-meta">Bn1.0 · 內測用 APK</div></a>
+      <a class="hs-tile" href="../assets/worklog-bn1.1.apk" download="worklog-bn1.1.apk"><div class="hs-name">後台 App</div><div class="hs-meta">Bn1.1 · 內測用 APK</div></a>
     </div>
   </div>
 
@@ -417,7 +417,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118133643";
+  var MY_BUILD="20261118234625";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
