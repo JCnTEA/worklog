@@ -593,7 +593,9 @@
   #devBanner{position:sticky;top:0;z-index:99;background:#7A2E1E;color:#FFF6E8;
     font:600 12px/1.45 "Noto Sans TC",system-ui,sans-serif;padding:9px 16px 9px 20px;display:flex;
     flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;margin:-22px -14px 14px}
-  #devBanner a,#devBanner button{font-size:10.5px;white-space:nowrap;padding:3px 7px !important}  
+  #devBanner{padding-right:64px !important;box-sizing:border-box}
+  #devBanner a,#devBanner button{font-size:10px !important;white-space:nowrap;padding:2px 5px !important;letter-spacing:0}
+  #devBanner span:last-child{gap:4px !important}
   #devBanner span:last-child{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
 
 /* 自訂店：往左滑刪除 */
@@ -690,8 +692,59 @@ body.updOpen #notice{display:none!important}
 #updX{position:absolute;top:9px;right:9px}
 </style>
 <style id="wlZoomLock">html,body{-webkit-text-size-adjust:100%;text-size-adjust:100%}input,textarea{font-size:16px}</style>
+<style>
+/* ===== 主題引擎（與正式版同一套） ===== */
+#themeBtn,#themeBtn *,.head,#thSheet,#thSheet *{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,select{-webkit-user-select:text;user-select:text}
+#themeBtn{touch-action:manipulation}
+#themeBtn::after{content:"";position:absolute;inset:-12px;border-radius:50%}
+#themeBtn{position:fixed !important;right:14px;top:calc(env(safe-area-inset-top) + 12px);z-index:10090;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(120,135,150,.55);background:rgba(12,18,26,.62);padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+#themeBtn .t-in{width:29px;height:29px;border-radius:50%;display:block;
+  background:linear-gradient(165deg,#F01152 0%,#FF5A1F 45%,#FFC83D 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+#themeBtn:active{transform:scale(.95)}
+#thSheet{position:fixed;inset:0;z-index:230;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(3,7,14,.55);padding:0 14px calc(env(safe-area-inset-bottom) + 16px)}
+#thSheet.on{display:flex}
+#thSheet .ts-card{width:100%;max-width:420px;background:var(--thcard,#FFFDF7);color:var(--ink);border:1px solid var(--line);
+  border-radius:16px;padding:14px;box-shadow:0 16px 44px rgba(0,0,0,.35)}
+#thSheet .ts-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#thSheet .ts-head strong{font:700 14px/1.2 "Noto Sans TC",system-ui,sans-serif}
+#thSheet .ts-x{border:0;background:transparent;color:var(--muted);font-size:22px;line-height:1;padding:0 4px}
+#thSheet .ts-tip{font:400 11.5px/1.75 "Noto Sans TC",system-ui,sans-serif;color:var(--muted);margin:2px 0 10px}
+#thSheet .ts-up{display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--line);border-radius:10px;
+  padding:11px;font:600 13px/1.2 "Noto Sans TC",system-ui,sans-serif;color:var(--blue);background:var(--blue-wash)}
+#thThumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#thThumbs .ts-th{position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;background-size:cover;background-position:center;border:1px solid var(--line)}
+#thThumbs .ts-th .x{position:absolute;top:0;right:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.6);color:#fff;font-size:12px;border-bottom-left-radius:8px}
+</style>
+<style id="selfcheckGuard">
+/* 自檢系統：版面防護（滿版、不得橫向溢出） */
+html,body{max-width:100vw;overflow-x:hidden}
+#homeScr,#homeScr *,#thSheet,#thSheet *,#themeBtn{box-sizing:border-box}
+</style>
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../assets/icon-152.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/icon-192.png">
+<link rel="manifest" href="../assets/manifest-vi.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1220">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 </head>
 <body>
+<button id="themeBtn" type="button" aria-label="切換顏色主題"><span class="t-in"></span></button>
+<div id="thSheet" role="dialog" aria-label="主題">
+  <div class="ts-card">
+    <div class="ts-head"><strong>主題</strong><button type="button" class="ts-x" id="thClose" aria-label="關閉">×</button></div>
+    <div class="ts-tip">按圓鈕切換顏色；長按圓鈕可上傳相簿照片當背景（最多 4 張）。文字顏色會依背景深淺自動變深或變亮。</div>
+    <label class="ts-up" for="thFile">＋ 上傳相簿照片（最多 4 張）</label>
+    <input type="file" id="thFile" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+    <div id="thThumbs"></div>
+  </div>
+</div>
+
+
 <script>
 /* 快取自癒（iOS Safari／加到主畫面的 PWA 最容易卡舊版）：
    頁面自己記住「我這一版」的版號，若線上 version.json 的 web 版號比這版新，
@@ -2623,7 +2676,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       elPlaceMeta.textContent = (err && err.code === 1)
         ? "定位權限被拒絕：請在瀏覽器設定允許這個網站使用位置，或手動填寫地點"
         : "取不到位置訊號：請到空曠處再試一次，或手動填寫地點";
-    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 });
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   });
 
   elCands.addEventListener("click", function(ev){
@@ -3661,6 +3714,222 @@ document.addEventListener("click", function(e){
       })
       .catch(function(){});
   }catch(e){}
+})();
+</script>
+<script>
+(function(){
+    var TH=[
+      {n:"紅橙黃",g:"linear-gradient(165deg,#F01152 0%,#FF5A1F 45%,#FFC83D 100%)"},
+      {n:"紫粉桃",g:"linear-gradient(170deg,#A64CFF 0%,#FF79C9 55%,#FF0F87 100%)"},
+      {n:"藍紫桃",g:"linear-gradient(170deg,#1FA8F0 0%,#7B4CFF 55%,#FF2FA0 100%)"},
+      {n:"青綠黃",g:"linear-gradient(170deg,#00C2E0 0%,#12D6A0 40%,#FFC233 100%)",light:1},
+      {n:"彩紅",g:"linear-gradient(160deg,#5BE36B 0%,#00C9E0 25%,#FF2FA0 55%,#FFC83D 78%,#FF5A1F 100%)"},
+      {n:"黑",g:"linear-gradient(160deg,#000000 0%,#10141B 55%,#1C222B 100%)"},
+      {n:"白",g:"linear-gradient(160deg,#FFFFFF 0%,#F3F5F9 55%,#E6EAF1 100%)",light:1}
+    ];
+    var K="wl_theme", CK="wl_custom_themes";
+    var B=document.getElementById("themeBtn");
+    if(!B) return;
+    var IN=B.querySelector(".t-in"), SH=document.getElementById("thSheet"),
+        FU=document.getElementById("thFile"), TB=document.getElementById("thThumbs"),
+        CL=document.getElementById("thClose");
+    var custom=[];
+    try{ custom=JSON.parse(localStorage.getItem(CK)||"[]")||[]; }catch(e){ custom=[]; }
+    var i=parseInt(localStorage.getItem(K)||"0",10);
+    if(isNaN(i)||i<0) i=0;
+    var touched=[], mo=null, moT=null, curDark=false;
+
+    function list(){
+      var L=TH.slice();
+      for(var n=0;n<custom.length;n++){
+        L.push({n:"相片"+(n+1), g:"url("+custom[n].d+") center/cover no-repeat", light:(custom[n].lum>0.58), custom:true});
+      }
+      return L;
+    }
+    function save(){ try{ localStorage.setItem(CK, JSON.stringify(custom)); }catch(e){ alert("相片太大，這台裝置存不下，換一張小一點的試試。"); } }
+
+    function restoreSurfaces(){
+      for(var i2=0;i2<touched.length;i2++){
+        var e=touched[i2];
+        e.style.removeProperty("background-color");
+        e.style.removeProperty("color");
+        e.removeAttribute("data-ths");
+      }
+      touched=[];
+      if(mo){ mo.disconnect(); mo=null; }
+    }
+    function darkSurfaces(){
+      if(!curDark) return;
+      var all=document.body.getElementsByTagName("*");
+      for(var j=0;j<all.length;j++){
+        var e=all[j];
+        if(e.hasAttribute("data-ths")) continue;
+        if(e.tagName==="CANVAS"||e.tagName==="IMG") continue;
+        if(e.closest&&(e.closest("#thSheet")||e.closest(".notice"))) continue;
+        if(e.closest&&e.closest(".nb-sw")) continue;
+        var cs; try{ cs=getComputedStyle(e); }catch(err){ continue; }
+        var bg=cs.backgroundColor;
+        var m=bg&&bg.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, ]+([\d.]+))?\)/);
+        if(!m) continue;
+        var al=(m[4]===undefined)?1:parseFloat(m[4]);
+        if(al<.5) continue;
+        var r=+m[1], g2=+m[2], b=+m[3];
+        var l=(.2126*r+.7152*g2+.0722*b)/255;
+        if(l>.60){
+          e.style.setProperty("background-color","#1F2B37","important");
+          if(!cs.color||l>.45) e.style.setProperty("color","#EAEFF5","important");
+          e.setAttribute("data-ths","1");
+          touched.push(e);
+        }
+      }
+      if(!mo){
+        mo=new MutationObserver(function(){
+          clearTimeout(moT); moT=setTimeout(darkSurfaces,260);
+        });
+        mo.observe(document.body,{childList:true,subtree:true});
+      }
+    }
+
+    function apply(){
+      var L=list(); if(i>=L.length) i=0; var t=L[i];
+      var root=document.documentElement, body=document.body;
+      var dark = !t.light;
+      root.style.setProperty("--paper", dark ? "#0E1520" : t.g.indexOf("#FFF")===0 ? "#F7F9FC" : "#FFFDF7");
+      root.style.setProperty("--sheet", dark ? "rgba(16,23,33,.88)" : "rgba(255,253,247,.90)");
+      root.style.setProperty("--thcard", dark ? "rgba(21,31,41,.94)" : "rgba(255,253,247,.96)");
+      root.style.setProperty("--ink",   dark ? "#EFF4F9" : "#16222E");
+      root.style.setProperty("--ink2",  dark ? "#C8D3DE" : "#495867");
+      root.style.setProperty("--muted", dark ? "#9FB0C0" : "#7C8895");
+      root.style.setProperty("--line",  dark ? "rgba(255,255,255,.26)" : "#D2DBE4");
+      root.style.setProperty("--line-soft", dark ? "rgba(255,255,255,.15)" : "#E3E9EF");
+      root.style.setProperty("--blue",  dark ? "#8FC1F0" : "#1B4C86");
+      root.style.setProperty("--blue-wash", dark ? "rgba(143,193,240,.16)" : "#E9F0F7");
+      root.style.setProperty("--stamp", dark ? "#E0705F" : "#A6382A");
+      root.style.colorScheme = dark ? "dark" : "light";
+
+      if(t.custom){
+        var ov = dark ? "rgba(8,12,18,.60)" : "rgba(255,255,255,.66)";
+        body.style.backgroundImage = "linear-gradient("+ov+","+ov+"),"+t.g;
+        body.style.backgroundSize = "cover, cover";
+      }else{
+        body.style.backgroundImage = t.g;
+        body.style.backgroundSize = "cover";
+      }
+      body.style.backgroundPosition = "center";
+      body.style.backgroundRepeat = "no-repeat";
+      body.style.backgroundAttachment = "fixed";
+      IN.style.background = t.g;
+      IN.style.backgroundSize = "cover";
+
+      if(dark){ curDark=false; restoreSurfaces(); curDark=true; darkSurfaces(); }
+      else { curDark=false; restoreSurfaces(); }
+      try{ localStorage.setItem(K,String(i)); }catch(e){}
+    }
+
+    function renderThumbs(){
+      if(!TB) return;
+      TB.innerHTML="";
+      for(var n=0;n<custom.length;n++){
+        (function(idx){
+          var d=document.createElement("div");
+          d.className="ts-th"; d.style.backgroundImage="url("+custom[idx].d+")";
+          var x=document.createElement("div"); x.className="x"; x.textContent="✕";
+          x.addEventListener("click", function(ev){
+            ev.stopPropagation(); ev.preventDefault();
+            custom.splice(idx,1); save();
+            if(i>=list().length) i=0;
+            apply(); renderThumbs();
+          });
+          d.appendChild(x); TB.appendChild(d);
+        })(n);
+      }
+    }
+    function openSheet(){ if(!SH) return; SH.classList.add("on"); renderThumbs(); }
+    function closeSheet(){ if(!SH) return; SH.classList.remove("on"); }
+
+    var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=2000, tapT=null;
+    function lpStart(e){
+      if(e && e.touches && e.touches.length>1) return;
+      var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+      holdX=t.clientX||0; holdY=t.clientY||0; holding=true; lpDone=false;
+    try{ if(e && e.pointerId!==undefined && B.setPointerCapture) B.setPointerCapture(e.pointerId); }catch(err){}
+      clearTimeout(lpT);
+      lpT=setTimeout(function(){ if(!holding) return; lpDone=true; holding=false; try{ if(navigator.vibrate) navigator.vibrate(30); }catch(err){} openSheet(); }, HOLDMS);
+    }
+    function lpMove(e){
+      if(!holding) return;
+      var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+      var dx=(t.clientX||0)-holdX, dy=(t.clientY||0)-holdY;
+      if(dx*dx+dy*dy > 676){ holding=false; clearTimeout(lpT); }
+    }
+    function lpEnd(){ holding=false; clearTimeout(lpT); }
+    B.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+    ["pointerdown","touchstart","mousedown"].forEach(function(ev){ B.addEventListener(ev, lpStart, {passive:true}); });
+    ["pointermove","touchmove"].forEach(function(ev){ B.addEventListener(ev, lpMove, {passive:true}); });
+    ["pointerup","touchend","mouseup"].forEach(function(ev){ B.addEventListener(ev, lpEnd, {passive:true}); });
+    ["selectstart","dragstart"].forEach(function(ev){
+      B.addEventListener(ev, function(e){ e.preventDefault(); });
+      if(SH) SH.addEventListener(ev, function(e){ e.preventDefault(); });
+    });
+    window.addEventListener("scroll", lpEnd, {passive:true});
+    B.addEventListener("click", function(){
+      if(lpDone){ lpDone=false; return; }
+      var L=list(); i=(i+1)%L.length; apply();
+    });
+    if(CL) CL.addEventListener("click", closeSheet);
+    if(SH) SH.addEventListener("click", function(e){ if(e.target===SH) closeSheet(); });
+
+    function avgLum(ctx,w,h){
+      var d=ctx.getImageData(0,0,w,h).data, n=0, sum=0;
+      for(var p=0;p<d.length;p+=4*8){
+        sum += (0.299*d[p] + 0.587*d[p+1] + 0.114*d[p+2])/255; n++;
+      }
+      return n ? sum/n : 0.5;
+    }
+    if(FU) FU.addEventListener("change", function(){
+      var f=FU.files && FU.files[0]; if(!f) return;
+      var r=new FileReader();
+      r.onload=function(){
+        var im=new Image();
+        im.onload=function(){
+          var max=1400, w=im.width, h=im.height;
+          if(Math.max(w,h)>max){ var sc=max/Math.max(w,h); w=Math.round(w*sc); h=Math.round(h*sc); }
+          var c=document.createElement("canvas"); c.width=w; c.height=h;
+          var cx=c.getContext("2d"); cx.drawImage(im,0,0,w,h);
+          var d=c.toDataURL("image/jpeg",0.72);
+          var lum=avgLum(cx,w,h);
+          custom.push({d:d,lum:lum});
+          if(custom.length>4) custom.shift();
+          save(); i=list().length-1; apply(); renderThumbs(); closeSheet();
+        };
+        im.onerror=function(){ alert("這張圖片讀不進來，換一張試試。"); };
+        im.src=r.result;
+      };
+      r.readAsDataURL(f);
+      FU.value="";
+    }); 
+
+    apply();
+  })();
+</script>
+<script>
+/* 版本自癒：卡在舊版就自動換一次 */
+(function(){
+  var MY_BUILD="20261118150833";
+  var KEY="wl_selfver";
+  function go(b){
+    try{ if (sessionStorage.getItem(KEY) === b) return; sessionStorage.setItem(KEY,b); }catch(e){}
+    location.replace(location.pathname + "?v=" + b);
+  }
+  function check(){
+    fetch("../assets/pages-version.json?t=" + Date.now(), {cache:"no-store"})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ if (d && d.build && d.build !== MY_BUILD) go(d.build); })
+      .catch(function(){});
+  }
+  check();
+  window.addEventListener("pageshow", check);
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) check(); });
 })();
 </script>
 </body>
