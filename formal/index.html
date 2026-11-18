@@ -248,10 +248,15 @@
   }
   .notice{background:#FFFFFF !important;border-color:#D2DBE4 !important}
   .notice h3{color:#1B4C86 !important}
-  .notice.ann{border-left:3px solid #E5342A !important}
+  .annmask{position:fixed;inset:0;z-index:95;background:rgba(10,16,24,.58);display:flex;align-items:center;justify-content:center;padding:22px}
+  .annmask[hidden]{display:none}
+  .notice.ann{position:relative !important;left:auto !important;right:auto !important;bottom:auto !important;
+    transform:none !important;width:100%;max-width:352px;margin:0;border-left:3px solid #E5342A !important;
+    border-radius:6px;box-shadow:0 18px 44px rgba(8,16,26,.42);animation:annIn .24s ease-out}
+  @keyframes annIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
   .notice.ann h3{color:#C0301F !important}
   .notice p{margin:0;font-size:12.8px;line-height:1.95;color:#3C4A59 !important;word-break:normal;overflow-wrap:break-word;line-break:strict;text-align:justify;text-justify:inter-ideograph}
-  .notice .notice-x{color:#7C8895 !important}
+  .notice .notice-x{color:#8A96A3 !important;z-index:3}
   .notice .notice-foot{border-top-color:#E3E9EF !important}
   .notice .notice-foot label{color:#495867 !important}
   .notice .notice-ok{background:#1F5FA8 !important;color:#FFFFFF !important;border-color:#1F5FA8 !important}
@@ -1500,6 +1505,7 @@ img,svg,canvas,video{max-width:100%}
 
 
   <!-- ===== 版本異動公告（獨立浮窗） ===== -->
+  <div class="annmask" id="annMask" hidden>
   <aside class="notice ann" id="ann" hidden>
     <button type="button" class="notice-x" id="annX" aria-label="關閉公告">✕</button>
     <h3 id="annTitle">版本異動公告 · 2026-11-18</h3>
@@ -1509,6 +1515,7 @@ img,svg,canvas,video{max-width:100%}
       <button type="button" class="notice-ok" id="annOk">知道了</button>
     </div>
   </aside>
+  </div>
 
   <!-- ===== 公告設定（後台2 專用） ===== -->
   <div class="nedit" id="nEdit" hidden>
@@ -3551,15 +3558,18 @@ img,svg,canvas,video{max-width:100%}
       .replace(/\n/g,"<br>");
   }
   var elAnn = document.getElementById("ann"), elAnnNever = document.getElementById("annNever");
+  var elAnnMask = document.getElementById("annMask");
   function annMuted(){ return annCfg().until > Date.now(); }
   function closeAnn(month){
     elAnn.hidden = true;
+    if (elAnnMask) elAnnMask.hidden = true;
     if (month){ var c = annCfg(); c.until = Date.now() + NOTICE_MONTH;
       try{ localStorage.setItem(ANN_KEY, JSON.stringify(c)); }catch(err){} }
     if (!noticeMuted()){ elNotice.hidden = false; }
   }
   annPaint();
   document.getElementById("annX").addEventListener("click", function(){ closeAnn(false); });
+  if (elAnnMask) elAnnMask.addEventListener("click", function(e){ if (e.target === elAnnMask) closeAnn(false); });
   document.getElementById("annOk").addEventListener("click", function(){ closeAnn(elAnnNever.checked); });
 
   /* 公告編輯（後台2 專屬內容） */
@@ -4228,7 +4238,7 @@ img,svg,canvas,video{max-width:100%}
   renderPlace();
   renderCands(-1);
   if (lastCoords && lastCoords.lat != null) nearRenderAll(lastCoords.lat, lastCoords.lng);
-  if (!annMuted()){ elAnn.hidden = false; } else if (!noticeMuted()){ elNotice.hidden = false; }
+  if (!annMuted()){ elAnn.hidden = false; if (elAnnMask) elAnnMask.hidden = false; } else if (!noticeMuted()){ elNotice.hidden = false; }
   paintPend();
 
   /* ---------- 掃描辨識待處理（截圖／相簿／貼文字） ---------- */
@@ -4557,7 +4567,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118142334";
+  var MY_BUILD="20261118143151";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
