@@ -143,6 +143,17 @@ footer{padding:22px 0 0;color:var(--muted);font-size:12.5px}
 }
 @keyframes toTopIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 </style>
+<!-- App 圖示：iOS 加到主畫面／Android 安裝時使用 -->
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../assets/icons/icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../assets/icons/icon-152.png">
+<link rel="manifest" href="../assets/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="勤務日誌">
+<meta name="application-name" content="勤務日誌">
+<meta name="theme-color" content="#0B1220">
 </head>
 <body>
 <script>
@@ -176,7 +187,7 @@ footer{padding:22px 0 0;color:var(--muted);font-size:12.5px}
     <span class="pill">手機優先</span>
     <span class="pill">資料存本機</span>
     <span class="pill">三段記錄</span>
-    <span class="pill">黑／白主題</span>
+    <span class="pill">7 色主題＋相片</span>
   </div>
 </header>
 
@@ -314,15 +325,18 @@ footer{padding:22px 0 0;color:var(--muted);font-size:12.5px}
 
 <section id="theme">
   <div class="eyebrow"><span class="num">09</span><h2>主題</h2></div>
-  <p>日期列右邊的「主題」可以換版面，只有黑、白兩款，加上相簿照片當背景。</p>
-<figure class="figure"><img src="https://aka.doubaocdn.com/s/cr0pc1kQ8C" width="780" height="1688" alt="主題浮窗：黑、白兩款＋相簿照片"><figcaption>主題浮窗：黑、白兩款＋相簿照片</figcaption></figure>
+  <p>首頁、主頁、後台都掛著同一顆圓形主題鈕：<b>44px、固定右上角、貼在日期旁邊</b>。三頁共用同一份主題設定，在後台換色，正式版打開就是同一個色。</p>
+<figure class="figure"><img src="https://aka.doubaocdn.com/s/MSSA7aYOKT" width="780" height="1688" alt="主題相片面板：長按圓鈕 3 秒開啟，可從相簿上傳相片當背景"><figcaption>長按右上角圓鈕 3 秒 → 主題相片面板</figcaption></figure>
   <ol class="steps">
-    <li>按「主題」打開浮窗。</li>
-    <li>選白色或黑色，或按「從相簿選擇」挑一張照片。</li>
-    <li>字色會自動依背景亮度切換深／淺，深色時卡片也會轉深。</li>
-    <li>按「儲存」套用；按右上角 <kbd>✕</kbd> 或「回到預設」則不套用。</li>
+    <li><b>輕點圓鈕</b>：跳到下一個顏色。內建 7 色：紅橙黃、紫粉桃、藍紫桃、青綠黃、彩紅、黑、白。</li>
+    <li><b>按住圓鈕 3 秒</b>：從底部滑出「主題相片」面板，按「從相簿選擇相片／圖片」就能把相片當背景，最多 4 張，第 5 張會汰換最舊的一張。</li>
+    <li>相片只留在這台裝置（存在瀏覽器本機），不會上傳、不會跑到別支手機。</li>
+    <li>字色與卡片會依背景明暗自動轉深或轉白；切到淺色（青綠黃、白）時，首頁磚塊與主頁欄位會自動換成深字。</li>
+    <li>面板按「關閉」或點面板外的遮罩就收起；相片左下角的 <kbd>✕</kbd> 可以單獨刪掉那一張。</li>
   </ol>
-  <div class="note">主題設定三頁共用：在後台設黑色，正式版打開也是黑色。</div>
+  <div class="note">長按要「按住不動」：手指位移超過約 2 公分會取消，避免滑動頁面時誤開。iPhone 若長按跳出系統選字選單，<b>連點圓鈕兩下</b>一樣會開面板（選字與放大鏡已被刻意關掉，正常不會出現）。</div>
+</section>
+
 </section>
 
 <section id="refresh">
@@ -394,8 +408,11 @@ footer{padding:22px 0 0;color:var(--muted);font-size:12.5px}
   <details><summary>更新視窗多久跳一次？</summary>
     <div class="body">每天第一次開啟才跳一次，當天再重開、按重新整理、下拉重整都不會再跳；跨過 00:00 才會補做當天檢查。</div>
   </details>
-  <details><summary>主題變黑色後字看不清楚怎麼辦？</summary>
-    <div class="body">字色會自動跟著背景亮度切換；若覺得太暗，回主題按「回到預設」即可。</div>
+  <details><summary>主題只有黑、白兩色嗎？</summary>
+    <div class="body">共 7 色：紅橙黃、紫粉桃、藍紫桃、青綠黃、彩紅、黑、白，輕點圓鈕就往下一個；另外可長按上傳相簿相片當背景（最多 4 張）。字色會自動跟著背景亮度切換。</div>
+  </details>
+  <details><summary>長按主題鈕沒反應？</summary>
+    <div class="body">要按住 3 秒且手指不要滑動；若 iPhone 跳出系統選字選單，改連點圓鈕兩下就會開面板。</div>
   </details>
   <details><summary>右下角的「回到頂端」不見了？</summary>
     <div class="body">它只在往下滑超過一段距離時出現，滑回上方會自動收起；按一下就會平滑捲回最上面。</div>
