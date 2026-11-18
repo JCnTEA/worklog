@@ -45,6 +45,8 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 </style>
 <link rel="manifest" href="../assets/manifest-vn.json">
 <meta name="theme-color" content="#0a1220">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../assets/icon-152.png">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
 
 <style>
@@ -59,6 +61,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 #homeScr .hs-tile .hs-name{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.45)}
 #homeScr .hs-tile .hs-meta{color:#fff;opacity:.86}
 #homeScr .hs-tile.main{background:rgba(9,13,24,.28);border-color:rgba(255,255,255,.4)}
+#themeBtn::after{content:"";position:absolute;inset:-12px;border-radius:50%}
 #themeBtn{position:fixed;right:16px;top:calc(env(safe-area-inset-top) + 18px);z-index:10090;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);background:rgba(10,16,26,.72);padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.45);-webkit-tap-highlight-color:transparent}
 #themeBtn .t-in{width:29px;height:29px;border-radius:50%;display:block;background:linear-gradient(165deg,#F01152 0%,#FF5A1F 45%,#FFC83D 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
 #themeBtn .t-name{display:none !important;position:absolute;top:52px;right:0;white-space:nowrap;padding:5px 10px;border-radius:10px;background:rgba(10,16,26,.86);color:#F5F7FB;font:600 11px/1.4 "Noto Sans TC",sans-serif;opacity:0;transition:opacity .25s}
@@ -288,11 +291,12 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   function openSheet(){ if(!SH) return; SH.classList.add("on"); renderThumbs(); }
   function closeSheet(){ if(!SH) return; SH.classList.remove("on"); }
 
-  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=3000;
+  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=3000, tapT=null;
   function lpStart(e){
     if(e && e.touches && e.touches.length>1) return;
     var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
     holdX=t.clientX||0; holdY=t.clientY||0; holding=true; lpDone=false;
+    try{ if(e && e.pointerId!==undefined && B.setPointerCapture) B.setPointerCapture(e.pointerId); }catch(err){}
     clearTimeout(lpT);
     lpT=setTimeout(function(){ if(!holding) return; lpDone=true; holding=false; try{ if(navigator.vibrate) navigator.vibrate(30); }catch(err){} openSheet(); }, HOLDMS);
   }
@@ -300,13 +304,13 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
     if(!holding) return;
     var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
     var dx=(t.clientX||0)-holdX, dy=(t.clientY||0)-holdY;
-    if(dx*dx+dy*dy > 144){ holding=false; clearTimeout(lpT); }
+    if(dx*dx+dy*dy > 676){ holding=false; clearTimeout(lpT); }
   }
   function lpEnd(){ holding=false; clearTimeout(lpT); }
   B.addEventListener("contextmenu", function(e){ e.preventDefault(); });
   ["pointerdown","touchstart","mousedown"].forEach(function(ev){ B.addEventListener(ev, lpStart, {passive:true}); });
   ["pointermove","touchmove"].forEach(function(ev){ B.addEventListener(ev, lpMove, {passive:true}); });
-  ["pointerup","pointercancel","pointerleave","touchend","mouseup","mouseleave"].forEach(function(ev){ B.addEventListener(ev, lpEnd, {passive:true}); });
+  ["pointerup","touchend","mouseup"].forEach(function(ev){ B.addEventListener(ev, lpEnd, {passive:true}); });
   ["selectstart","dragstart"].forEach(function(ev){
     B.addEventListener(ev, function(e){ e.preventDefault(); });
     if(SH) SH.addEventListener(ev, function(e){ e.preventDefault(); });
@@ -314,6 +318,8 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   window.addEventListener("scroll", lpEnd, {passive:true});
   B.addEventListener("click", function(){
     if(lpDone){ lpDone=false; return; }
+    if(tapT){ clearTimeout(tapT); tapT=null; var L2=list(); i=(i-1+L2.length)%L2.length; apply(); openSheet(); return; }
+    tapT=setTimeout(function(){ tapT=null; },350);
     var L=list(); i=(i+1)%L.length; apply();
     NM.classList.add("on"); clearTimeout(window.__tn); window.__tn=setTimeout(function(){NM.classList.remove("on");},1400);
   });
