@@ -417,7 +417,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118132539";
+  var MY_BUILD="20261118133030";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
@@ -442,6 +442,29 @@ img,svg,canvas,video{max-width:100%}
   check();
   window.addEventListener("pageshow", function(e){ if(e.persisted) check(); });
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && TRIES<2) check(); });
+})();
+</script>
+<script>
+/* 主題圓鈕：永遠釘在畫面右上角（相容 iPhone 工具列伸縮、視覺視窗位移與頁面捲動） */
+(function(){
+  var B=document.getElementById("themeBtn"); if(!B) return;
+  var BASE=12, raf=null;
+  function sync(){
+    var off=(window.visualViewport && window.visualViewport.offsetTop) || 0;
+    B.style.position="fixed";
+    B.style.top="calc(env(safe-area-inset-top) + " + Math.round(BASE+off) + "px)";
+    B.style.right="14px";
+  }
+  function syncSoon(){ if(raf) return; raf=requestAnimationFrame(function(){ raf=null; sync(); }); }
+  window.addEventListener("scroll", syncSoon, {passive:true});
+  window.addEventListener("resize", syncSoon, {passive:true});
+  window.addEventListener("orientationchange", function(){ setTimeout(sync,350); });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("scroll", syncSoon, {passive:true});
+    window.visualViewport.addEventListener("resize", syncSoon, {passive:true});
+  }
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) sync(); });
+  setTimeout(sync,0); setTimeout(sync,500);
 })();
 </script>
 </body>
