@@ -11,13 +11,13 @@
 html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 </style>
 <style>
-#homeScr{position:fixed;inset:0;z-index:10080;background:linear-gradient(180deg,#0B1220,#111B2E 45%,#0B1220);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 34px) 18px calc(env(safe-area-inset-bottom) + 18px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#homeScr{position:fixed;inset:0;z-index:10080;background:var(--wbg,linear-gradient(180deg,#0B1220,#111B2E 45%,#0B1220));background-size:cover;background-position:center;background-repeat:no-repeat;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 34px) 18px calc(env(safe-area-inset-bottom) + 18px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 #homeScr .hs-brand{font:700 13px/1.4 "IBM Plex Mono",monospace;letter-spacing:.22em;color:#7C8AA5;text-transform:uppercase}
 #homeScr .hs-title{font:900 30px/1.25 "Noto Sans TC",sans-serif;color:#F5F7FB;margin:10px 0 4px;letter-spacing:.02em}
 #homeScr .hs-sub{font:400 14px/1.6 "Noto Sans TC",sans-serif;color:#93A1B8;margin-bottom:22px}
 #homeScr .hs-grid{display:grid;grid-template-columns:1fr;gap:10px}
-#homeScr .hs-tile{display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:70px;padding:14px 16px;gap:10px;border-radius:14px;background:#16223A;border:1px solid #24344F;text-decoration:none;color:#F5F7FB}
-#homeScr .hs-tile.main{background:linear-gradient(135deg,#1E3A6B,#16223A);border-color:#2E4C82;min-height:112px}
+#homeScr .hs-tile{display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:70px;padding:14px 16px;gap:10px;border-radius:14px;background:rgba(10,16,26,.70);border:1px solid rgba(255,255,255,.18);text-decoration:none;color:#F5F7FB;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#homeScr .hs-tile.main{background:linear-gradient(135deg,rgba(30,58,107,.84),rgba(10,16,26,.70));border-color:rgba(90,130,200,.55);min-height:112px}
 #homeScr .hs-tile .hs-name{font:700 18px/1.3 "Noto Sans TC",sans-serif}
 #homeScr .hs-tile .hs-meta{font:500 12px/1.4 "IBM Plex Mono",monospace;color:#8FA3C0;margin:0;text-align:right;white-space:nowrap}
 #homeScr .hs-tile.main .hs-name{font-size:22px}
@@ -26,7 +26,44 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 #homeScr .hs-tile.off .hs-meta{color:#66738A}
 #homeScr .hs-foot{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:10px}
 #homeScr .hs-note{font:400 12px/1.6 "Noto Sans TC",sans-serif;color:#7C8AA5;text-align:center}
+#themeBtn{position:fixed;right:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:10090;width:44px;height:44px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.55);background:rgba(10,16,26,.72);padding:0;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.45);touch-action:manipulation}
+#themeBtn .t-in{width:29px;height:29px;border-radius:50%;display:block;background:linear-gradient(165deg,#F01152 0%,#FF5A1F 45%,#FFC83D 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+#themeBtn:active{transform:scale(.94)}
+#themeBtn,#themeBtn *,#thSheet,#thSheet *{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#thSheet{position:fixed;inset:0;z-index:10095;display:none;align-items:flex-end;justify-content:center;background:rgba(3,7,14,.55);padding:0 14px calc(env(safe-area-inset-bottom) + 18px)}
+#thSheet.on{display:flex}
+#thSheet .ts-card{width:min(520px,96vw);border-radius:20px;padding:18px 16px 14px;background:rgba(12,18,30,.66);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 46px rgba(0,0,0,.5);color:#F5F7FB}
+#thSheet .ts-title{font:800 15px/1.3 "Noto Sans TC",sans-serif;letter-spacing:.06em}
+#thSheet .ts-sub{margin-top:6px;font:400 12px/1.6 "Noto Sans TC",sans-serif;color:#A7B4C8}
+#thSheet .ts-file{position:relative;display:flex;align-items:center;justify-content:center;margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font:700 14px/1 "Noto Sans TC",sans-serif}
+#thSheet .ts-file input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#thSheet .ts-thumbs{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+#thSheet .ts-th{position:relative;width:56px;height:56px;border-radius:14px;background-size:cover;background-position:center;border:1px solid rgba(255,255,255,.35)}
+#thSheet .ts-th .x{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:rgba(9,13,24,.92);color:#fff;font:700 12px/18px "Noto Sans TC",sans-serif;text-align:center;border:1px solid rgba(255,255,255,.45)}
+#thSheet .ts-foot{margin-top:16px;display:flex;justify-content:flex-end}
+#thSheet .ts-close{padding:10px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#E8EEF9;font:700 13px/1 "Noto Sans TC",sans-serif}
+#homeScr.th-light .hs-brand{color:#5A6875}
+#homeScr.th-light .hs-title{color:#101A26}
+#homeScr.th-light .hs-sub{color:#4B5A68}
+#homeScr.th-light .hs-tile{background:rgba(255,255,255,.78);border-color:rgba(15,23,42,.16);color:#101A26}
+#homeScr.th-light .hs-tile .hs-meta{color:#5A6875}
+#homeScr.th-light .hs-tile.main{background:linear-gradient(135deg,rgba(255,255,255,.86),rgba(233,240,247,.82));border-color:rgba(27,76,134,.28)}
+#homeScr.th-light .hs-tile.off{background:rgba(255,255,255,.5);border-color:rgba(15,23,42,.1)}
+#homeScr.th-light .hs-note{color:#5A6875}
+#homeScr.th-light #themeBtn{border-color:rgba(15,23,42,.30);background:rgba(255,255,255,.8)}
 </style>
+<button id="themeBtn" type="button" aria-label="切換顏色主題"><span class="t-in"></span></button>
+<div id="thSheet" role="dialog" aria-label="主題相片">
+  <div class="ts-card">
+    <div class="ts-title">主題相片</div>
+    <div class="ts-sub">長按右上角圓鈕 3 秒就會開這裡。選一張相簿相片或圖片就新增一個主題；字色會依背景明暗自動轉深或轉白。</div>
+    <label class="ts-file">從相簿選擇相片／圖片<input type="file" id="thFile" accept="image/*"></label>
+    <div class="ts-thumbs" id="thThumbs"></div>
+    <div class="ts-foot"><button type="button" class="ts-close" id="thClose">關閉</button></div>
+  </div>
+</div>
 <section id="homeScr">
   <div class="hs-brand">WORK LOG SYSTEM · HOME</div>
   <div class="hs-title">勤務記錄系統_首頁 V0.10</div>
@@ -47,6 +84,129 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
     <div class="hs-note">按上面的按鈕選入口；正式版是平常上班用的那一頁。</div>
   </div>
 </section>
+<script>
+/* 主題：7 色漸層＋相片（與後台、正式版主頁同一套設定） */
+(function(){
+  var TH=[
+    {n:"紅橙黃",g:"linear-gradient(165deg,#F01152 0%,#FF5A1F 45%,#FFC83D 100%)"},
+    {n:"紫粉桃",g:"linear-gradient(170deg,#A64CFF 0%,#FF79C9 55%,#FF0F87 100%)"},
+    {n:"藍紫桃",g:"linear-gradient(170deg,#1FA8F0 0%,#7B4CFF 55%,#FF2FA0 100%)"},
+    {n:"青綠黃",g:"linear-gradient(170deg,#00C2E0 0%,#12D6A0 40%,#FFC233 100%)",light:1},
+    {n:"彩紅",g:"linear-gradient(160deg,#5BE36B 0%,#00C9E0 25%,#FF2FA0 55%,#FFC83D 78%,#FF5A1F 100%)"},
+    {n:"黑",g:"linear-gradient(160deg,#000000 0%,#10141B 55%,#1C222B 100%)"},
+    {n:"白",g:"linear-gradient(160deg,#FFFFFF 0%,#F3F5F9 55%,#E6EAF1 100%)",light:1}
+  ];
+  var K="wl_theme", CK="wl_custom_themes";
+  var H=document.getElementById("homeScr"), B=document.getElementById("themeBtn");
+  if(!B||!H) return;
+  var IN=B.querySelector(".t-in"), SH=document.getElementById("thSheet"),
+      FU=document.getElementById("thFile"), TB=document.getElementById("thThumbs"),
+      CL=document.getElementById("thClose");
+  var custom=[];
+  try{ custom=JSON.parse(localStorage.getItem(CK)||"[]")||[]; }catch(e){ custom=[]; }
+  var i=parseInt(localStorage.getItem(K)||"0",10);
+  if(isNaN(i)||i<0) i=0;
+
+  function list(){
+    var L=TH.slice();
+    for(var n=0;n<custom.length;n++){
+      L.push({n:"相片"+(n+1), g:"url("+custom[n].d+") center/cover no-repeat", light:(custom[n].lum>0.58), custom:true});
+    }
+    return L;
+  }
+  function save(){ try{ localStorage.setItem(CK, JSON.stringify(custom)); }catch(e){ alert("相片太大，這台裝置存不下，換一張小一點的試試。"); } }
+  function apply(){
+    var L=list(); if(i>=L.length) i=0; var t=L[i];
+    H.style.setProperty("--wbg", t.g);
+    if(t.light){ H.classList.add("th-light"); } else { H.classList.remove("th-light"); }
+    IN.style.background=t.g; IN.style.backgroundSize="cover";
+    try{ localStorage.setItem(K,String(i)); }catch(e){}
+  }
+  function renderThumbs(){
+    if(!TB) return;
+    TB.innerHTML="";
+    for(var n=0;n<custom.length;n++){
+      (function(idx){
+        var d=document.createElement("div");
+        d.className="ts-th"; d.style.backgroundImage="url("+custom[idx].d+")";
+        var x=document.createElement("div"); x.className="x"; x.textContent="✕";
+        x.addEventListener("click", function(ev){
+          ev.stopPropagation(); ev.preventDefault();
+          custom.splice(idx,1); save();
+          if(i>=list().length) i=0;
+          apply(); renderThumbs();
+        });
+        d.appendChild(x); TB.appendChild(d);
+      })(n);
+    }
+  }
+  function openSheet(){ if(!SH) return; SH.classList.add("on"); renderThumbs(); }
+  function closeSheet(){ if(!SH) return; SH.classList.remove("on"); }
+
+  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=3000;
+  function lpStart(e){
+    if(e && e.touches && e.touches.length>1) return;
+    var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+    holdX=t.clientX||0; holdY=t.clientY||0; holding=true; lpDone=false;
+    clearTimeout(lpT);
+    lpT=setTimeout(function(){ if(!holding) return; lpDone=true; holding=false; try{ if(navigator.vibrate) navigator.vibrate(30); }catch(err){} openSheet(); }, HOLDMS);
+  }
+  function lpMove(e){
+    if(!holding) return;
+    var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+    var dx=(t.clientX||0)-holdX, dy=(t.clientY||0)-holdY;
+    if(dx*dx+dy*dy > 144){ holding=false; clearTimeout(lpT); }
+  }
+  function lpEnd(){ holding=false; clearTimeout(lpT); }
+  B.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+  ["pointerdown","touchstart","mousedown"].forEach(function(ev){ B.addEventListener(ev, lpStart, {passive:true}); });
+  ["pointermove","touchmove"].forEach(function(ev){ B.addEventListener(ev, lpMove, {passive:true}); });
+  ["pointerup","pointercancel","pointerleave","touchend","mouseup","mouseleave"].forEach(function(ev){ B.addEventListener(ev, lpEnd, {passive:true}); });
+  ["selectstart","dragstart"].forEach(function(ev){
+    B.addEventListener(ev, function(e){ e.preventDefault(); });
+    if(SH) SH.addEventListener(ev, function(e){ e.preventDefault(); });
+  });
+  window.addEventListener("scroll", lpEnd, {passive:true});
+  B.addEventListener("click", function(){
+    if(lpDone){ lpDone=false; return; }
+    var L=list(); i=(i+1)%L.length; apply();
+  });
+  if(CL) CL.addEventListener("click", closeSheet);
+  if(SH) SH.addEventListener("click", function(e){ if(e.target===SH) closeSheet(); });
+
+  function avgLum(ctx,w,h){
+    var d=ctx.getImageData(0,0,w,h).data, n=0, sum=0;
+    for(var p=0;p<d.length;p+=4*8){
+      sum += (0.299*d[p] + 0.587*d[p+1] + 0.114*d[p+2])/255; n++;
+    }
+    return n ? sum/n : 0.5;
+  }
+  if(FU) FU.addEventListener("change", function(){
+    var f=FU.files && FU.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      var im=new Image();
+      im.onload=function(){
+        var max=1400, w=im.width, h=im.height;
+        if(Math.max(w,h)>max){ var sc=max/Math.max(w,h); w=Math.round(w*sc); h=Math.round(h*sc); }
+        var c=document.createElement("canvas"); c.width=w; c.height=h;
+        var cx=c.getContext("2d"); cx.drawImage(im,0,0,w,h);
+        var d=c.toDataURL("image/jpeg",0.72);
+        var lum=avgLum(cx,w,h);
+        custom.push({d:d,lum:lum});
+        if(custom.length>4) custom.shift();
+        save(); i=list().length-1; apply(); renderThumbs(); closeSheet();
+      };
+      im.onerror=function(){ alert("這張圖片讀不進來，換一張試試。"); };
+      im.src=r.result;
+    };
+    r.readAsDataURL(f);
+    FU.value="";
+  });
+
+  apply();
+})();
+</script>
 <script>
 /* 開頁自檢：偵測到新版就自動重載一次，不需重新下載或更換 App */
 (function(){
