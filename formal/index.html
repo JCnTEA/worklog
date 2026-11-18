@@ -4486,5 +4486,36 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
   }catch(e){}
 })();
 </script>
+<script>
+/* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
+   （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
+(function(){
+  var MY_BUILD="20261118130341";
+  var KEY="wl_selfver", TRIES=0, busy=false;
+  function go(b){
+    if(busy) return; busy=true;
+    try{
+      if(sessionStorage.getItem(KEY)===b) return;
+      sessionStorage.setItem(KEY,b);
+    }catch(e){}
+    var dir=location.pathname.replace(/[^/]*$/,"");
+    try{ location.replace(dir+"?v="+encodeURIComponent(b)); }catch(e){}
+  }
+  function check(){
+    TRIES++;
+    var u=location.origin+"/worklog/assets/pages-version.json?t="+Date.now();
+    fetch(u,{cache:"reload"})
+      .then(function(r){ if(!r.ok) throw new Error("bad"); return r.json(); })
+      .then(function(j){
+        var b=String((j&&j.build)||""); if(!b) return;
+        if(b!==MY_BUILD) go(b);
+      })
+      .catch(function(){ if(TRIES<4) setTimeout(check,2500); });
+  }
+  check();
+  window.addEventListener("pageshow", function(e){ if(e.persisted) check(); });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && TRIES<2) check(); });
+})();
+</script>
 </body>
 </html>
