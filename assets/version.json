@@ -1,11 +1,11 @@
 {
- "versionCode": 21,
- "versionName": "V1.0",
- "build": "21",
- "apk": "https://jcntea.github.io/worklog/assets/worklog-1.0.apk",
- "fileName": "worklog-1.0.apk",
+ "versionCode": 22,
+ "versionName": "V1.1",
+ "build": "22",
+ "apk": "https://jcntea.github.io/worklog/assets/worklog-1.1.apk",
+ "fileName": "worklog-1.1.apk",
  "apkPage": "../apk/",
- "notes": "APK 連結一律留在 App 內下載＋自動安裝（不外跳瀏覽器）",
+ "notes": "修正 App 桌面圖示（改用勤務日誌官方圖示，支援自適應／圓形圖示）",
  "web": "V0.10",
  "apkRequired": true
 }
