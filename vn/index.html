@@ -75,6 +75,9 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
 #homeScr.th-light .hs-tile.main{background:rgba(255,255,255,.86);border-color:rgba(15,23,42,.22)}
 #homeScr.th-light #themeBtn{border-color:rgba(15,23,42,.35);background:rgba(255,255,255,.75)}
 #themeBtn .t-in{position:relative}
+#themeBtn,#thSheet,#thSheet *{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none}
+#themeBtn{touch-action:manipulation}
+#thSheet .ts-file input{display:block;position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 </style>
 <style>
 /* 主題相片面板（半透明玻璃） */
@@ -282,12 +285,30 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   function openSheet(){ if(!SH) return; SH.classList.add("on"); renderThumbs(); }
   function closeSheet(){ if(!SH) return; SH.classList.remove("on"); }
 
-  var lpT=null, lpDone=false;
-  function lpStart(){ lpDone=false; clearTimeout(lpT); lpT=setTimeout(function(){ lpDone=true; openSheet(); }, 620); }
-  function lpEnd(){ clearTimeout(lpT); }
+  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=3000;
+  function lpStart(e){
+    if(e && e.touches && e.touches.length>1) return;
+    var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+    holdX=t.clientX||0; holdY=t.clientY||0; holding=true; lpDone=false;
+    clearTimeout(lpT);
+    lpT=setTimeout(function(){ if(!holding) return; lpDone=true; holding=false; try{ if(navigator.vibrate) navigator.vibrate(30); }catch(err){} openSheet(); }, HOLDMS);
+  }
+  function lpMove(e){
+    if(!holding) return;
+    var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
+    var dx=(t.clientX||0)-holdX, dy=(t.clientY||0)-holdY;
+    if(dx*dx+dy*dy > 144){ holding=false; clearTimeout(lpT); }
+  }
+  function lpEnd(){ holding=false; clearTimeout(lpT); }
   B.addEventListener("contextmenu", function(e){ e.preventDefault(); });
   ["pointerdown","touchstart","mousedown"].forEach(function(ev){ B.addEventListener(ev, lpStart, {passive:true}); });
+  ["pointermove","touchmove"].forEach(function(ev){ B.addEventListener(ev, lpMove, {passive:true}); });
   ["pointerup","pointercancel","pointerleave","touchend","mouseup","mouseleave"].forEach(function(ev){ B.addEventListener(ev, lpEnd, {passive:true}); });
+  ["selectstart","dragstart"].forEach(function(ev){
+    B.addEventListener(ev, function(e){ e.preventDefault(); });
+    if(SH) SH.addEventListener(ev, function(e){ e.preventDefault(); });
+  });
+  window.addEventListener("scroll", lpEnd, {passive:true});
   B.addEventListener("click", function(){
     if(lpDone){ lpDone=false; return; }
     var L=list(); i=(i+1)%L.length; apply();
