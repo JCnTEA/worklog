@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B1220">
 <meta name="format-detection" content="telephone=no">
-<title>勤務記錄系統_找廁所 V0.2</title>
-<meta name="description" content="全臺公共廁所查詢：依目前位置由近到遠列出，支援無障礙、親子尿布台、等級篩選與一鍵導航。">
+<title>勤務記錄系統_找廁所 V0.3</title>
+<meta name="description" content="全臺找廁所：公共廁所＋7-11／全家有廁所門市＋捷運站，依目前位置由近到遠列出，支援無障礙、尿布台與一鍵導航。">
 <style>
 :root{
   --bg:#0B1220;--card:#16223A;--card2:#101B2E;--line:#24344F;
   --ink:#F5F7FB;--ink2:#A9B8CE;--ink3:#7E90AA;--blue:#2E5C9E;--blue2:#3B72C0;
-  --green:#1C5D3A;--gold:#6B4E13;--red:#5A2231;
+  --green:#1C5D3A;--gold:#6B4E13;--red:#5A2231;--fmb:#1B4B7A;--mrt:#3E2C6B;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
@@ -71,6 +71,9 @@ button{font-family:inherit}
 .tag.g-best{background:var(--gold);color:#FFE7B5}
 .tag.g-bad{background:var(--red);color:#FFD7E2}
 .tag.cat{background:#26324A;color:#AFC0D8}
+.tag.b711{background:#1C5D3A;color:#D6F7E4}
+.tag.bfm{background:var(--fmb);color:#D3E9FF}
+.tag.bmrt{background:var(--mrt);color:#DCD3FF}
 .addr{margin-top:8px;font-size:12px;color:var(--ink2);line-height:1.55;word-break:break-word}
 .mine{margin-top:6px;font-size:11px;color:var(--ink3);word-break:break-word}
 .bottom{display:flex;gap:8px;margin-top:11px;align-items:center}
@@ -97,8 +100,8 @@ button{font-family:inherit}
 <body>
 <div class="wrap">
   <div class="brand"><i></i>勤務記錄系統 · TOILET FINDER</div>
-  <h1>找廁所<span>V0.2</span></h1>
-  <p class="sub">全臺公共廁所資料（含無障礙、親子尿布台、等級與管理單位），依目前位置由近到遠排序，可直接導航。</p>
+  <h1>找廁所<span>V0.3</span></h1>
+  <p class="sub">公共廁所 ＋ 7-11／全家「有廁所」門市 ＋ 捷運站，依目前位置由近到遠排序，可直接導航。</p>
 
   <div class="acts">
     <button class="act primary" id="btnGps">
@@ -111,10 +114,13 @@ button{font-family:inherit}
     </button>
   </div>
 
-  <div class="status" id="status"><span class="dot"></span><div id="statusText">尚未定位。按下「取得目前位置」後會載入附近廁所資料。</div></div>
+  <div class="status" id="status"><span class="dot"></span><div id="statusText">尚未定位。按下「取得目前位置」後會載入附近廁所與門市資料。</div></div>
 
   <div class="filters" id="chips">
     <button class="chip on" data-f="all">全部</button>
+    <button class="chip" data-f="s711">7-11</button>
+    <button class="chip" data-f="sfm">全家</button>
+    <button class="chip" data-f="mrt">捷運站</button>
     <button class="chip" data-f="acc">無障礙</button>
     <button class="chip" data-f="baby">尿布台</button>
     <button class="chip" data-f="traffic">交通</button>
@@ -126,7 +132,7 @@ button{font-family:inherit}
 
   <div class="searchbox">
     <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#8FA3C0" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input id="q" type="search" inputmode="search" placeholder="搜尋廁所名稱或地址" autocomplete="off">
+    <input id="q" type="search" inputmode="search" placeholder="搜尋廁所／門市名稱或地址" autocomplete="off">
     <button class="clr" id="qClr" aria-label="清除">✕</button>
   </div>
 
@@ -139,9 +145,11 @@ button{font-family:inherit}
   <button class="more" id="btnMore" hidden>載入更多</button>
 
   <div class="foot">
-    資料來源：<a href="https://toilets.littlechin.tw/map" target="_blank" rel="noopener">littlechin.tw 廁所地圖</a>（政府開放資料彙整，共 <span id="totalAll">—</span> 筆）。
-    本頁僅作查詢與導航，資料更新以來源站為準。<br>
-    導航使用 Google 地圖；座標為資料原始位置，現場樓層請以現場標示為準。
+    資料來源：<a href="https://toilets.littlechin.tw/map" target="_blank" rel="noopener">littlechin.tw 廁所地圖</a>（政府開放資料彙整，共 <span id="totalAll">—</span> 筆）、
+    <a href="https://emap.pcsc.com.tw/#" target="_blank" rel="noopener">7-ELEVEN 門市地圖</a>（有廁所門市 <span id="n711">—</span> 家）、
+    <a href="https://www.family.com.tw/Marketing/zh/Map" target="_blank" rel="noopener">全家店舖查詢</a>（有廁所門市 <span id="nfm">—</span> 家）。
+    捷運站廁所取自公廁資料中名稱含「捷運」者。<br>
+    門市資料抓取日 <span id="storeDate">—</span>；導航使用 Google 地圖，現場設施請以店家公告為準。
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -151,11 +159,14 @@ button{font-family:inherit}
 "use strict";
 var IDX_URL = "https://toilets.littlechin.tw/data/index.json";
 var C_URL   = "https://toilets.littlechin.tw/data/counties/";
+var STORE_URL = "data/stores.json";
 var CACHE_MS = 6*60*60*1000;
 var PAGE = 20;
+var NEAR_STORE_KM = 60;      // 定位時只納入 60 公里內的門市，避免一次列出全臺
 
 var state = { idx:null, counties:[], venues:[], pos:null,
-  filter:"all", q:"", shown:PAGE, busy:false, countySel:"" };
+  filter:"all", q:"", shown:PAGE, busy:false, countySel:"",
+  stores:null, storesMeta:null };
 
 var $ = function(id){ return document.getElementById(id); };
 var listEl=$("list"), statusEl=$("status"), statusTx=$("statusText");
@@ -192,6 +203,7 @@ function bboxDist(b,lat,lng){
   return hav(lat,lng,la,ln);
 }
 function fmtDist(m){ return m<1000 ? Math.round(m)+" m" : (m/1000).toFixed(m<10000?1:0)+" km"; }
+function normT(s){ return String(s||"").replace(/臺/g,"台"); }
 
 function loadIndex(){
   var c=cacheGet("index"); if(c){ state.idx=c; return Promise.resolve(c); }
@@ -204,6 +216,29 @@ function loadCounty(file){
   return fetch(C_URL+file).then(function(r){
     if(!r.ok) throw new Error(file+" "+r.status); return r.json();
   }).then(function(j){ try{ cacheSet("c_"+file,j); }catch(e){} return j; });
+}
+function loadStores(){
+  if(state.stores) return Promise.resolve(state.stores);
+  var c=cacheGet("stores");
+  if(c && c.s){ state.stores=storeVenues(c); state.storesMeta=c; return Promise.resolve(state.stores); }
+  return fetch(STORE_URL).then(function(r){
+    if(!r.ok) throw new Error("stores "+r.status); return r.json();
+  }).then(function(j){
+    state.storesMeta=j; state.stores=storeVenues(j);
+    try{ cacheSet("stores",j); }catch(e){}
+    return state.stores;
+  });
+}
+function storeVenues(j){
+  var out=[], rows=(j&&j.s)||[];
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i], lat=+r[3], lng=+r[4];
+    if(!isFinite(lat)||!isFinite(lng)) continue;
+    out.push({ name:String(r[1]||""), addr:String(r[2]||""), area:"",
+      lat:lat, lng:lng, cat:"便利商店", mine:"", types:{}, diaper:false, g:-1, gzh:"",
+      src:(Number(r[0])===0?"711":"fm"), mrt:false });
+  }
+  return out;
 }
 
 var SUF=/(?:[-－—｜|_]\s*)?(無障礙廁所|親子廁所|性別友善廁所|混合廁所|男廁所|女廁所|男廁|女廁|無障礙|親子|友善|混合|男|女|廁所)\s*$/;
@@ -234,9 +269,10 @@ function toVenues(arr){
     if(!v){
       v=map[key]={ name:bn, addr:t.address_zh||"", area:t.area_zh||"",
         lat:lat, lng:lng, cat:t.category_zh||"", mine:t.manager||t.administration||"",
-        types:{}, diaper:false, g:0, gzh:"" };
+        types:{}, diaper:false, g:0, gzh:"", src:"wc", mrt:false };
       out.push(v);
     }
+    if(/捷運/.test(String(t.name_zh||""))||/捷運站/.test(String(t.address_zh||""))) v.mrt=true;
     if(t.type_zh) v.types[t.type_zh]=1;
     if(t.has_diaper===true) v.diaper=true;
     if(bn && bn.length < v.name.length) v.name=bn;   // 取較簡潔的名稱
@@ -253,9 +289,15 @@ var CATMAP = {
 };
 function matches(v){
   var f=state.filter;
+  if(f==="s711" && v.src!=="711") return false;
+  if(f==="sfm" && v.src!=="fm") return false;
+  if(f==="mrt" && !v.mrt) return false;
   if(f==="acc" && !v.types["無障礙廁所"]) return false;
   if(f==="baby" && !(v.diaper || v.types["親子廁所"])) return false;
-  if(CATMAP[f] && String(v.cat).indexOf(CATMAP[f])<0) return false;
+  if(CATMAP[f]){
+    if(v.src!=="wc") return false;
+    if(String(v.cat).indexOf(CATMAP[f])<0) return false;
+  }
   if(state.q){
     var q=state.q.toLowerCase();
     if((v.name+" "+v.addr+" "+v.area+" "+v.mine).toLowerCase().indexOf(q)<0) return false;
@@ -264,16 +306,19 @@ function matches(v){
 }
 function tagHtml(v){
   var h="";
+  if(v.src==="711") h+='<span class="tag b711">7-11</span>';
+  if(v.src==="fm")  h+='<span class="tag bfm">全家</span>';
+  if(v.mrt) h+='<span class="tag bmrt">捷運站</span>';
   if(v.g===2) h+='<span class="tag g-old">優級</span>';
   else if(v.g===1) h+='<span class="tag g-old">普通級</span>';
-  else if(v.g===0) h+='<span class="tag g-bad">待改善</span>';
+  else if(v.g===0 && v.src==="wc") h+='<span class="tag g-bad">待改善</span>';
   if(v.types["無障礙廁所"]) h+='<span class="tag acc">無障礙</span>';
   if(v.types["親子廁所"]||v.diaper){
     var lbl = v.types["親子廁所"] ? (v.diaper?"親子・尿布台":"親子") : "尿布台";
     h+='<span class="tag fam">'+lbl+'</span>';
   }
   if(v.types["性別友善廁所"]) h+='<span class="tag cat">性別友善</span>';
-  if(v.cat) h+='<span class="tag cat">'+esc(v.cat)+'</span>';
+  if(v.cat && v.src==="wc") h+='<span class="tag cat">'+esc(v.cat)+'</span>';
   return h;
 }
 function render(){
@@ -335,6 +380,20 @@ function rankedCounties(lat,lng){
     .sort(function(a,b){ return a.d-b.d; });
 }
 
+function storesNear(lat,lng){
+  var arr=state.stores||[], out=[];
+  for(var i=0;i<arr.length;i++){ if(hav(lat,lng,arr[i].lat,arr[i].lng)<=NEAR_STORE_KM*1000) out.push(arr[i]); }
+  return out;
+}
+function storesInCounty(name){
+  var arr=state.stores||[], n=normT(name), out=[];
+  for(var i=0;i<arr.length;i++){
+    var a=normT(arr[i].addr);
+    if(a.indexOf(n)===0) out.push(arr[i]);
+  }
+  return out;
+}
+
 function loadNearby(lat,lng){
   var ranked=rankedCounties(lat,lng), picked=[];
   for(var i=0;i<ranked.length && picked.length<2;i++){
@@ -342,7 +401,7 @@ function loadNearby(lat,lng){
   }
   state.venues=[]; state.busy=true;
   var names=picked.map(function(p){ return p.c.name_zh; }).join("、");
-  setStatus("已定位 · 正在載入 <b>"+esc(names)+"</b> 的廁所資料…");
+  setStatus("已定位 · 正在載入 <b>"+esc(names)+"</b> 的廁所與門市資料…");
   skeleton(4);
 
   var chain=picked.reduce(function(prev,cur){
@@ -355,20 +414,27 @@ function loadNearby(lat,lng){
   }, Promise.resolve());
 
   return chain.then(function(){
-    state.busy=false;
-    setStatus("已載入 <b>"+esc(names)+"</b> · 合計 "+state.venues.length+" 處，依距離由近到遠");
-    render();
+    return loadStores().then(function(){ return storesNear(lat,lng); }).catch(function(){ return []; })
+      .then(function(sv){
+        state.venues=state.venues.concat(sv);
+        state.busy=false;
+        var sc=sv.length ? "，含 7-11／全家 "+sv.length+" 家" : "";
+        setStatus("已載入 <b>"+esc(names)+"</b> · 合計 "+state.venues.length+" 處"+sc+"，依距離由近到遠");
+        render();
+      });
   });
-
 }
 
 function pickupCounty(file,name){
   state.pos=null; state.q=""; $("q").value=""; $("qClr").style.display="none";
-  setStatus("載入 <b>"+esc(name)+"</b> 的廁所資料…");
+  setStatus("載入 <b>"+esc(name)+"</b> 的廁所與門市資料…");
   skeleton(4); state.busy=true; state.shown=PAGE;
-  return loadCounty(file).then(function(arr){
-    state.venues=toVenues(arr); state.busy=false;
-    setStatus("已載入 <b>"+esc(name)+"</b> · 共 "+state.venues.length+" 處，依名稱排序");
+  return Promise.all([ loadCounty(file), loadStores().catch(function(){ return []; }) ])
+  .then(function(res){
+    var sv=storesInCounty(name);
+    state.venues=toVenues(res[0]).concat(sv); state.busy=false;
+    var sc=sv.length ? "，含 7-11／全家 "+sv.length+" 家" : "";
+    setStatus("已載入 <b>"+esc(name)+"</b> · 共 "+state.venues.length+" 處"+sc+"，依名稱排序");
     render();
   }).catch(function(e){
     state.busy=false; listEl.innerHTML="";
@@ -416,6 +482,17 @@ function boot(){
   });
 }
 
+(function metaStores(){
+  fetch(STORE_URL).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+    if(!j) return;
+    var n711=0,nfm=0;
+    for(var i=0;i<j.s.length;i++){ if(+j.s[i][0]===0) n711++; else nfm++; }
+    $("n711").textContent = n711.toLocaleString("en-US");
+    $("nfm").textContent  = nfm.toLocaleString("en-US");
+    $("storeDate").textContent = j.u||"—";
+  }).catch(function(){});
+})();
+
 $("btnGps").addEventListener("click", function(){ getPos(); });
 $("btnRe").addEventListener("click", function(){
   if(state.pos){
@@ -455,7 +532,7 @@ listEl.addEventListener("click", function(e){
 });
 
 boot().catch(function(e){
-  setStatus("無法連上資料來源（"+esc(e.message||e)+"）。可稍後重試，或到 <a href='https://toilets.littlechin.tw/map' target='_blank' rel='noopener'>來源地圖</a>。","err");
+  setStatus("無法連上資料來源（"+esc(e.message||e)+"）。可稍後重試，或到 <a href='https://toilets.littlechin.tw/map' target='_blank' rel='noopener'>來源地圖</a> 查詢。","err");
 });
 })();
 </script>
