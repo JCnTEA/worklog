@@ -1,10 +1,10 @@
 {
- "versionCode": 13,
- "versionName": "Bn1.0",
- "build": "13",
- "apk": "https://jcntea.github.io/worklog/assets/worklog-bn1.0.apk",
- "fileName": "worklog-bn1.0.apk",
- "notes": "APK 連結一律留在 App 內下載＋自動安裝（不外跳瀏覽器）",
+ "versionCode": 14,
+ "versionName": "Bn1.1",
+ "build": "14",
+ "apk": "https://jcntea.github.io/worklog/assets/worklog-bn1.1.apk",
+ "fileName": "worklog-bn1.1.apk",
+ "notes": "修正 App 桌面圖示（勤務日誌官方圖示）",
  "web": "V0.10",
  "apkRequired": false
 }
