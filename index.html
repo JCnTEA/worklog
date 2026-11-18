@@ -158,7 +158,7 @@ html,body{margin:0;padding:0;background:#0B1220;-webkit-text-size-adjust:100%}
   function openSheet(){ if(!SH) return; SH.classList.add("on"); renderThumbs(); }
   function closeSheet(){ if(!SH) return; SH.classList.remove("on"); }
 
-  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=3000, tapT=null;
+  var lpT=null, lpDone=false, holdX=0, holdY=0, holding=false, HOLDMS=2000, tapT=null;
   function lpStart(e){
     if(e && e.touches && e.touches.length>1) return;
     var t=(e && (e.touches&&e.touches[0] || e.changedTouches&&e.changedTouches[0])) || e || {};
