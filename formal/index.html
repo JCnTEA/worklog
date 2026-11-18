@@ -246,7 +246,15 @@
     margin:0 0 7px;font-family:var(--mono);font-size:10.5px;font-weight:700;
     letter-spacing:.16em;color:var(--blue);text-transform:uppercase;
   }
-  .notice p{margin:0;font-size:12.5px;line-height:1.72;color:var(--ink2)}
+  .notice{background:#FFFFFF !important;border-color:#D2DBE4 !important}
+  .notice h3{color:#1B4C86 !important}
+  .notice p{margin:0;font-size:12.8px;line-height:1.8;color:#3C4A59 !important;word-break:keep-all;overflow-wrap:anywhere}
+  .notice .notice-x{color:#7C8895 !important}
+  .notice .notice-foot{border-top-color:#E3E9EF !important}
+  .notice .notice-foot label{color:#495867 !important}
+  .notice .notice-ok{background:#1F5FA8 !important;color:#FFFFFF !important;border-color:#1F5FA8 !important}
+  .notice p .nt-hl{color:#E5342A;font-weight:700}
+  .notice p .nt-hl{ -webkit-text-fill-color:#E5342A}
   .notice-x{
     position:absolute;top:4px;right:4px;width:34px;height:34px;
     border:0;background:transparent;color:var(--muted);
@@ -3466,10 +3474,10 @@ img,svg,canvas,video{max-width:100%}
 
 
   /* ---------- 浮動公告 ---------- */
-  var NOTICE_KEY = "worklog.dev2.notice.v1";
+  var NOTICE_KEY = "worklog.notice.announce.20261118";
   var NOTICE_DEF = {
-    title: "使用說明",
-    body: "每天從 0 開始，件數自己填。\n08:00、13:00、18:00 換段時，上一段自動記一筆。\nGPS 只幫你認店家，資料留在這台手機。"
+    title: "版本異動公告 · 2026-11-18",
+    body: "主題 [[7 色＋相片背景]]，三頁同步\n圓鈕 [[固定右上角]]，不隨頁面移動\n後台首頁改滿版、App 圖示更新\n[[自動換版]] 與 [[自檢系統]] 上線\n舊樣式會自動換一次，資料不變"
   };
   function noticeCfg(){
     try{
@@ -3484,7 +3492,10 @@ img,svg,canvas,video{max-width:100%}
     var c = noticeCfg();
     var t = document.getElementById("noticeTitle"), b = document.getElementById("noticeBody");
     if (t) t.textContent = c.title;
-    if (b) b.innerHTML = String(c.body).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,"<br>");
+    if (b) b.innerHTML = String(c.body)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/\[\[(.+?)\]\]/g, '<span class="nt-hl">$1</span>')
+        .replace(/\n/g,"<br>");
   }
   var elNotice      = document.getElementById("notice");
   var elNoticeNever = document.getElementById("noticeNever");
@@ -3991,7 +4002,7 @@ img,svg,canvas,video{max-width:100%}
         var e=all[j];
         if(e.hasAttribute("data-ths")) continue;
         if(e.tagName==="CANVAS"||e.tagName==="IMG") continue;
-        if(e.closest&&e.closest("#thSheet")) continue;
+        if(e.closest&&(e.closest("#thSheet")||e.closest(".notice"))) continue;
         if(e.closest&&e.closest(".nb-sw")) continue;
         var cs; try{ cs=getComputedStyle(e); }catch(err){ continue; }
         var bg=cs.backgroundColor;
@@ -4498,7 +4509,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118133643";
+  var MY_BUILD="20261118134105";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
