@@ -248,6 +248,8 @@
   }
   .notice{background:#FFFFFF !important;border-color:#D2DBE4 !important}
   .notice h3{color:#1B4C86 !important}
+  .notice.ann{border-left:3px solid #E5342A !important}
+  .notice.ann h3{color:#C0301F !important}
   .notice p{margin:0;font-size:12.8px;line-height:1.95;color:#3C4A59 !important;word-break:normal;overflow-wrap:break-word;line-break:strict;text-align:justify;text-justify:inter-ideograph}
   .notice .notice-x{color:#7C8895 !important}
   .notice .notice-foot{border-top-color:#E3E9EF !important}
@@ -1493,6 +1495,18 @@ img,svg,canvas,video{max-width:100%}
     <div class="notice-foot">
       <label><input type="checkbox" id="noticeNever">一個月內不再出現</label>
       <button type="button" class="notice-ok" id="noticeOk">知道了</button>
+    </div>
+  </aside>
+
+
+  <!-- ===== 版本異動公告（獨立浮窗） ===== -->
+  <aside class="notice ann" id="ann" hidden>
+    <button type="button" class="notice-x" id="annX" aria-label="關閉公告">✕</button>
+    <h3 id="annTitle">版本異動公告 · 2026-11-18</h3>
+    <p id="annBody"></p>
+    <div class="notice-foot">
+      <label><input type="checkbox" id="annNever">一個月內不再出現</label>
+      <button type="button" class="notice-ok" id="annOk">知道了</button>
     </div>
   </aside>
 
@@ -3475,10 +3489,10 @@ img,svg,canvas,video{max-width:100%}
 
 
   /* ---------- 浮動公告 ---------- */
-  var NOTICE_KEY = "worklog.notice.announce.20261118";
+  var NOTICE_KEY = "worklog.dev2.notice.v1";
   var NOTICE_DEF = {
-    title: "版本異動公告 · 2026-11-18",
-    body: "本次版本異動已完成上線：主題系統全面升級（[[7 色＋自訂相片背景]]，首頁、主頁同步）、主題鈕 [[固定於畫面右上角]]、版面比例修正、App 圖示更新，以及 [[版本自動更新]] 與 [[自檢系統]] 上線。\n\n開啟後若仍顯示舊樣式，系統會 [[自動換版一次]]；資料與操作方式均未變動。\n\n造成不便，敬請見諒。"
+    title: "使用說明",
+    body: "每天從 0 開始，件數自己填。\n08:00、13:00、18:00 換段時，上一段自動記一筆。\nGPS 只幫你認店家，資料留在這台手機。"
   };
   function noticeCfg(){
     try{
@@ -3514,6 +3528,39 @@ img,svg,canvas,video{max-width:100%}
   document.getElementById("noticeOk").addEventListener("click", function(){
     closeNotice(elNoticeNever.checked ? "month" : "session");
   });
+
+
+  /* ---------- 版本異動公告（獨立浮窗） ---------- */
+  var ANN_KEY = "worklog.announce.20261118";
+  var ANN_DEF = {
+    title: "版本異動公告 · 2026-11-18",
+    body: "本次版本異動已完成上線：主題系統全面升級（[[7 色＋自訂相片背景]]，首頁、主頁同步）、主題鈕 [[固定於畫面右上角]]、版面比例修正、App 圖示更新，以及 [[版本自動更新]] 與 [[自檢系統]] 上線。\n\n開啟後若仍顯示舊樣式，系統會 [[自動換版一次]]；資料與操作方式均未變動。\n\n造成不便，敬請見諒。"
+  };
+  function annCfg(){
+    try{
+      var o = JSON.parse(localStorage.getItem(ANN_KEY) || "{}");
+      return { until: Number(o.until) || 0 };
+    }catch(err){ return { until: 0 }; }
+  }
+  function annPaint(){
+    var b = document.getElementById("annBody");
+    document.getElementById("annTitle").textContent = ANN_DEF.title;
+    if (b) b.innerHTML = String(ANN_DEF.body)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/\[\[(.+?)\]\]/g, '<span class="nt-hl">$1</span>')
+      .replace(/\n/g,"<br>");
+  }
+  var elAnn = document.getElementById("ann"), elAnnNever = document.getElementById("annNever");
+  function annMuted(){ return annCfg().until > Date.now(); }
+  function closeAnn(month){
+    elAnn.hidden = true;
+    if (month){ var c = annCfg(); c.until = Date.now() + NOTICE_MONTH;
+      try{ localStorage.setItem(ANN_KEY, JSON.stringify(c)); }catch(err){} }
+    if (!noticeMuted()){ elNotice.hidden = false; }
+  }
+  annPaint();
+  document.getElementById("annX").addEventListener("click", function(){ closeAnn(false); });
+  document.getElementById("annOk").addEventListener("click", function(){ closeAnn(elAnnNever.checked); });
 
   /* 公告編輯（後台2 專屬內容） */
   var elNEdit = document.getElementById("nEdit");
@@ -4181,7 +4228,7 @@ img,svg,canvas,video{max-width:100%}
   renderPlace();
   renderCands(-1);
   if (lastCoords && lastCoords.lat != null) nearRenderAll(lastCoords.lat, lastCoords.lng);
-  if (!noticeMuted()) elNotice.hidden = false;
+  if (!annMuted()){ elAnn.hidden = false; } else if (!noticeMuted()){ elNotice.hidden = false; }
   paintPend();
 
   /* ---------- 掃描辨識待處理（截圖／相簿／貼文字） ---------- */
@@ -4510,7 +4557,7 @@ img,svg,canvas,video{max-width:100%}
 /* 版本自癒：這一頁自己記住自己的 build，跟線上 pages-version.json 不同就帶 ?v= 重載一次
    （iOS Safari／加到主畫面最容易卡舊快取，這一段不依賴 localStorage，避免被其他分頁先寫掉） */
 (function(){
-  var MY_BUILD="20261118135642";
+  var MY_BUILD="20261118142334";
   var KEY="wl_selfver", TRIES=0, busy=false;
   function go(b){
     if(busy) return; busy=true;
