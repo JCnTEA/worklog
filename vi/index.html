@@ -45,6 +45,7 @@
     width:100%;
     margin:0;
     background:var(--sheet);
+    padding-top:56px;
   }
   @media (min-width: 768px){
     body{padding:22px 14px 40px}
@@ -699,6 +700,7 @@ input[type="checkbox"],input[type="radio"]{font-size:inherit !important}</style>
 #themeBtn,#themeBtn *,.head,#thSheet,#thSheet *{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 input,textarea,select{-webkit-user-select:text;user-select:text}
 #themeBtn{touch-action:manipulation}
+#themeBtn{display:none !important}
 #themeBtn::after{content:"";position:absolute;inset:-12px;border-radius:50%}
 #themeBtn{position:fixed !important;right:14px;top:calc(env(safe-area-inset-top) + 12px);z-index:10090;width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(120,135,150,.55);background:rgba(12,18,26,.62);padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);-webkit-tap-highlight-color:transparent;box-sizing:border-box}
 #themeBtn .t-in{width:29px;height:29px;border-radius:50%;display:block;
@@ -810,23 +812,7 @@ document.addEventListener("touchend", function(e){
 })();
 </script>
 
-<div id="devBanner">
-  <span style="display:flex;align-items:center;gap:8px">
-    <button type="button" id="navBtn" aria-label="開啟選單"><span></span><span></span><span></span></button>
-    <span style="white-space:nowrap">開發版-後台 Vi.2</span>
-  </span>
-  <span style="display:flex;gap:5px;align-items:center;white-space:nowrap">
-    <button type="button" id="devReload" style="color:#FFE2B8;background:transparent;border:1px solid #FFE2B8;
-      border-radius:5px;padding:3px 9px;font-size:12px;white-space:nowrap;cursor:pointer">重新整理</button>
-    <button type="button" id="devLogBtn" style="color:#FFE2B8;background:transparent;border:1px solid #FFE2B8;
-      border-radius:5px;padding:3px 9px;font-size:12px;white-space:nowrap;cursor:pointer">更新紀錄</button>
-    <button type="button" id="devPubBtn" title="把後台目前的內容送到正式版並開啟" style="color:#5A1F12;background:#FFE2B8;border:1px solid #FFE2B8;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer">發布</button>
-    <a href="../opt/" style="color:#FFE2B8;text-decoration:none;border:1px solid #FFE2B8;
-      border-radius:5px;padding:3px 9px;font-size:12px;white-space:nowrap;font-size:11.5px">優化版-後台 →</a>
-    <a href="../index.html" style="color:#FFE2B8;text-decoration:none;border:1px solid #FFE2B8;
-      border-radius:5px;padding:3px 9px;font-size:12px;white-space:nowrap;font-size:11.5px">回主頁 ↗</a>
-  </span>
-</div>
+<button type="button" id="navBtn" aria-label="開啟選單"><span></span><span></span><span></span></button>
 
 <main class="sheet">
   <!-- ===== 表頭 ===== -->
@@ -3625,10 +3611,11 @@ document.addEventListener("click", function(e){
 
 <style>
 /* ===== Vi：左上漢堡選單 + 左側隱藏抽屜 ===== */
-#navBtn{position:relative;flex:0 0 auto;width:32px;height:24px;border-radius:7px;
-  background:rgba(255,246,232,.12);border:1px solid rgba(255,246,232,.7);display:flex;flex-direction:column;
-  justify-content:center;align-items:center;gap:3px;cursor:pointer}
-#navBtn span{display:block;width:15px;height:2px;background:#FFF6E8;border-radius:2px}
+#navBtn{position:fixed;top:calc(env(safe-area-inset-top) + 10px);left:12px;z-index:10060;box-sizing:border-box;
+  width:52px;height:46px;border-radius:13px;padding:0;background:rgba(12,18,26,.62);backdrop-filter:blur(6px);
+  border:1.5px solid rgba(255,246,232,.8);display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:5px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:120}
+#navBtn span{display:block;width:24px;height:2.8px;background:#FFF6E8;border-radius:2px}
 #navMask{position:fixed;inset:0;background:rgba(4,8,16,.55);z-index:128;opacity:0;pointer-events:none;transition:opacity .18s}
 #navDrawer{position:fixed;left:0;top:0;bottom:0;width:250px;max-width:80vw;z-index:130;background:#101B2E;
   border-right:1px solid #24344F;transform:translateX(-102%);transition:transform .2s ease;padding:18px 14px;
@@ -3636,16 +3623,24 @@ document.addEventListener("click", function(e){
 #navDrawer.on{transform:none}
 #navMask.on{opacity:1;pointer-events:auto}
 #navDrawer .nd-g{font-size:11px;color:#7E93B2;letter-spacing:.12em;margin:12px 4px 4px}
-#navDrawer .nd-theme{display:flex;align-items:center;gap:9px;width:100%;padding:10px 6px;margin:2px 0 6px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:10px;color:#FFF6E8;
-  font:700 13px/1.2 "Noto Sans TC",system-ui,sans-serif;cursor:pointer;text-align:left}
-#navDrawer .nd-theme:active{background:rgba(255,255,255,.14)}
+#navDrawer .nd-theme{display:flex;align-items:center;gap:6px;width:100%;padding:6px;margin:2px 0 6px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:10px;color:#FFF6E8}
+#navDrawer .nd-tb{display:flex;align-items:center;gap:9px;flex:1 1 auto;min-width:0;padding:4px 2px;background:transparent;
+  border:0;color:inherit;font:700 13px/1.2 "Noto Sans TC",system-ui,sans-serif;text-align:left;cursor:pointer}
+#navDrawer .nd-tb:active{opacity:.75}
+#navDrawer .nd-up{flex:0 0 auto;width:32px;height:32px;padding:0;border-radius:9px;border:1px solid rgba(255,255,255,.26);
+  background:rgba(255,255,255,.10);color:#FFF6E8;font:400 18px/1 system-ui,sans-serif;display:flex;align-items:center;
+  justify-content:center;cursor:pointer}
+#navDrawer .nd-up:active{background:rgba(255,255,255,.24)}
 #navDrawer .nd-sw{width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);flex:0 0 auto}
 #navDrawer .nd-a{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#DCE7F5;
   font:600 13px/1.3 "Noto Sans TC",system-ui,sans-serif;padding:11px 10px;margin:6px 0 0;width:100%;text-align:left;
   cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:9px}
 #navDrawer .nd-a:active{background:rgba(255,255,255,.14)}
 #navDrawer .nd-sep{height:1px;margin:0 4px 6px;background:rgba(255,255,255,.14)}
+#navDrawer .nd-apk{display:block;margin:8px 0 0;padding:0;line-height:0;border-radius:12px;overflow:hidden}
+#navDrawer .nd-apk img{display:block;width:100%;height:auto;border-radius:12px}
+#navDrawer .nd-apk:active{opacity:.82}
 #navDrawer .nd-gap{height:66px}
 .fbk{position:fixed;inset:0;z-index:260;background:rgba(10,16,24,.6);display:flex;align-items:center;justify-content:center;padding:22px}
 .fbk[hidden]{display:none}
@@ -3671,7 +3666,10 @@ document.addEventListener("click", function(e){
 <div id="navMask"></div>
 <nav id="navDrawer" aria-label="頁面選單">
   <div class="nd-t">勤務記錄系統</div>
-  <button type="button" class="nd-theme" id="ndTheme"><span class="nd-sw" id="ndSw"></span><span>主題切換</span></button>
+  <div class="nd-theme">
+    <button type="button" class="nd-tb" id="ndTheme"><span class="nd-sw" id="ndSw"></span><span>主題切換</span></button>
+    <button type="button" class="nd-up" id="ndUp" aria-label="上傳相簿照片當背景" title="上傳相簿照片當背景">＋</button>
+  </div>
   <a href="../index.html">首頁</a>
   <a href="../formal/">主頁</a>
   <div class="nd-gap"></div>
@@ -3679,7 +3677,9 @@ document.addEventListener("click", function(e){
   <a href="../guide/">使用教學</a>
   <button type="button" class="nd-a" id="ndFb">建議與回報</button>
   <a href="../wc/">找廁所 <em>V0.1</em></a>
-  <a href="../assets/worklog-v1.7.apk" download>勤務系統 Android</a>
+  <a class="nd-apk" href="../assets/worklog-v1.7.apk" download aria-label="下載勤務系統 Android App">
+    <img src="../assets/apk-btn.png" alt="Download Android APK V1.7" width="540" height="179">
+  </a>
   <button type="button" class="nd-x" id="navClose">關閉選單</button>
 </nav>
 
@@ -3710,6 +3710,16 @@ document.addEventListener("click", function(e){
     var t=document.getElementById("themeBtn");
     if(t){ t.click(); setTimeout(paintSw,60); }
   });
+  var ndUp=document.getElementById("ndUp"), thFileEl=document.getElementById("thFile");
+  if(ndUp && thFileEl){
+    ndUp.addEventListener("click", function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      thFileEl.value=""; thFileEl.click();
+    });
+    thFileEl.addEventListener("change", function(){
+      setTimeout(function(){ paintSw(); closeD(); }, 1600);
+    });
+  }
   paintSw();
   /* 建議與回報 */
   var fbk=document.getElementById("fbk");
@@ -3812,7 +3822,7 @@ document.addEventListener("click", function(e){
     function list(){
       var L=TH.slice();
       for(var n=0;n<custom.length;n++){
-        L.push({n:"相片"+(n+1), g:"url("+custom[n].d+") center/cover no-repeat", light:(custom[n].lum>0.58), custom:true});
+        L.push({n:"相片"+(n+1), g:'url("'+custom[n].d+'")', light:(custom[n].lum>0.58), custom:true});
       }
       return L;
     }
@@ -3878,7 +3888,7 @@ document.addEventListener("click", function(e){
       root.style.colorScheme = dark ? "dark" : "light";
 
       if(t.custom){
-        var ov = dark ? "rgba(8,12,18,.60)" : "rgba(255,255,255,.66)";
+        var ov = dark ? "rgba(8,12,18,.46)" : "rgba(255,255,255,.58)";
         body.style.backgroundImage = "linear-gradient("+ov+","+ov+"),"+t.g;
         body.style.backgroundSize = "cover, cover";
       }else{
@@ -3985,7 +3995,7 @@ document.addEventListener("click", function(e){
 <script>
 /* 版本自癒：卡在舊版就自動換一次 */
 (function(){
-  var MY_BUILD="20261118233449";
+  var MY_BUILD="20261118234625";
   var KEY="wl_selfver";
   function go(b){
     try{ if (sessionStorage.getItem(KEY) === b) return; sessionStorage.setItem(KEY,b); }catch(e){}
