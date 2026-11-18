@@ -3671,15 +3671,11 @@ document.addEventListener("click", function(e){
 <nav id="navDrawer" aria-label="頁面選單">
   <div class="nd-t">勤務記錄系統</div>
   <button type="button" class="nd-theme" id="ndTheme"><span class="nd-sw" id="ndSw"></span><span>主題切換</span></button>
-  <div class="nd-g">正式版</div>
   <a href="../index.html">首頁</a>
   <a href="../formal/">主頁</a>
-  <a href="../assets/worklog-v1.7.apk" download>Android</a>
+  <a href="../assets/worklog-v1.7.apk" download>勤務系統 Android</a>
   <a href="../guide/">使用教學</a>
   <button type="button" class="nd-a" id="ndFb">建議與回報</button>
-  <div class="nd-sep"></div>
-  <a href="../dev/?skip=1">開發版 <em>Vn.59</em></a>
-  <a href="../opt/?skip=1">優化版 <em>Vn.58</em></a>
   <a href="../wc/">找廁所 <em>V0.1</em></a>
   <button type="button" class="nd-x" id="navClose">關閉選單</button>
 </nav>
@@ -3986,7 +3982,7 @@ document.addEventListener("click", function(e){
 <script>
 /* 版本自癒：卡在舊版就自動換一次 */
 (function(){
-  var MY_BUILD="20261118183730";
+  var MY_BUILD="20261118193416";
   var KEY="wl_selfver";
   function go(b){
     try{ if (sessionStorage.getItem(KEY) === b) return; sessionStorage.setItem(KEY,b); }catch(e){}
