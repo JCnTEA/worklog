@@ -3646,7 +3646,7 @@ document.addEventListener("click", function(e){
   cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:9px}
 #navDrawer .nd-a:active{background:rgba(255,255,255,.14)}
 #navDrawer .nd-sep{height:1px;margin:0 4px 6px;background:rgba(255,255,255,.14)}
-#navDrawer .nd-gap{height:30px}
+#navDrawer .nd-gap{height:66px}
 .fbk{position:fixed;inset:0;z-index:260;background:rgba(10,16,24,.6);display:flex;align-items:center;justify-content:center;padding:22px}
 .fbk[hidden]{display:none}
 .fbk-card{width:100%;max-width:330px;background:#fff;color:#16222E;border-radius:12px;padding:18px 16px 14px;box-shadow:0 18px 44px rgba(8,16,26,.4)}
@@ -3676,10 +3676,10 @@ document.addEventListener("click", function(e){
   <a href="../formal/">主頁</a>
   <div class="nd-gap"></div>
   <div class="nd-sep"></div>
-  <a href="../assets/worklog-v1.7.apk" download>勤務系統 Android</a>
   <a href="../guide/">使用教學</a>
   <button type="button" class="nd-a" id="ndFb">建議與回報</button>
   <a href="../wc/">找廁所 <em>V0.1</em></a>
+  <a href="../assets/worklog-v1.7.apk" download>勤務系統 Android</a>
   <button type="button" class="nd-x" id="navClose">關閉選單</button>
 </nav>
 
@@ -3985,7 +3985,7 @@ document.addEventListener("click", function(e){
 <script>
 /* 版本自癒：卡在舊版就自動換一次 */
 (function(){
-  var MY_BUILD="20261118220258";
+  var MY_BUILD="20261118233449";
   var KEY="wl_selfver";
   function go(b){
     try{ if (sessionStorage.getItem(KEY) === b) return; sessionStorage.setItem(KEY,b); }catch(e){}
