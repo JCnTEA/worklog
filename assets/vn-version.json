@@ -4,7 +4,7 @@
  "build": "14",
  "apk": "https://jcntea.github.io/worklog/assets/worklog-bn1.1.apk",
  "fileName": "worklog-bn1.1.apk",
- "notes": "修正 App 桌面圖示（勤務日誌官方圖示）",
+ "notes": "修正 App 桌面圖示，並在圖示右下角加上「後台」角標",
  "web": "V0.10",
  "apkRequired": false
 }
