@@ -5,7 +5,7 @@
  "apk": "https://jcntea.github.io/worklog/assets/worklog-1.1.apk",
  "fileName": "worklog-1.1.apk",
  "apkPage": "../apk/",
- "notes": "修正 App 桌面圖示（改用勤務日誌官方圖示，支援自適應／圓形圖示）",
+ "notes": "修正 App 桌面圖示，並在圖示右下角加上「正式版」角標",
  "web": "V0.10",
  "apkRequired": true
 }
