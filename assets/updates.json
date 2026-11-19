@@ -1,6 +1,15 @@
 {
- "updated": "2026-11-20 01:08",
+ "updated": "2026-11-20 01:11",
  "items": [
+  {
+   "date": "2026-11-20 01:11",
+   "level": "feature",
+   "cat": "新增",
+   "ver": "實驗版",
+   "title": "新增自建帳號系統（帳密）＋加密紀錄跨裝置",
+   "detail": "實驗版加入「帳號」面板：自訂帳號密碼註冊／登入，紀錄用密碼派生金鑰 AES-GCM 加密後才上傳，換裝置同帳密按「取回紀錄」即還原。後端為 Cloudflare Worker（tools/acct-worker），GitHub 權杖與簽章金鑰只放在 Worker 環境變數，前端只存服務位址。移除先前的 Google 與倉庫同步。",
+   "state": "完成"
+  },
   {
    "date": "2026-11-20 01:08",
    "level": "minor",
