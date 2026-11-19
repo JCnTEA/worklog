@@ -3579,6 +3579,7 @@ document.addEventListener("click", function(e){
   <div class="hs-sub">排障與會同件數記錄。先選入口，按「正式版」才進去登記。</div>
   <div class="hs-grid">
     <a class="hs-tile" href="../guide/"><div class="hs-name">教學</div><div class="hs-meta">V0.10</div></a>
+    <a class="hs-tile" href="#" id="hsAcc"><div class="hs-name">帳號與備份</div><div class="hs-meta">Google 登入 / 跨裝置</div></a>
     <a class="hs-tile main" href="../formal/">
       <div class="hs-name">正式版</div>
       <div class="hs-meta">V0.10 · 平常上班用這個</div>
@@ -3677,6 +3678,73 @@ document.addEventListener("click", function(e){
   </a>
   <button type="button" class="nd-x" id="navClose">關閉選單</button>
 </nav>
+
+<style>
+#accMask{position:fixed;inset:0;z-index:30000;display:none;background:rgba(5,9,16,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center}
+#accMask.on{display:flex}
+.acc-card{width:100%;max-width:480px;background:#0F1929;border:1px solid #24344F;border-radius:18px 18px 0 0;
+padding:16px 16px calc(16px + env(safe-area-inset-bottom));color:#E8EDF6;max-height:86vh;overflow:auto;
+font-family:"Noto Sans TC",-apple-system,"PingFang TC",sans-serif}
+.acc-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.acc-hd h3{margin:0;font-size:17px;font-weight:700}
+.acc-hd button{background:none;border:0;color:#93A1B8;font-size:13px;padding:6px}
+.acc-id{display:flex;align-items:center;gap:8px;background:#16223A;border:1px solid #24344F;border-radius:12px;
+padding:11px 12px;font-size:13px;color:#C9D5E6;margin-bottom:12px;word-break:break-all}
+.acc-id i{width:8px;height:8px;border-radius:50%;background:#6B7C93;flex:0 0 auto}
+.acc-id.on i{background:#4ADE80}
+.acc-row{display:flex;gap:8px;margin-top:8px}
+.acc-b{flex:1 1 0;display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border-radius:11px;
+border:1px solid #3E63A8;background:#2F6BD8;color:#fff;font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+.acc-b:active{opacity:.82}
+.acc-b.ghost{background:#16223A;border-color:#2A3C5A;color:#DCE7F5;font-weight:500}
+.acc-b:disabled{opacity:.45}
+.acc-note{margin-top:12px;font-size:12px;line-height:1.7;color:#8FA3C0;min-height:34px}
+.acc-note.ok{color:#7BCB9B}
+.acc-note.err{color:#FF9B9B}
+.acc-set{margin-top:14px;border-top:1px solid #22304A;padding-top:12px}
+.acc-set summary{font-size:12.5px;color:#8FA3C0;cursor:pointer;list-style:none}
+.acc-set summary::-webkit-details-marker{display:none}
+.acc-set p{font-size:12px;line-height:1.75;color:#8FA3C0;margin:8px 0}
+.acc-set b{color:#DCE7F5}
+.acc-cid{display:flex;gap:6px;margin-top:6px}
+.acc-cid input{flex:1 1 auto;min-width:0;background:#101A2B;border:1px solid #2A3C5A;border-radius:9px;color:#E8EDF6;
+padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
+.acc-cid button{flex:0 0 auto;padding:0 12px;border-radius:9px;border:1px solid #2A3C5A;background:#16223A;color:#DCE7F5;font-size:12.5px}
+</style>
+<div id="accMask" role="dialog" aria-label="帳號與雲端備份">
+  <div class="acc-card">
+    <div class="acc-hd"><h3>帳號與雲端備份</h3><button type="button" id="accX">關閉</button></div>
+    <div class="acc-id" id="accIdBox"><i></i><span id="accWho">未登入</span></div>
+    <div class="acc-row">
+      <button type="button" class="acc-b" id="accIn">使用 Google 登入</button>
+      <button type="button" class="acc-b ghost" id="accOut" hidden>登出</button>
+    </div>
+    <div class="acc-row">
+      <button type="button" class="acc-b ghost" id="accUp">備份到雲端</button>
+      <button type="button" class="acc-b ghost" id="accDown">從雲端還原</button>
+    </div>
+    <div class="acc-row">
+      <button type="button" class="acc-b ghost" id="accExp">匯出紀錄檔</button>
+      <label class="acc-b ghost" for="accFile">匯入紀錄檔</label>
+      <input type="file" id="accFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="acc-note" id="accMsg">登入後可把紀錄備份到你的 Google 雲端硬碟（只存在 App 專用的隱藏資料夾），換裝置登入同一個帳號就能還原。</div>
+    <details class="acc-set" id="accSet">
+      <summary>Google 登入設定（第一次使用才需要）</summary>
+      <p>
+        1. 到 <b>console.cloud.google.com</b> 建一個專案，啟用「Google Drive API」。<br>
+        2. 建立「OAuth 用戶端 ID」，類型選 <b>網頁應用程式</b>。<br>
+        3. 已授權的 JavaScript 來源填 <b>https://jcntea.github.io</b>。<br>
+        4. OAuth 同意畫面把 <b>drive.appdata</b> 加進範圍，測試使用者填你自己的 Google 帳號。<br>
+        5. 把產生的用戶端 ID（xxx.apps.googleusercontent.com）貼到下面。
+      </p>
+      <div class="acc-cid">
+        <input id="accCid" placeholder="xxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+        <button type="button" id="accCidSave">儲存</button>
+      </div>
+    </details>
+  </div>
+</div>
 
 <div class="fbk" id="fbk" hidden>
   <div class="fbk-card">
@@ -4006,5 +4074,233 @@ document.addEventListener("click", function(e){
   document.addEventListener("visibilitychange", function(){ if (!document.hidden) check(); });
 })();
 </script>
+<script>
+/* ===== 帳號與雲端備份（Google 登入 + Drive App 資料夾） ===== */
+(function(){
+  var CID_KEY="worklog.google.clientid.v1";
+  var TOK=null, TOK_EXP=0, ME=null;
+  function $(id){ return document.getElementById(id); }
+  function msg(t, cls){
+    var el=$("accMsg"); if(!el) return;
+    el.className="acc-note"+(cls?" "+cls:"");
+    el.textContent=t;
+  }
+  function openAcc(){ $("accMask").classList.add("on"); render(); }
+  function closeAcc(){ $("accMask").classList.remove("on"); }
+
+  /* --- 抽屜入口 --- */
+  var ndBtn=document.createElement("button");
+  ndBtn.type="button"; ndBtn.className="nd-a"; ndBtn.id="ndAcc";
+  ndBtn.innerHTML='帳號與備份 <em id="ndAccSt" style="font-style:normal;font-size:11.5px;color:#7E93B2">未登入</em>';
+  var fb=$("ndFb");
+  if(fb && fb.parentNode){ fb.parentNode.insertBefore(ndBtn, fb.nextSibling); }
+  ndBtn.addEventListener("click", function(){ try{ $("navClose").click(); }catch(e){} openAcc(); });
+
+  /* --- 快照 --- */
+  function collect(){
+    var o={};
+    try{
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k && k.indexOf("worklog.")===0) o[k]=localStorage.getItem(k);
+      }
+    }catch(e){}
+    return o;
+  }
+  function snapshot(){
+    return { app:"worklog", page:"vi", schema:1,
+      exportedAt:new Date().toISOString(), tz:"Asia/Taipei",
+      device:(navigator.userAgent||"").slice(0,120), data:collect() };
+  }
+  function applySnapshot(o){
+    if(!o || typeof o!=="object" || !o.data) throw new Error("檔案格式不對（缺少 data）");
+    var n=0;
+    Object.keys(o.data).forEach(function(k){
+      if(k.indexOf("worklog.")!==0) return;
+      localStorage.setItem(k, o.data[k]); n++;
+    });
+    return n;
+  }
+  function countEntries(){
+    try{
+      var raw=localStorage.getItem("worklog.dev.daily.v1")||"{}";
+      var d=JSON.parse(raw);
+      if(Array.isArray(d)) return d.length;
+      if(d && d.records) return Object.keys(d.records).length;
+      if(d && d.items) return d.items.length;
+    }catch(e){}
+    return 0;
+  }
+
+  function render(){
+    var who=$("accWho"), box=$("accIdBox");
+    if(ME && ME.email){
+      who.textContent="已登入：" + ME.email + (countEntries()? "・本機 "+countEntries()+" 筆":"");
+      box.classList.add("on");
+      $("accIn").hidden=true; $("accOut").hidden=false;
+      var st=$("ndAccSt"); if(st){ st.textContent=ME.email.split("@")[0]; }
+    }else{
+      who.textContent="未登入";
+      box.classList.remove("on");
+      $("accIn").hidden=false; $("accOut").hidden=true;
+      var st2=$("ndAccSt"); if(st2){ st2.textContent="未登入"; }
+    }
+    var cid=localStorage.getItem(CID_KEY)||"";
+    if($("accCid") && !$("accCid").value) $("accCid").value=cid;
+  }
+
+  /* --- 匯出／匯入 --- */
+  function exportFile(){
+    var s=snapshot();
+    var blob=new Blob([JSON.stringify(s,null,1)],{type:"application/json"});
+    var d=new Date();
+    var name="worklog-backup-"+d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+".json";
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    msg("已匯出紀錄檔（"+Object.keys(s.data).length+" 個資料項目）。", "ok");
+  }
+  function importFile(file){
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var o=JSON.parse(r.result);
+        var n=applySnapshot(o);
+        msg("已匯入 "+n+" 個資料項目，重新載入…", "ok");
+        setTimeout(function(){ location.reload(); }, 900);
+      }catch(e){ msg("匯入失敗："+e.message, "err"); }
+    };
+    r.readAsText(file);
+  }
+
+  /* --- Google 登入 --- */
+  function loadGIS(cb){
+    if(window.google && google.accounts && google.accounts.oauth2){ cb(); return; }
+    var s=document.createElement("script");
+    s.src="https://accounts.google.com/gsi/client"; s.async=true; s.defer=true;
+    s.onload=function(){ cb(); };
+    s.onerror=function(){ msg("Google 登入元件載入失敗（網路被擋或離線）", "err"); };
+    document.head.appendChild(s);
+  }
+  function tokenOK(){ return TOK && Date.now() < TOK_EXP - 60000; }
+  function ensureToken(cb){
+    if(tokenOK()) { cb(); return; }
+    msg("登入狀態已過期，請重新按「使用 Google 登入」。", "err");
+  }
+  function signIn(){
+    var cid=(localStorage.getItem(CID_KEY)||"").trim();
+    if(!cid){
+      msg("尚無 Client ID：展開下方設定，貼上 Google OAuth 用戶端 ID 後再登入。", "err");
+      var d=$("accSet"); if(d) d.open=true;
+      return;
+    }
+    msg("開啟 Google 登入…");
+    loadGIS(function(){
+      try{
+        var tc=google.accounts.oauth2.initTokenClient({
+          client_id:cid,
+          scope:"openid email profile https://www.googleapis.com/auth/drive.appdata",
+          callback:function(resp){
+            if(resp && resp.access_token){
+              TOK=resp.access_token; TOK_EXP=Date.now()+((resp.expires_in||3600)*1000);
+              fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+TOK}})
+                .then(function(r){ return r.ok? r.json(): {}; })
+                .then(function(u){ ME=u||{}; render(); msg("已登入，可備份或還原紀錄。", "ok"); })
+                .catch(function(){ ME={email:""}; render(); msg("已登入（無法取得帳號資訊，仍可備份）。", "ok"); });
+            }else{
+              msg("登入未完成（" + ((resp && resp.error) || "已取消") + "）", "err");
+            }
+          }
+        });
+        tc.requestAccessToken({prompt:""});
+      }catch(e){ msg("登入初始化失敗："+e.message, "err"); }
+    });
+  }
+  function signOut(){
+    if(window.google && google.accounts && google.accounts.oauth2 && TOK){
+      try{ google.accounts.oauth2.revoke(TOK, function(){}); }catch(e){}
+    }
+    TOK=null; TOK_EXP=0; ME=null; render(); msg("已登出（雲端檔案仍在你的 Google 帳號裡）。");
+  }
+
+  /* --- Drive（appDataFolder） --- */
+  var FNAME="worklog-backup.json";
+  function api(url, opt){
+    opt=opt||{};
+    opt.headers=Object.assign({}, opt.headers||{}, {Authorization:"Bearer "+TOK});
+    return fetch(url,opt).then(function(r){
+      if(r.status===401){ TOK=null; TOK_EXP=0; throw new Error("登入已過期，請重新登入"); }
+      if(!r.ok) return r.text().then(function(t){ throw new Error("Drive 回應 "+r.status+"："+t.slice(0,120)); });
+      return r;
+    });
+  }
+  function findFile(){
+    var q=encodeURIComponent("name='"+FNAME+"' and trashed=false");
+    return api("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q="+q+
+               "&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime desc")
+      .then(function(r){ return r.json(); })
+      .then(function(d){ return (d.files && d.files[0]) || null; });
+  }
+  function upload(){
+    return findFile().then(function(f){
+      var body=JSON.stringify(snapshot());
+      var meta=JSON.stringify(f ? {name:FNAME} : {name:FNAME,parents:["appDataFolder"]});
+      var bd="----wl"+Date.now();
+      var blob=new Blob(["--"+bd+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+
+                         "\r\n--"+bd+"\r\nContent-Type: application/json\r\n\r\n"+body+"\r\n--"+bd+"--"],
+                        {type:"multipart/related; boundary="+bd});
+      var url="https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime"+(f? "": "");
+      if(f) url="https://www.googleapis.com/upload/drive/v3/files/"+f.id+"?uploadType=multipart&fields=id,modifiedTime";
+      return api(url,{method:f?"PATCH":"POST",body:blob}).then(function(r){ return r.json(); });
+    });
+  }
+  function download(){
+    return findFile().then(function(f){
+      if(!f) throw new Error("雲端沒有備份檔");
+      return api("https://www.googleapis.com/drive/v3/files/"+f.id+"?alt=media").then(function(r){ return r.text(); });
+    }).then(function(t){
+      var o=JSON.parse(t);
+      var n=applySnapshot(o);
+      msg("已從雲端還原 "+n+" 個資料項目（備份時間 "+String(o.exportedAt||"").replace("T"," ").slice(0,16)+"），重新載入…", "ok");
+      setTimeout(function(){ location.reload(); }, 1200);
+    });
+  }
+
+  /* --- 事件 --- */
+  $("accX").addEventListener("click", closeAcc);
+  $("accMask").addEventListener("click", function(e){ if(e.target===this) closeAcc(); });
+  $("accIn").addEventListener("click", signIn);
+  $("accOut").addEventListener("click", signOut);
+  $("accExp").addEventListener("click", exportFile);
+  $("accFile").addEventListener("change", function(e){ var f=e.target.files&&e.target.files[0]; if(f) importFile(f); e.target.value=""; });
+  $("accCidSave").addEventListener("click", function(){
+    var v=($("accCid").value||"").trim();
+    if(!/\.apps\.googleusercontent\.com$/.test(v)){ msg("Client ID 格式應為 xxx.apps.googleusercontent.com", "err"); return; }
+    localStorage.setItem(CID_KEY, v);
+    msg("Client ID 已儲存，可以按「使用 Google 登入」了。", "ok");
+  });
+  $("accUp").addEventListener("click", function(){
+    ensureToken(function(){
+      msg("上傳中…");
+      upload().then(function(d){ msg("已備份到雲端（"+countEntries()+" 筆紀錄・"+new Date().toLocaleTimeString("zh-Hant",{hour12:false})+"）", "ok"); })
+        .catch(function(e){ msg("備份失敗："+e.message, "err"); });
+    });
+  });
+  $("accDown").addEventListener("click", function(){
+    ensureToken(function(){
+      if(!confirm("會用雲端的備份覆蓋這台裝置目前的紀錄，確定還原？")) return;
+      msg("下載中…");
+      download().catch(function(e){ msg("還原失敗："+e.message, "err"); });
+    });
+  });
+
+  var hsAcc=$("hsAcc");
+  if(hsAcc){ hsAcc.addEventListener("click", function(ev){ ev.preventDefault(); openAcc(); }); }
+  render();
+  window.__accOpen = openAcc;
+})();
+</script>
+
 </body>
 </html>
