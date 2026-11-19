@@ -629,16 +629,6 @@
 #dUpdOk{width:100%;border:0;border-radius:8px;background:var(--blue,#1D5F9E);color:#fff;padding:10px;font-weight:700;font-size:14px;cursor:pointer}
 
 /* ===== 捷運站點資料庫（後台） ===== */
-.wc-card{margin:14px 0 18px;padding:14px 14px 12px;border:1px solid var(--line-soft,#E7E1D2);border-radius:12px;background:var(--sheet,#FCFDFE)}
-.wc-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
-.wc-hd b{font-size:16px}
-.wc-cnt{font-size:12.5px;color:var(--ink3,#77899B)}
-.wc-sub{font-size:12.5px;line-height:1.5;color:var(--ink3,#77899B)}
-.wc-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
-.wc-chip{appearance:none;border:1px solid var(--line-soft,#E7E1D2);background:var(--sheet,#FCFDFE);color:var(--ink2,#3C5063);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer}
-.wc-chip.on{background:#0B63B6;border-color:#0B63B6;color:#fff;font-weight:600}
-.wc-none{padding:14px 2px;font-size:13.5px;line-height:1.6;color:var(--ink3,#77899B)}
-.wc-note{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line-soft,#E7E1D2);font-size:12px;line-height:1.6;color:var(--ink3,#77899B)}
 .mrt-card{margin:14px 0 18px;padding:14px 14px 12px;border:1px solid var(--line-soft,#E7E1D2);border-radius:12px;background:var(--sheet,#FCFDFE)}
 .mrt-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
 .mrt-hd b{font-size:16px}
@@ -882,18 +872,6 @@ document.addEventListener("touchend", function(e){
     </div>
   </section>
 
-
-  <!-- ===== 尋找廁所 ===== -->
-  <section class="wc-card" aria-label="尋找廁所">
-    <div class="wc-hd"><b>尋找廁所</b><span id="wcCount" class="wc-cnt"></span></div>
-    <div class="wc-sub">用現有資料庫直接找：便利商店（座標齊全）・加油站（中油／台塑，資料匯入中）</div>
-    <div class="wc-chips" id="wcChips">
-      <button type="button" class="wc-chip on" data-k="ps">便利商店</button>
-      <button type="button" class="wc-chip" data-k="gp">加油站</button>
-    </div>
-    <div class="wc-list" id="wcList"></div>
-    <div class="wc-note">超商多有廁所（部分門市限消費、半夜不開放）；加油站以中油直營站較穩，實際仍以現場為準。</div>
-  </section>
 
   <!-- ===== 捷運站點資料庫（後台） ===== -->
   <section class="mrt-card" aria-label="捷運站點資料庫">
@@ -2334,7 +2312,6 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   }
 
   function renderPlaceActs(){
-    if (typeof wcRender === "function"){ try{ wcRender(); }catch(e){} }
     var p = todayData.place;
     elPlaceActs.hidden = !(p && p.lat != null);
   }
@@ -2890,53 +2867,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   /* ===== 捷運站點資料庫（TDX 官方站體座標，一站一筆：轉乘站已合併）===== */
   var MRT_LINES = ["全部", "淡水信義", "板南", "松山新店", "中和新蘆", "文湖"];
   var mrtLine = "全部";
-  /* ---------- 尋找廁所（用現有資料庫，依 GPS 由近到遠） ---------- */
-  var WC_KIND = "ps";
-  function wcCoords(){
-    if (lastCoords && lastCoords.lat != null) return lastCoords;
-    var p = todayData.place;
-    if (p && p.lat != null) return { lat: p.lat, lng: p.lng, acc: p.acc };
-    return null;
-  }
-  function wcRender(){
-    var list = document.getElementById("wcList"), cnt = document.getElementById("wcCount");
-    if (!list) return;
-    var c = wcCoords();
-    if (!c){ cnt.textContent = ""; list.innerHTML = '<div class="wc-none">先按上方「取得 GPS 位置」（或用「貼座標」），就會依距離列出最近的選項。</div>'; return; }
-    if (WC_KIND === "gp"){
-      cnt.textContent = "";
-      list.innerHTML = '<div class="wc-none">加油站據點（中油／台塑等）還沒匯入資料庫，匯入後這裡會直接列出最近的加油站與距離。</div>';
-      return;
-    }
-    var arr = [], i, x;
-    for (i = 0; i < PSEN.length; i++){
-      x = PSEN[i];
-      if (x.x == null || x.y == null) continue;
-      arr.push({ x: x, d: haversine(c.lat, c.lng, x.x, x.y) });
-    }
-    arr.sort(function(a, b){ return a.d - b.d; });
-    cnt.textContent = "最近 12 間・共 " + arr.length + " 間有座標";
-    list.innerHTML = arr.slice(0, 12).map(function(t){
-      var it = t.x, nm = String(it.n || "").replace(/^7-11\s*/, "");
-      return '<div class="cand"><span class="cand-top">' + btagHTML(it.b || "")
-        + '<b>' + esc(nm) + '</b><em>' + (t.d < 1000 ? Math.round(t.d) + " m" : (t.d / 1000).toFixed(1) + " km") + '</em></span>'
-        + '<span class="cand-addr">' + esc(it.s || it.m || "") + '</span></div>';
-    }).join("");
-  }
-  (function(){
-    var chips = document.getElementById("wcChips");
-    if (!chips) return;
-    chips.addEventListener("click", function(ev){
-      var b = ev.target.closest ? ev.target.closest(".wc-chip") : null;
-      if (!b) return;
-      WC_KIND = b.getAttribute("data-k") || "ps";
-      [].forEach.call(chips.querySelectorAll(".wc-chip"), function(x){ x.classList.toggle("on", x === b); });
-      wcRender();
-    });
-  })();
-  wcRender();
-
-  var elMrtQ = document.getElementById("mrtQ");
+    var elMrtQ = document.getElementById("mrtQ");
   var elMrtList = document.getElementById("mrtList");
   var elMrtCount = document.getElementById("mrtCount");
   var elMrtChips = document.getElementById("mrtChips");
@@ -3653,7 +3584,6 @@ document.addEventListener("click", function(e){
       <div class="hs-meta">V0.10 · 平常上班用這個</div>
     </a>
     <a class="hs-tile" href="../dev/?skip=1"><div class="hs-name">開發版</div><div class="hs-meta">Vn.59 · 需要密碼登入</div></a>
-    <a class="hs-tile" href="../wc/"><div class="hs-name">找廁所</div><div class="hs-meta">V0.1 · 超商優先</div></a>
     <a class="hs-tile" href="../assets/Work Log System V1.7.apk"><div class="hs-name">App 下載</div><div class="hs-meta">V1.7</div></a>
   </div>
   <div class="hs-foot">
@@ -3742,7 +3672,6 @@ document.addEventListener("click", function(e){
   <div class="nd-sep"></div>
   <a href="../guide/">使用教學</a>
   <button type="button" class="nd-a" id="ndFb">建議與回報</button>
-  <a href="../wc/">找廁所 <em>V0.1</em></a>
   <a class="nd-apk" href="../assets/worklog-v1.7.apk" download aria-label="下載勤務系統 Android App">
     <img src="../assets/apk-btn.svg" alt="Download Android APK V1.7" width="270" height="90">
   </a>
@@ -3811,8 +3740,7 @@ document.addEventListener("click", function(e){
   /* 白色標題可收折（合計區不動） */
   var targets=[
     [document.querySelector("section.place"), document.querySelector(".place-head")],
-    [document.querySelector("section.wc-card"), document.querySelector(".wc-hd")],
-    [document.querySelector("section.mrt-card"), document.querySelector(".mrt-hd")],
+       [document.querySelector("section.mrt-card"), document.querySelector(".mrt-hd")],
     [document.querySelector("section.records"), document.querySelector(".rec-head")],
     [document.querySelector("section.history"), document.querySelector(".hist-head")]
   ];
