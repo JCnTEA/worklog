@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.jcmtea.worklog.vn"
+    android:versionCode="15"
+    android:versionName="Bn1.2">
+
+  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34"/>
+
+  <!-- 相容性：GPS/定位不是必需，避免 Play 安裝器誤判裝置不相容 -->
+  <uses-feature android:name="android.hardware.location" android:required="false"/>
+  <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+  <uses-feature android:name="android.hardware.location.network" android:required="false"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+  <application
+      android:label="@string/app_name"
+      android:icon="@mipmap/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:usesCleartextTraffic="true"
+      android:allowBackup="true"
+      android:theme="@android:style/Theme.Light.NoTitleBar">
+
+    <activity
+        android:name=".MainActivity"
+        android:exported="true"
+        android:configChanges="orientation|screenSize|keyboardHidden"
+        android:windowSoftInputMode="adjustResize"
+        android:launchMode="singleTop">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+
+    <receiver android:name=".UpdateAlarmReceiver" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+      </intent-filter>
+    </receiver>
+
+
+    <provider
+      android:name=".ApkProvider"
+      android:authorities="com.jcmtea.worklog.vn.update"
+      android:exported="false"
+      android:grantUriPermissions="true"/>
+
+  </application>
+</manifest>
