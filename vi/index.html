@@ -3578,6 +3578,7 @@ document.addEventListener("click", function(e){
   <div class="hs-title">勤務記錄系統_正式版 V0.10</div>
   <div class="hs-sub">排障與會同件數記錄。先選入口，按「正式版」才進去登記。</div>
   <div class="hs-grid">
+    <a class="hs-tile" href="#" id="hsAcct"><div class="hs-name">帳號</div><div class="hs-meta">紀錄跟著人到處跑</div></a>
     <a class="hs-tile" href="../guide/"><div class="hs-name">教學</div><div class="hs-meta">V0.10</div></a>
     <a class="hs-tile main" href="../formal/">
       <div class="hs-name">正式版</div>
@@ -4008,5 +4009,173 @@ document.addEventListener("click", function(e){
 </script>
 
 
+<style>
+#acMask{position:fixed;inset:0;z-index:30000;display:none;background:rgba(4,8,16,.62);padding:16px;overflow:auto}
+#acMask.on{display:flex;align-items:center;justify-content:center}
+.ac-card{width:100%;max-width:440px;background:#0F1929;border:1px solid #24344F;border-radius:16px;padding:16px;color:#DCE7F5}
+.ac-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ac-hd h3{margin:0;font-size:17px;font-weight:700}
+.ac-hd button{background:none;border:0;color:#93A1B8;font-size:13px}
+.ac-in{display:flex;flex-direction:column;gap:8px}
+.ac-in input{padding:10px 11px;border-radius:10px;border:1px solid #2A3C5A;background:#0E1728;color:#DCE7F5;font-size:13px;min-width:0}
+.ac-row{display:flex;gap:8px;margin-top:8px}
+.ac-row button{flex:1 1 0;min-height:44px;border-radius:11px;border:1px solid #2A3C5A;background:#1B2C46;color:#E7EFFA;font-size:14px;font-weight:600}
+.ac-row button.gh{background:#16223A;font-weight:500;color:#DCE7F5}
+.ac-row button:active{opacity:.82}
+.ac-note{margin-top:12px;font-size:12.5px;line-height:1.7;color:#93A3BC}
+.ac-note.ok{color:#7BCB9B}
+.ac-note.err{color:#FF9B9B}
+.ac-set{margin-top:14px;border-top:1px solid #22304A;padding-top:10px}
+.ac-set summary{font-size:12.5px;color:#8FA3C0;cursor:pointer}
+.ac-set p{font-size:12px;line-height:1.7;color:#8FA3C0;margin:8px 0 0}
+.ac-set .ac-in{margin-top:8px}
+</style>
+<div id="acMask" role="dialog" aria-label="帳號">
+  <div class="ac-card">
+    <div class="ac-hd"><h3>帳號</h3><button type="button" id="acX">關閉</button></div>
+    <div class="ac-in">
+      <input id="acU" placeholder="帳號（3–24 碼，英數字）" autocomplete="username" spellcheck="false">
+      <input id="acP" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password">
+    </div>
+    <div class="ac-row">
+      <button type="button" id="acReg" class="gh">註冊</button>
+      <button type="button" id="acLogin">登入</button>
+    </div>
+    <div class="ac-row">
+      <button type="button" id="acUp" class="gh">上傳紀錄</button>
+      <button type="button" id="acGet" class="gh">取回紀錄</button>
+    </div>
+    <div class="ac-note" id="acMsg">登入後按「上傳紀錄」，把這台的紀錄用你的密碼加密後存到雲端；換手機輸入同一組帳號密碼，按「取回紀錄」就回來。</div>
+    <details class="ac-set" id="acSet">
+      <summary>服務位址設定（第一次使用才要填）</summary>
+      <p>Cloudflare Worker 部署好會得到一個 <b>https://worklog-acct.xxx.workers.dev</b> 網址，貼在下面；這個位址只存在這台裝置。</p>
+      <div class="ac-in"><input id="acApi" placeholder="https://worklog-acct.xxx.workers.dev" autocomplete="off" spellcheck="false"></div>
+      <div class="ac-row"><button type="button" id="acApiSave" class="gh">儲存位址</button></div>
+    </details>
+  </div>
+</div>
+<script>
+/* ===== 帳號（帳密歸帳密、紀錄歸紀錄，紀錄加密後才上傳） ===== */
+(function(){
+  var K="worklog.acct.v1", S={api:"",u:"",token:""};
+  function $(id){ return document.getElementById(id); }
+  function note(t, cls){ var b=$("acMsg"); if(!b) return; b.className="ac-note"+(cls?" "+cls:""); b.textContent=t; }
+  function load(){ try{ S=Object.assign(S, JSON.parse(localStorage.getItem(K)||"{}")); }catch(e){} }
+  function save(){ try{ localStorage.setItem(K, JSON.stringify(S)); }catch(e){} }
+
+  /* 快照：只收本系統的 worklog. 開頭資料 */
+  function snapshot(){
+    var d={}, i, k;
+    try{ for(i=0;i<localStorage.length;i++){ k=localStorage.key(i); if(k && k.indexOf("worklog.")===0) d[k]=localStorage.getItem(k); } }catch(e){}
+    return { app:"worklog", page:"vi", schema:1, exportedAt:new Date().toISOString(), device:navigator.platform||"", data:d };
+  }
+  function applySnapshot(o){
+    if(!o || !o.data) throw new Error("紀錄檔格式不對");
+    var n=0;
+    Object.keys(o.data).forEach(function(k){ if(k.indexOf("worklog.")===0){ try{ localStorage.setItem(k, o.data[k]); n++; }catch(e){} } });
+    return n;
+  }
+
+  /* 加密：密碼 → PBKDF2 → AES-GCM */
+  function key(){
+    var e=new TextEncoder(), pass=$("acP").value.trim()||S.lastPass||"";
+    if(pass.length<6) throw new Error("請先在上面填密碼（至少 6 碼）");
+    S.lastPass=pass;
+    return crypto.subtle.importKey("raw", e.encode(pass), {name:"PBKDF2"}, false, ["deriveKey"]).then(function(bk){
+      return crypto.subtle.deriveKey({name:"PBKDF2", salt:e.encode("wl-acct:"+S.u), iterations:120000, hash:"SHA-256"},
+        bk, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+    });
+  }
+  function b64(buf){ var u=new Uint8Array(buf), s=""; for(var i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+  function unb64(s){ var a=atob(s), u=new Uint8Array(a.length); for(var i=0;i<a.length;i++) u[i]=a.charCodeAt(i); return u; }
+  function seal(text){
+    return key().then(function(k){
+      var iv=crypto.getRandomValues(new Uint8Array(12));
+      return crypto.subtle.encrypt({name:"AES-GCM", iv:iv}, k, new TextEncoder().encode(text)).then(function(ct){
+        return JSON.stringify({v:1, u:S.u, iv:b64(iv), ct:b64(ct)});
+      });
+    });
+  }
+  function unseal(enc){
+    var o=JSON.parse(enc);
+    return key().then(function(k){ return crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(o.iv)}, k, unb64(o.ct)); })
+      .then(function(pt){ return new TextDecoder().decode(pt); });
+  }
+
+  function api(path, opt){
+    if(!S.api) throw new Error("還沒設定服務位址（在下面「服務位址設定」填）");
+    opt=opt||{};
+    opt.headers=Object.assign({"Content-Type":"application/json"}, opt.headers||{});
+    return fetch(S.api.replace(/\/$/,"")+path, opt).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(d){
+        if(!r.ok) throw new Error(d.err || ("服務回應 "+r.status));
+        return d;
+      });
+    });
+  }
+  function needUser(){ var u=$("acU").value.trim().toLowerCase(), p=$("acP").value.trim();
+    if(!/^[a-z0-9_.-]{3,24}$/.test(u)) throw new Error("帳號 3–24 碼，只能用英數字與 . _ -");
+    if(p.length<6) throw new Error("密碼至少 6 碼"); S.u=u; save(); return {u:u,p:p}; }
+
+  function reg(){
+    var c=needUser();
+    api("/api/reg",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})})
+      .then(function(){ note("帳號建立好了，按「登入」開始用。","ok"); })
+      .catch(function(e){ note(e.message,"err"); });
+  }
+  function login(){
+    var c=needUser();
+    api("/api/login",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})})
+      .then(function(d){ S.token=d.token; S.u=d.u; save();
+        note("已登入 "+d.u+"。可以按「上傳紀錄」或「取回紀錄」。","ok"); })
+      .catch(function(e){ note(e.message,"err"); });
+  }
+  function up(){
+    if(!S.token) return note("先按「登入」","err");
+    note("加密上傳中…");
+    seal(JSON.stringify(snapshot())).then(function(enc){
+      return api("/api/rec",{method:"PUT",body:JSON.stringify({token:S.token, enc:enc})});
+    }).then(function(){
+      note("已上傳（"+new Date().toLocaleTimeString("zh-Hant",{hour12:false})+"）。換裝置用同一組帳密取回即可。","ok");
+    }).catch(function(e){ note("上傳失敗："+e.message,"err"); });
+  }
+  function get(){
+    if(!S.token) return note("先按「登入」","err");
+    note("取回解密中…");
+    api("/api/rec?token="+encodeURIComponent(S.token)).then(function(d){
+      return unseal(d.enc).then(function(t){
+        var o=JSON.parse(t), n=applySnapshot(o);
+        note("已取回 "+n+" 個資料項目，重新載入…","ok");
+        setTimeout(function(){ location.reload(); }, 1100);
+      });
+    }).catch(function(e){ note("取回失敗："+e.message,"err"); });
+  }
+
+  /* 入口：首頁磚塊 + 側邊選單 */
+  var tile=document.getElementById("hsAcct");
+  function open(){ $("acMask").classList.add("on"); if(S.api) $("acApi").value=S.api; if(S.u) $("acU").value=S.u; }
+  var btn=document.createElement("button");
+  btn.type="button"; btn.className="nd-a"; btn.id="ndAcct";
+  btn.textContent="帳號";
+  var fb=document.getElementById("ndFb");
+  if(fb && fb.parentNode) fb.parentNode.insertBefore(btn, fb.nextSibling);
+
+  load();
+  if(tile) tile.addEventListener("click", function(ev){ ev.preventDefault(); open(); });
+  btn.addEventListener("click", function(){ try{ document.getElementById("navClose").click(); }catch(e){} open(); });
+  $("acX").addEventListener("click", function(){ $("acMask").classList.remove("on"); });
+  $("acMask").addEventListener("click", function(e){ if(e.target===this) this.classList.remove("on"); });
+  $("acReg").addEventListener("click", function(){ try{ reg(); }catch(e){ note(e.message,"err"); } });
+  $("acLogin").addEventListener("click", function(){ try{ login(); }catch(e){ note(e.message,"err"); } });
+  $("acUp").addEventListener("click", function(){ try{ up(); }catch(e){ note(e.message,"err"); } });
+  $("acGet").addEventListener("click", function(){ try{ get(); }catch(e){ note(e.message,"err"); } });
+  $("acApiSave").addEventListener("click", function(){
+    var v=($("acApi").value||"").trim().replace(/\/$/,"");
+    if(!/^https:\/\//.test(v) && !/^http:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(v)) return note("位址要 https:// 開頭","err");
+    S.api=v; save(); note("服務位址已儲存。","ok");
+  });
+  window.__acctOpen = open;
+})();
+</script>
 </body>
 </html>
