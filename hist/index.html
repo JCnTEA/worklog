@@ -178,13 +178,13 @@ function render(){
 }
 function mergeLive(items){
   const rows = BASE.slice();
-  const seen = new Set(rows.map(r => (r.text||'').replace(/[^\w\u4e00-\u9fff]/g,'').slice(0,26)));
+  const seen = new Set(rows.map(r => (r.text||'').replace(/[^\w\u4e00-\u9fff]/g,'').slice(0,80)));
   for(const it of items){
     const d = String(it.date||'').slice(0,10);
     const t = String(it.title||'').replace(/\s+/g,' ').trim();
     const det = String(it.detail||'').replace(/\s+/g,' ').trim();
     const text = (t + (det ? '：' + det : '')).trim();
-    const key = text.replace(/[^\w\u4e00-\u9fff]/g,'').slice(0,26);
+    const key = text.replace(/[^\w\u4e00-\u9fff]/g,'').slice(0,80);
     if(!key || seen.has(key)) continue;
     seen.add(key);
     rows.push({date:d, cat:it.cat||'其他', text:text});
