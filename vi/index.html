@@ -4027,6 +4027,8 @@ document.addEventListener("click", function(e){
 .ac-note.err{color:#FF9B9B}
 .ac-set{margin-top:14px;border-top:1px solid #22304A;padding-top:10px}
 .ac-set summary{font-size:12.5px;color:#8FA3C0;cursor:pointer}
+.ac-auto{margin:0 0 10px;padding:8px 12px;border-radius:10px;background:rgba(64,224,208,.08);border:1px solid rgba(64,224,208,.25);font-size:12px;color:#7FE3D6;line-height:1.6}
+.ac-auto.warn{background:rgba(255,196,0,.08);border-color:rgba(255,196,0,.28);color:#E8C879}
 .ac-set p{font-size:12px;line-height:1.7;color:#8FA3C0;margin:8px 0 0}
 .ac-set .ac-in{margin-top:8px}
 </style>
@@ -4044,6 +4046,7 @@ document.addEventListener("click", function(e){
       <button type="button" id="acUp" class="gh">上傳紀錄</button>
       <button type="button" id="acGet" class="gh">取回紀錄</button>
     </div>
+    <div class="ac-auto" id="acAuto" hidden></div>
     <div class="ac-note" id="acMsg">第一次用填帳號密碼按「登入」會自動建立帳號；之後按「上傳紀錄」把這台紀錄加密存雲端，換手機同帳密按「取回紀錄」就回來。</div>
     <details class="ac-set" id="acHelp">
       <summary>第一次用？三個步驟就好</summary>
@@ -4090,8 +4093,10 @@ document.addEventListener("click", function(e){
   }
 
   /* 加密：密碼 → PBKDF2 → AES-GCM */
+  function sessPw(){ try{ return sessionStorage.getItem("worklog.acct.pw")||""; }catch(e){ return ""; } }
+  function keepPw(p){ try{ sessionStorage.setItem("worklog.acct.pw", p); }catch(e){} }
   function key(){
-    var e=new TextEncoder(), pass=$("acP").value.trim()||S.lastPass||"";
+    var e=new TextEncoder(), pass=($("acP").value||"").trim()||S.lastPass||sessPw()||"";
     if(pass.length<6) throw new Error("請先在上面填密碼（至少 6 碼）");
     S.lastPass=pass;
     return crypto.subtle.importKey("raw", e.encode(pass), {name:"PBKDF2"}, false, ["deriveKey"]).then(function(bk){
@@ -4132,8 +4137,9 @@ document.addEventListener("click", function(e){
 
   function doLogin(c){
     return api("/api/login",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})}).then(function(d){
-      S.token=d.token; S.u=d.u; save();
-      note("已登入 "+d.u+"。可以按「上傳紀錄」或「取回紀錄」。","ok");
+      S.token=d.token; S.u=d.u; S.lastPass=c.p; keepPw(c.p); save();
+      note("已登入 "+d.u+"。","ok");
+      askCloud();
     });
   }
   function go(){
@@ -4153,7 +4159,8 @@ document.addEventListener("click", function(e){
     seal(JSON.stringify(snapshot())).then(function(enc){
       return api("/api/rec",{method:"PUT",body:JSON.stringify({token:S.token, enc:enc})});
     }).then(function(){
-      note("已上傳（"+new Date().toLocaleTimeString("zh-Hant",{hour12:false})+"）。換裝置用同一組帳密取回即可。","ok");
+      lastSent=JSON.stringify(snapshot()); autoInfo=new Date().toLocaleTimeString("zh-Hant",{hour12:false}); devSet(S.u+"|cover"); autoState();
+      note("已上傳（"+autoInfo+"）。換裝置用同一組帳密取回即可。","ok");
     }).catch(function(e){ note("上傳失敗："+e.message,"err"); });
   }
   function get(){
@@ -4161,16 +4168,78 @@ document.addEventListener("click", function(e){
     note("取回解密中…");
     api("/api/rec?token="+encodeURIComponent(S.token)).then(function(d){
       return unseal(d.enc).then(function(t){
-        var o=JSON.parse(t), n=applySnapshot(o);
+        var o=JSON.parse(t), n=applySnapshot(o); devSet(S.u+"|pull");
         note("已取回 "+n+" 個資料項目，重新載入…","ok");
         setTimeout(function(){ location.reload(); }, 1100);
       });
     }).catch(function(e){ note("取回失敗："+e.message,"err"); });
   }
 
+  /* ===== 自動備份：每次存檔後自動加密上傳（靜默，不打擾） ===== */
+  var lastSent="", autoT=null, autoBusy=false, autoInfo=null;
+  function autoState(msg, warn){
+    var el=$("acAuto"); if(!el) return;
+    if(!S.token){ el.hidden=true; return; }
+    el.hidden=false;
+    el.className="ac-auto"+(warn?" warn":"");
+    el.textContent=msg || (autoInfo ? "自動備份：已同步 "+autoInfo : "自動備份：開著，存檔後約 3 秒自動上傳");
+  }
+  var DEVK="worklog.acct.dev.v1";
+  function devGet(){ try{ return localStorage.getItem(DEVK)||""; }catch(e){ return ""; } }
+  function devSet(v){ try{ localStorage.setItem(DEVK, v); }catch(e){} }
+  function resolved(){ return devGet().indexOf(S.u+"|")===0; }
+  function canAuto(){ return !!S.token && resolved() && (!!($("acP").value||"").trim() || !!S.lastPass || !!sessPw()); }
+  /* 登入後先看雲端有沒有備份：這台從沒同步過就問一次，避免新機用空白資料蓋掉舊備份 */
+  function askCloud(){
+    if(!S.token) return;
+    if(resolved()){ autoState(); return; }
+    api("/api/rec?token="+encodeURIComponent(S.token)).then(function(d){
+      if(!d || !d.enc){ devSet(S.u+"|cover"); autoState(); return; }
+      var el=$("acAuto"); if(!el) return;
+      el.hidden=false; el.className="ac-auto warn";
+      el.textContent="雲端已有這個帳號的備份（"+(d.at? new Date(d.at).toLocaleString("zh-Hant",{hour12:false}):"先前")+"）。要先取回，還是用這台的紀錄覆蓋？";
+      var row=document.createElement("div"); row.className="ac-row"; row.style.margin="8px 0 0";
+      var b1=document.createElement("button"); b1.type="button"; b1.className="gh"; b1.textContent="取回雲端備份";
+      var b2=document.createElement("button"); b2.type="button"; b2.className="gh"; b2.textContent="用這台的紀錄覆蓋";
+      b1.addEventListener("click",function(){ devSet(S.u+"|pull"); el.hidden=true; try{ get(); }catch(e){ note(e.message,"err"); } });
+      b2.addEventListener("click",function(){ devSet(S.u+"|cover"); el.hidden=true; autoUp(true); });
+      row.appendChild(b1); row.appendChild(b2); el.appendChild(row);
+    }).catch(function(e){
+      if(/還沒有這個帳號的紀錄/.test(e.message||"")){ devSet(S.u+"|cover"); autoState(); return; }
+      autoState("自動備份：連線不到雲端，稍後會再試", true);
+    });
+  }
+  function autoUp(force){
+    if(!S.token || autoBusy) return;
+    if(!resolved()){ autoState("自動備份：先在上面決定要「取回雲端備份」或「用這台覆蓋」", true); return; }
+    if(!canAuto()){ autoState("自動備份：重開瀏覽器後需要再輸入一次密碼，才會自動上傳", true); return; }
+    var snap=JSON.stringify(snapshot());
+    if(!force && snap===lastSent) return;
+    autoBusy=true;
+    seal(snap).then(function(enc){
+      return api("/api/rec",{method:"PUT",body:JSON.stringify({token:S.token, enc:enc})});
+    }).then(function(){
+      lastSent=snap; autoInfo=new Date().toLocaleTimeString("zh-Hant",{hour12:false});
+      autoState();
+    }).catch(function(e){
+      autoState("自動備份失敗："+e.message+"（下次存檔會再試）", true);
+    }).then(function(){ autoBusy=false; });
+  }
+  function queue(){
+    if(!S.token) return;
+    clearTimeout(autoT);
+    autoT=setTimeout(function(){ autoUp(false); }, 3000);
+  }
+  var _si=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(k,v){
+    _si.call(this,k,v);
+    if(this===localStorage && typeof k==="string" && k.indexOf("worklog.")===0 && k!==K && k!=="worklog.acct.dev.v1") queue();
+  };
+  try{ localStorage.removeItem("setItem"); }catch(e){}
+
   /* 入口：首頁磚塊 + 側邊選單 */
   var tile=document.getElementById("hsAcct");
-  function open(){ $("acMask").classList.add("on"); if(S.api) $("acApi").value=S.api; if(S.u) $("acU").value=S.u; }
+  function open(){ $("acMask").classList.add("on"); if(S.api) $("acApi").value=S.api; if(S.u) $("acU").value=S.u; autoState(); }
   var btn=document.createElement("button");
   btn.type="button"; btn.className="nd-a"; btn.id="ndAcct";
   btn.textContent="帳號";
@@ -4191,6 +4260,8 @@ document.addEventListener("click", function(e){
     S.api=v; save(); note("服務位址已儲存。","ok");
   });
   window.__acctOpen = open;
+  window.__autoUp = autoUp;
+  autoState();
 })();
 </script>
 </body>
