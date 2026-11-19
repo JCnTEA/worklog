@@ -4045,6 +4045,20 @@ document.addEventListener("click", function(e){
       <button type="button" id="acGet" class="gh">取回紀錄</button>
     </div>
     <div class="ac-note" id="acMsg">第一次用填帳號密碼按「登入」會自動建立帳號；之後按「上傳紀錄」把這台紀錄加密存雲端，換手機同帳密按「取回紀錄」就回來。</div>
+    <details class="ac-set" id="acHelp">
+      <summary>第一次用？三個步驟就好</summary>
+      <p>
+        1. 上面填一個自己記得的帳號（3–24 碼英數字）和密碼（至少 6 碼）。<br>
+        2. 按「登入（沒帳號會自動建立）」，第一次按就會順便建帳號。<br>
+        3. 按「上傳紀錄」把這台的紀錄存到雲端；換手機時開同一頁、填同一組帳密、按「取回紀錄」。
+      </p>
+      <p>
+        常見狀況：<br>
+        ‧ 顯示「密碼不對」→ 帳號已存在但密碼打錯，換回原本的密碼。<br>
+        ‧ 顯示「連結失敗」→ 換個網路（行動網路／Wi-Fi）再試，或稍後再按一次。<br>
+        ・ 忘記密碼 → 目前沒有救援機制（紀錄是用密碼加密的），只能重新註冊一組新帳號。
+      </p>
+    </details>
     <details class="ac-set" id="acSet">
       <summary>服務位址（已內建，一般不用改）</summary>
       <p>預設已指向本系統的帳號服務 <b>worklog-acct.jcmtea.workers.dev</b>；只有在服務搬家時才需要改這個欄位。</p>
