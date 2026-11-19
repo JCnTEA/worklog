@@ -3729,14 +3729,14 @@ padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
       <label class="acc-b ghost" for="accFile">匯入紀錄檔</label>
       <input type="file" id="accFile" accept="application/json,.json" hidden>
     </div>
-    <div class="acc-note" id="accMsg">登入後可把紀錄備份到你的 Google 雲端硬碟（只存在 App 專用的隱藏資料夾），換裝置登入同一個帳號就能還原。</div>
+    <div class="acc-note" id="accMsg">登入後可把紀錄備份到你的 Google 雲端硬碟「Worklog」資料夾（我的雲端硬碟裡看得到、可下載），換裝置登入同一個帳號按「從雲端還原」就回來。</div>
     <details class="acc-set" id="accSet">
       <summary>Google 登入設定（第一次使用才需要）</summary>
       <p>
         1. 到 <b>console.cloud.google.com</b> 建一個專案，啟用「Google Drive API」。<br>
         2. 建立「OAuth 用戶端 ID」，類型選 <b>網頁應用程式</b>。<br>
         3. 已授權的 JavaScript 來源填 <b>https://jcntea.github.io</b>。<br>
-        4. OAuth 同意畫面把 <b>drive.appdata</b> 加進範圍，測試使用者填你自己的 Google 帳號。<br>
+        4. OAuth 同意畫面把 <b>drive.file</b> 加進範圍（只會存取本系統建立的 Worklog 資料夾），測試使用者填你自己的 Google 帳號。<br>
         5. 把產生的用戶端 ID（xxx.apps.googleusercontent.com）貼到下面。
       </p>
       <p>同意畫面要填的三個網址：<br>
@@ -4206,7 +4206,7 @@ padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
       try{
         var tc=google.accounts.oauth2.initTokenClient({
           client_id:cid,
-          scope:"openid email profile https://www.googleapis.com/auth/drive.appdata",
+          scope:"openid email profile https://www.googleapis.com/auth/drive.file",
           callback:function(resp){
             if(resp && resp.access_token){
               TOK=resp.access_token; TOK_EXP=Date.now()+((resp.expires_in||3600)*1000);
@@ -4230,50 +4230,69 @@ padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
     TOK=null; TOK_EXP=0; ME=null; render(); msg("已登出（雲端檔案仍在你的 Google 帳號裡）。");
   }
 
-  /* --- Drive（appDataFolder） --- */
-  var FNAME="worklog-backup.json";
-  function api(url, opt){
-    opt=opt||{};
-    opt.headers=Object.assign({}, opt.headers||{}, {Authorization:"Bearer "+TOK});
-    return fetch(url,opt).then(function(r){
-      if(r.status===401){ TOK=null; TOK_EXP=0; throw new Error("登入已過期，請重新登入"); }
-      if(!r.ok) return r.text().then(function(t){ throw new Error("Drive 回應 "+r.status+"："+t.slice(0,120)); });
-      return r;
+  /* --- Drive（可見的 Worklog 資料夾） --- */
+var FNAME="worklog-backup.json", DNAME="Worklog", LAST_LINK="";
+function api(url, opt){
+  opt=opt||{};
+  opt.headers=Object.assign({}, opt.headers||{}, {Authorization:"Bearer "+TOK});
+  return fetch(url,opt).then(function(r){
+    if(r.status===401){ TOK=null; TOK_EXP=0; throw new Error("登入已過期，請重新登入"); }
+    if(!r.ok) return r.text().then(function(t){ throw new Error("Drive 回應 "+r.status+"："+t.slice(0,120)); });
+    return r;
+  });
+}
+function ensureFolder(){
+  var q=encodeURIComponent("name='"+DNAME+"' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  return api("https://www.googleapis.com/drive/v3/files?q="+q+"&fields=files(id,name)&spaces=drive")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.files && d.files[0]) return d.files[0].id;
+      return api("https://www.googleapis.com/drive/v3/files?fields=id",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name:DNAME,mimeType:"application/vnd.google-apps.folder"})
+      }).then(function(r){ return r.json(); }).then(function(j){ return j.id; });
     });
-  }
-  function findFile(){
-    var q=encodeURIComponent("name='"+FNAME+"' and trashed=false");
-    return api("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q="+q+
-               "&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime desc")
-      .then(function(r){ return r.json(); })
-      .then(function(d){ return (d.files && d.files[0]) || null; });
-  }
-  function upload(){
-    return findFile().then(function(f){
+}
+function findFile(folderId){
+  var q=encodeURIComponent("name='"+FNAME+"' and trashed=false"+(folderId? " and '"+folderId+"' in parents" : ""));
+  return api("https://www.googleapis.com/drive/v3/files?q="+q+
+             "&fields=files(id,name,modifiedTime,size,webViewLink)&orderBy=modifiedTime desc&spaces=drive")
+    .then(function(r){ return r.json(); })
+    .then(function(d){ return (d.files && d.files[0]) || null; });
+}
+function upload(){
+  return ensureFolder().then(function(fid){
+    return findFile(fid).then(function(f){
       var body=JSON.stringify(snapshot());
-      var meta=JSON.stringify(f ? {name:FNAME} : {name:FNAME,parents:["appDataFolder"]});
+      var meta=f ? {name:FNAME} : {name:FNAME, mimeType:"application/json", parents:[fid]};
       var bd="----wl"+Date.now();
-      var blob=new Blob(["--"+bd+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+
+      var blob=new Blob(["--"+bd+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify(meta)+
                          "\r\n--"+bd+"\r\nContent-Type: application/json\r\n\r\n"+body+"\r\n--"+bd+"--"],
                         {type:"multipart/related; boundary="+bd});
-      var url="https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime"+(f? "": "");
-      if(f) url="https://www.googleapis.com/upload/drive/v3/files/"+f.id+"?uploadType=multipart&fields=id,modifiedTime";
+      var base="https://www.googleapis.com/upload/drive/v3/files";
+      var url=base+"?uploadType=multipart&fields=id,modifiedTime,webViewLink";
+      if(f) url=base+"/"+f.id+"?uploadType=multipart&fields=id,modifiedTime,webViewLink";
       return api(url,{method:f?"PATCH":"POST",body:blob}).then(function(r){ return r.json(); });
     });
-  }
-  function download(){
-    return findFile().then(function(f){
-      if(!f) throw new Error("雲端沒有備份檔");
+  });
+}
+function download(){
+  return ensureFolder().then(function(fid){
+    return findFile(fid).then(function(f){
+      if(!f) throw new Error("雲端還沒有備份檔（先按一次「備份到雲端」）");
+      LAST_LINK=f.webViewLink||LAST_LINK;
       return api("https://www.googleapis.com/drive/v3/files/"+f.id+"?alt=media").then(function(r){ return r.text(); });
-    }).then(function(t){
-      var o=JSON.parse(t);
-      var n=applySnapshot(o);
-      msg("已從雲端還原 "+n+" 個資料項目（備份時間 "+String(o.exportedAt||"").replace("T"," ").slice(0,16)+"），重新載入…", "ok");
-      setTimeout(function(){ location.reload(); }, 1200);
     });
-  }
+  }).then(function(t){
+    var o=JSON.parse(t);
+    var n=applySnapshot(o);
+    msg("已從雲端還原 "+n+" 個資料項目（備份時間 "+String(o.exportedAt||"").replace("T"," ").slice(0,16)+"），重新載入…", "ok");
+    setTimeout(function(){ location.reload(); }, 1200);
+  });
+}
 
-  /* --- 事件 --- */
+/* --- 事件 --- */
   $("accX").addEventListener("click", closeAcc);
   $("accMask").addEventListener("click", function(e){ if(e.target===this) closeAcc(); });
   $("accIn").addEventListener("click", signIn);
@@ -4289,7 +4308,13 @@ padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
   $("accUp").addEventListener("click", function(){
     ensureToken(function(){
       msg("上傳中…");
-      upload().then(function(d){ msg("已備份到雲端（"+countEntries()+" 筆紀錄・"+new Date().toLocaleTimeString("zh-Hant",{hour12:false})+"）", "ok"); })
+      upload().then(function(d){
+        LAST_LINK=(d && d.webViewLink)||LAST_LINK;
+        var box=$("accMsg");
+        box.className="acc-note ok";
+        box.innerHTML="已備份到「我的雲端硬碟・Worklog」資料夾（"+countEntries()+" 筆紀錄）。"+
+          (LAST_LINK? ' <a href="'+LAST_LINK+'" target="_blank" rel="noopener" style="color:#9FC1FF">在雲端硬碟查看</a>' : "");
+      })
         .catch(function(e){ msg("備份失敗："+e.message, "err"); });
     });
   });
