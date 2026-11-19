@@ -1,10 +1,10 @@
 {
- "versionCode": 14,
- "versionName": "Bn1.1",
- "build": "14",
- "apk": "https://jcntea.github.io/worklog/assets/worklog-bn1.1.apk",
- "fileName": "worklog-bn1.1.apk",
- "notes": "修正 App 桌面圖示，並在圖示右下角加上「後台」角標",
+ "versionCode": 15,
+ "versionName": "Bn1.2",
+ "build": "15",
+ "apk": "https://jcntea.github.io/worklog/assets/worklog-bn1.2.apk",
+ "fileName": "worklog-bn1.2.apk",
+ "notes": "後台 App 重新打包：版本碼提升，桌面圖示與登入流程照舊；配合後台首頁版本資訊與實驗版帳號備份上線。",
  "web": "V0.10",
- "apkRequired": false
+ "apkRequired": true
 }
