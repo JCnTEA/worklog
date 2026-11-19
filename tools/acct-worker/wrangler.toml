@@ -1,0 +1,16 @@
+name = "worklog-acct"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# 先跑 npx wrangler kv namespace create KV，把印出的 id 貼到下面
+kv_namespaces = [
+  { binding = "KV", id = "貼上你的 KV namespace id" }
+]
+
+[vars]
+GH_REPO = ""      # 例如 jcntea/worklog；留空＝紀錄存在 KV，完全不碰 GitHub
+GH_BRANCH = "main"
+
+# 機密不要寫在這個檔案裡，用指令設定：
+#   npx wrangler secret put SECRET     登入簽章用，隨便一串長字
+#   npx wrangler secret put GH_TOKEN   GitHub fine-grained token（Contents: Read/Write）
