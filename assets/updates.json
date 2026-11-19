@@ -1,6 +1,15 @@
 {
- "updated": "2026-11-20 00:24",
+ "updated": "2026-11-20 00:35",
  "items": [
+  {
+   "date": "2026-11-20 00:35",
+   "level": "minor",
+   "cat": "新增",
+   "ver": "全版本",
+   "title": "新增隱私權政策與服務條款頁",
+   "detail": "新增 /terms/：一份共用條款，涵蓋網頁（含 iOS Safari）、Android APK 與電腦版，寫明資料只留本機、Google 登入只用 drive.appdata 隱藏資料夾、撤回授權與刪除方式；同時列出可填進 Google 同意畫面的三個網址。",
+   "state": "完成"
+  },
   {
    "date": "2026-11-20 00:24",
    "level": "minor",
