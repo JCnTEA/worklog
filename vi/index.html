@@ -4038,14 +4038,13 @@ document.addEventListener("click", function(e){
       <input id="acP" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password">
     </div>
     <div class="ac-row">
-      <button type="button" id="acReg" class="gh">註冊</button>
-      <button type="button" id="acLogin">登入</button>
+      <button type="button" id="acGo">登入（沒帳號會自動建立）</button>
     </div>
     <div class="ac-row">
       <button type="button" id="acUp" class="gh">上傳紀錄</button>
       <button type="button" id="acGet" class="gh">取回紀錄</button>
     </div>
-    <div class="ac-note" id="acMsg">登入後按「上傳紀錄」，把這台的紀錄用你的密碼加密後存到雲端；換手機輸入同一組帳號密碼，按「取回紀錄」就回來。</div>
+    <div class="ac-note" id="acMsg">第一次用填帳號密碼按「登入」會自動建立帳號；之後按「上傳紀錄」把這台紀錄加密存雲端，換手機同帳密按「取回紀錄」就回來。</div>
     <details class="ac-set" id="acSet">
       <summary>服務位址（已內建，一般不用改）</summary>
       <p>預設已指向本系統的帳號服務 <b>worklog-acct.jcmtea.workers.dev</b>；只有在服務搬家時才需要改這個欄位。</p>
@@ -4117,18 +4116,22 @@ document.addEventListener("click", function(e){
     if(!/^[a-z0-9_.-]{3,24}$/.test(u)) throw new Error("帳號 3–24 碼，只能用英數字與 . _ -");
     if(p.length<6) throw new Error("密碼至少 6 碼"); S.u=u; save(); return {u:u,p:p}; }
 
-  function reg(){
-    var c=needUser();
-    api("/api/reg",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})})
-      .then(function(){ note("帳號建立好了，按「登入」開始用。","ok"); })
-      .catch(function(e){ note(e.message,"err"); });
+  function doLogin(c){
+    return api("/api/login",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})}).then(function(d){
+      S.token=d.token; S.u=d.u; save();
+      note("已登入 "+d.u+"。可以按「上傳紀錄」或「取回紀錄」。","ok");
+    });
   }
-  function login(){
+  function go(){
     var c=needUser();
-    api("/api/login",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})})
-      .then(function(d){ S.token=d.token; S.u=d.u; save();
-        note("已登入 "+d.u+"。可以按「上傳紀錄」或「取回紀錄」。","ok"); })
-      .catch(function(e){ note(e.message,"err"); });
+    note("連線中…");
+    doLogin(c).catch(function(e){
+      if(/找不到這個帳號/.test(e.message)){
+        return api("/api/reg",{method:"POST",body:JSON.stringify({u:c.u,p:c.p})})
+          .then(function(){ note("帳號已建立，登入中…"); return doLogin(c); });
+      }
+      throw e;
+    }).catch(function(e){ note(e.message,"err"); });
   }
   function up(){
     if(!S.token) return note("先按「登入」","err");
@@ -4165,8 +4168,7 @@ document.addEventListener("click", function(e){
   btn.addEventListener("click", function(){ try{ document.getElementById("navClose").click(); }catch(e){} open(); });
   $("acX").addEventListener("click", function(){ $("acMask").classList.remove("on"); });
   $("acMask").addEventListener("click", function(e){ if(e.target===this) this.classList.remove("on"); });
-  $("acReg").addEventListener("click", function(){ try{ reg(); }catch(e){ note(e.message,"err"); } });
-  $("acLogin").addEventListener("click", function(){ try{ login(); }catch(e){ note(e.message,"err"); } });
+  $("acGo").addEventListener("click", function(){ try{ go(); }catch(e){ note(e.message,"err"); } });
   $("acUp").addEventListener("click", function(){ try{ up(); }catch(e){ note(e.message,"err"); } });
   $("acGet").addEventListener("click", function(){ try{ get(); }catch(e){ note(e.message,"err"); } });
   $("acApiSave").addEventListener("click", function(){
