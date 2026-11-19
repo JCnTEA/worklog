@@ -34,10 +34,10 @@ a.link{color:var(--green)}
   <h1>隱私權政策與服務條款</h1>
   <div class="meta">適用：網頁版（含 iOS Safari／電腦瀏覽器）、Android APK・最後更新 2026-11-20</div>
 
-  <div class="toc"><a href="#privacy">隱私權政策</a><a href="#terms">服務條款</a><a href="#google">Google 登入與雲端備份</a><a href="#contact">聯絡方式</a></div>
+  <div class="toc"><a href="#privacy">隱私權政策</a><a href="#terms">服務條款</a><a href="#local">資料存放與換機</a><a href="#contact">聯絡方式</a></div>
 
   <h2 id="privacy">一、隱私權政策</h2>
-  <p>「勤務記錄系統」（以下稱本系統）是個人勤務紀錄工具。我們的設計原則是：<b>資料預設只留在你自己的裝置</b>，只有在你主動登入並按下備份時，才會上傳到你自己的 Google 雲端硬碟。</p>
+  <p>「勤務記錄系統」（以下稱本系統）是個人勤務紀錄工具。我們的設計原則是：<b>資料只留在你自己的裝置</b>，本系統沒有帳號、沒有伺服器，也不上傳到任何雲端。</p>
 
   <h3>1. 蒐集哪些資料</h3>
   <ul>
@@ -63,21 +63,16 @@ a.link{color:var(--green)}
   <ul>
     <li>可隨時在帳號面板「匯出紀錄檔」帶走全部資料。</li>
     <li>清除瀏覽器資料、或解除安裝 App，即會刪除本機紀錄。</li>
-    <li>雲端備份可自行在 Google 雲端硬碟的「Worklog」資料夾中刪除，或登出後停止使用。</li>
+    <li>要清空紀錄，在系統刪除各筆資料，或清除瀏覽器網站資料即可。</li>
   </ul>
 
-  <h2 id="google">二、Google 登入與雲端備份</h2>
-  <div class="box">
-    <p class="k">使用的 Google 授權範圍</p>
-    <ul>
-      <li><b>openid／email／profile</b>：僅用來顯示「已登入的帳號」。</li>
-      <li><b>drive.file</b>：只能存取本系統自己建立的檔案與「Worklog」資料夾，<b>看不到你其他的檔案</b>。</li>
-    </ul>
-    <p class="k">備份內容</p>
-    <p>一份 JSON 檔，放在「我的雲端硬碟 → Worklog → worklog-backup.json」，內含你的勤務紀錄與介面設定；你可自行開啟、下載或刪除，其他人（包含本系統作者）無法讀取。</p>
-    <p class="k">撤回授權</p>
-    <p>可在 <a class="link" href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google 帳號的第三方應用程式權限</a> 頁面移除本系統，或在帳號面板按「登出」。</p>
-  </div>
+  <h2 id="local">二、資料存放與換機</h2>
+  <p class="k">紀錄存在哪裡</p>
+  <p>你登記的勤務紀錄、排障與會同件數、據點清單、介面設定，全部存放在這台裝置瀏覽器的本機儲存空間（localStorage）。<b>沒有任何資料傳到網路上</b>，本系統的作者與第三方都讀不到。</p>
+  <p class="k">換裝置或清除資料</p>
+  <p>因為紀錄只在本機，換手機、換電腦、換瀏覽器，或使用「清除瀏覽資料／清除網站資料」、無痕模式，紀錄都不會跟著過去，也無法從雲端取回。請把這件事當成一般本機檔案看待。</p>
+  <p class="k">沒有帳號</p>
+  <p>本系統不提供註冊、登入、Google 登入或雲端同步。移除帳號與備份功能後，頁面上也不會再出現任何登入或備份按鈕。</p>
 
   <h2 id="terms">三、服務條款</h2>
   <p>使用本系統即表示你同意以下事項。</p>
@@ -90,7 +85,7 @@ a.link{color:var(--green)}
     <li>共用裝置時，請自行登出或清除本機資料。</li>
   </ul>
   <h3>3. 資料與服務中斷</h3>
-  <p>本系統為免費提供，可能因裝置、瀏覽器、網路、Google 服務或平台政策變動而中斷或改版；我們不保證資料永不失損，請定期使用「匯出紀錄檔」自行留存備份。</p>
+  <p>本系統為免費提供，可能因裝置、瀏覽器、網路、Google 服務或平台政策變動而中斷或改版；我們不保證資料永不失損，建議重要紀錄自行抄錄留存。</p>
   <h3>4. 智慧財產與第三方資源</h3>
   <p>店家名稱、地址與座標來自公開資料或官方門市查詢頁，權利屬原權利人；本系統僅作查找與距離比對之用。</p>
   <h3>5. 條款變更</h3>
@@ -101,7 +96,7 @@ a.link{color:var(--green)}
   <h2 id="contact">四、聯絡方式</h2>
   <p>隱私或條款問題、資料刪除請求：LINE <b>jcmtea168</b>（同系統「建議與回報」入口）。</p>
 
-  <div class="foot">勤務記錄系統・jcntea.github.io/worklog・本頁同時作為 Google OAuth 同意畫面的「應用程式首頁／隱私權政策／服務條款」連結使用。</div>
+  <div class="foot">勤務記錄系統・jcntea.github.io/worklog・本頁為本系統的隱私權政策與服務條款。</div>
 </div>
 </body>
 </html>
