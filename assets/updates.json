@@ -1,6 +1,15 @@
 {
- "updated": "2026-11-20 01:11",
+ "updated": "2026-11-20 01:44",
  "items": [
+  {
+   "date": "2026-11-20 01:44",
+   "level": "feature",
+   "cat": "新增",
+   "ver": "實驗版",
+   "title": "帳號服務正式上線（Cloudflare Worker）",
+   "detail": "部署 worklog-acct.jcmtea.workers.dev：註冊／登入／上傳／取回皆已實測通過（錯密碼 401、重複註冊 409）；PBKDF2 因 Workers 上限改為 10 萬次迭代。帳號面板已內建服務位址，使用者只需填帳號密碼。",
+   "state": "完成"
+  },
   {
    "date": "2026-11-20 01:11",
    "level": "feature",
