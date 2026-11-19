@@ -2774,10 +2774,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     elPlaceSugs.hidden = true;
     elPlaceSugs.innerHTML = "";
     elNearWrap.hidden = true;
-    elNearSh.innerHTML = "";
-    elNearSv.innerHTML = "";
-    elNearSvHd.hidden = true;
-    elNearSv.hidden = true;
+    nearClear();
     renderPlace();
     setTip("已清除座標");
   });
@@ -3057,7 +3054,34 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       }
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
   }
-  window.addEventListener("load", function(){ setTimeout(autoGpsRefresh, 200); });
+  /* ---------- 附近候選／最近門市 一次清空（元素以 id 取得，避免舊變數名） ---------- */
+  function nearClear(){
+    if (elNearWrap) elNearWrap.hidden = true;
+    ["nearSh","nearPs","nearMk","nearBk","nearMx"].forEach(function(id){
+      var b = document.getElementById(id); if (b) b.innerHTML = "";
+    });
+  }
+
+  /* ---------- 重新進入頁面：清掉上次座標（件數與已保存紀錄不動） ---------- */
+  function resetPlaceOnEnter(){
+    var p = todayData.place;
+    if (!p) return;
+    if (!p.name && p.lat == null) return;
+    lastCoords = null;
+    p.name = ""; p.addr = ""; p.lat = null; p.lng = null; p.acc = 0; p.at = null;
+    persist();
+    cands = [];
+    MORE_OPEN = false;
+    elCands.innerHTML = "";
+    elPlaceInput.value = "";
+    elPlaceSugs.hidden = true;
+    elPlaceSugs.innerHTML = "";
+    elNearWrap.hidden = true;
+    nearClear();
+    renderPlace();
+  }
+
+  window.addEventListener("load", function(){ setTimeout(function(){ resetPlaceOnEnter(); autoGpsRefresh(); }, 200); });
   document.addEventListener("visibilitychange", function(){
     if (document.visibilityState === "visible") autoGpsRefresh();
   });
