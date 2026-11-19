@@ -3711,6 +3711,14 @@ border:1px solid #3E63A8;background:#2F6BD8;color:#fff;font-size:14px;font-weigh
 .acc-cid input{flex:1 1 auto;min-width:0;background:#101A2B;border:1px solid #2A3C5A;border-radius:9px;color:#E8EDF6;
 padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
 .acc-cid button{flex:0 0 auto;padding:0 12px;border-radius:9px;border:1px solid #2A3C5A;background:#16223A;color:#DCE7F5;font-size:12.5px}
+.acc-sep{display:flex;align-items:center;gap:8px;margin:14px 0 9px;color:#7E8CA6;font-size:11.5px;letter-spacing:.06em}
+.acc-sep::before,.acc-sep::after{content:"";height:1px;flex:1;background:#2A3C5A}
+.acc-g{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+.acc-g label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#93A3BC}
+.acc-g input{padding:9px 10px;border-radius:9px;border:1px solid #2A3C5A;background:#0E1728;color:#DCE7F5;
+  font:500 12px/1 "IBM Plex Mono",monospace;min-width:0}
+.acc-g .row{display:flex;gap:7px}
+.acc-g .row button{flex:0 0 auto;padding:0 12px;border-radius:9px;border:1px solid #2A3C5A;background:#16223A;color:#DCE7F5;font-size:12.5px}
 </style>
 <div id="accMask" role="dialog" aria-label="帳號與雲端備份">
   <div class="acc-card">
@@ -3730,6 +3738,24 @@ padding:9px 10px;font:500 12px/1 "IBM Plex Mono",monospace}
       <input type="file" id="accFile" accept="application/json,.json" hidden>
     </div>
     <div class="acc-note" id="accMsg">登入後可把紀錄備份到你的 Google 雲端硬碟「Worklog」資料夾（我的雲端硬碟裡看得到、可下載），換裝置登入同一個帳號按「從雲端還原」就回來。</div>
+    <div class="acc-sep">或．不靠 Google，走倉庫同步</div>
+    <div class="acc-row">
+      <button type="button" class="acc-b ghost" id="gUp">倉庫上傳</button>
+      <button type="button" class="acc-b ghost" id="gDown">倉庫取回</button>
+    </div>
+    <div class="acc-note" id="gMsg">紀錄加密後存進 GitHub 倉庫的 sync/ 資料夾，換手機、換電腦用同一組「同步碼＋密碼」就能取回；倉庫裡只會看到一串亂碼。</div>
+    <details class="acc-set" id="gSet">
+      <summary>倉庫同步設定（第一次使用填一次，之後會記住）</summary>
+      <p>需要一組 GitHub 存取權杖（Fine-grained token，權限只勾 <b>Contents: Read and write</b>，範圍選 jcntea/worklog 這個倉庫）。
+      設定後這台裝置會自己記住，換裝置再填一次同一組「同步碼＋密碼」即可。</p>
+      <div class="acc-g">
+        <label>倉庫<input id="gRepo" placeholder="jcntea/worklog" autocomplete="off" spellcheck="false"></label>
+        <label>存取權杖<input id="gTok" placeholder="github_pat_..." autocomplete="off" spellcheck="false"></label>
+        <label>同步碼（自訂，英數字）<span class="row"><input id="gCode" placeholder="例如 jcmtea-01" autocomplete="off" spellcheck="false"><button type="button" id="gCodeNew">產生</button></span></label>
+        <label>密碼（加密用，忘了就取不回）<input id="gPass" type="password" placeholder="至少 6 碼" autocomplete="off"></label>
+        <div class="row"><button type="button" id="gSave">儲存設定</button></div>
+      </div>
+    </details>
     <details class="acc-set" id="accSet">
       <summary>Google 登入設定（第一次使用才需要）</summary>
       <p>
@@ -4292,7 +4318,110 @@ function download(){
   });
 }
 
+/* --- 倉庫同步（GitHub，加密存放） --- */
+var GK="worklog.ghs.v1";
+var GS={repo:"jcntea/worklog",token:"",code:"",pass:""};
+function gLoad(){ try{ var o=JSON.parse(localStorage.getItem(GK)||"{}"); GS=Object.assign(GS,o);}catch(e){} }
+function gSave(){ try{ localStorage.setItem(GK, JSON.stringify(GS)); }catch(e){} }
+function gFill(){
+  if($("gRepo")) $("gRepo").value=GS.repo||"jcntea/worklog";
+  if($("gTok")) $("gTok").value=GS.token||"";
+  if($("gCode")) $("gCode").value=GS.code||"";
+  if($("gPass")) $("gPass").value=GS.pass||"";
+}
+function gMsgUI(t, k){ var b=$("gMsg"); if(!b) return; b.className="acc-note"+(k?(" "+k):""); b.textContent=t; }
+function gRead(){
+  GS.repo=($("gRepo").value||"").trim(); GS.token=($("gTok").value||"").trim();
+  GS.code=($("gCode").value||"").trim(); GS.pass=($("gPass").value||"").trim(); gSave();
+}
+function gCheck(){
+  gRead();
+  if(!/^[\w.-]+\/[\w.-]+$/.test(GS.repo)) throw new Error("倉庫格式要像 jcntea/worklog");
+  if(!GS.token) throw new Error("請填 GitHub 存取權杖");
+  if(!/^[A-Za-z0-9_-]{4,32}$/.test(GS.code)) throw new Error("同步碼只能用英數字與 - _，4～32 碼");
+  if(GS.pass.length<6) throw new Error("密碼至少 6 碼（用來加密，忘了就取不回）");
+}
+function b64(buf){ var u=new Uint8Array(buf), s=""; for(var i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s); }
+function unb64(str){ var s=atob(str), u=new Uint8Array(s.length); for(var i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; }
+function utf8b64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64utf8(str){ return decodeURIComponent(escape(atob(str))); }
+function gKey(){
+  var enc=new TextEncoder();
+  return crypto.subtle.importKey("raw", enc.encode(GS.pass), {name:"PBKDF2"}, false, ["deriveKey"]).then(function(k){
+    return crypto.subtle.deriveKey({name:"PBKDF2", salt:enc.encode("worklog-sync:"+GS.code), iterations:120000, hash:"SHA-256"},
+      k, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+  });
+}
+function gEnc(text){
+  return gKey().then(function(k){
+    var iv=crypto.getRandomValues(new Uint8Array(12));
+    return crypto.subtle.encrypt({name:"AES-GCM", iv:iv}, k, new TextEncoder().encode(text)).then(function(ct){
+      return JSON.stringify({v:1,alg:"AES-GCM",iv:b64(iv),ct:b64(ct)});
+    });
+  });
+}
+function gDec(text){
+  var o=JSON.parse(text);
+  return gKey().then(function(k){
+    return crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(o.iv)}, k, unb64(o.ct));
+  }).then(function(pt){ return new TextDecoder().decode(pt); });
+}
+function gPath(){ return "sync/"+GS.code+".json"; }
+function gApi(url, opt){
+  opt=opt||{};
+  opt.headers=Object.assign({"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",
+    "Authorization":"Bearer "+GS.token,"Content-Type":"application/json"}, opt.headers||{});
+  return fetch(url,opt).then(function(r){
+    if(r.status===404) return {missing:true};
+    if(r.status===401||r.status===403) throw new Error("權杖無效或沒有這個倉庫的寫入權限（"+r.status+"）");
+    if(!r.ok) return r.text().then(function(t){ throw new Error("GitHub 回應 "+r.status+"："+t.slice(0,120)); });
+    return r.json();
+  });
+}
+function gBackup(){
+  return gEnc(JSON.stringify(snapshot())).then(function(enc){
+    var url="https://api.github.com/repos/"+GS.repo+"/contents/"+gPath();
+    return gApi(url+"?ref=main").then(function(ex){
+      var body={message:"worklog sync "+new Date().toISOString().slice(0,16), content:utf8b64(enc)};
+      if(ex && ex.sha) body.sha=ex.sha;
+      return gApi(url,{method:"PUT", body:JSON.stringify(body)});
+    });
+  }).then(function(){
+    var link="https://github.com/"+GS.repo+"/blob/main/"+gPath();
+    var b=$("gMsg"); b.className="acc-note ok";
+    b.innerHTML="已上傳到倉庫（"+countEntries()+" 筆紀錄・"+new Date().toLocaleTimeString("zh-Hant",{hour12:false})+"）。"+
+      ' <a href="'+link+'" target="_blank" rel="noopener" style="color:#9FC1FF">在倉庫查看</a>';
+  });
+}
+function gRestore(){
+  return gApi("https://api.github.com/repos/"+GS.repo+"/contents/"+gPath()+"?ref=main").then(function(r){
+    if(!r || r.missing) throw new Error("倉庫裡沒有 sync/"+GS.code+".json，先在這台上傳一次");
+    return gDec(b64utf8(String(r.content||"").replace(/\s/g,"")));
+  }).then(function(t){
+    var o=JSON.parse(t), n=applySnapshot(o);
+    gMsgUI("已從倉庫取回 "+n+" 個資料項目（備份時間 "+String(o.exportedAt||"").replace("T"," ").slice(0,16)+"），重新載入…","ok");
+    setTimeout(function(){ location.reload(); },1200);
+  });
+}
 /* --- 事件 --- */
+  gLoad(); gFill();
+  (function(){
+    var sv=$("gSave"); if(sv) sv.addEventListener("click", function(){
+      try{ gCheck(); gMsgUI("設定已儲存，這台裝置會記住。","ok"); }catch(e){ gMsgUI(e.message,"err"); }
+    });
+    var nc=$("gCodeNew"); if(nc) nc.addEventListener("click", function(){ $("gCode").value="wl-"+Math.random().toString(36).slice(2,8); });
+    var up=$("gUp"); if(up) up.addEventListener("click", function(){
+      try{ gCheck(); }catch(e){ return gMsgUI(e.message,"err"); }
+      gMsgUI("加密上傳中…"); up.disabled=true;
+      gBackup().catch(function(e){ gMsgUI(e.message,"err"); up.disabled=false; })
+              .then(function(){ up.disabled=false; });
+    });
+    var dn=$("gDown"); if(dn) dn.addEventListener("click", function(){
+      try{ gCheck(); }catch(e){ return gMsgUI(e.message,"err"); }
+      gMsgUI("下載解密中…"); dn.disabled=true;
+      gRestore().catch(function(e){ gMsgUI("取回失敗："+e.message,"err"); dn.disabled=false; });
+    });
+  })();
   $("accX").addEventListener("click", closeAcc);
   $("accMask").addEventListener("click", function(e){ if(e.target===this) closeAcc(); });
   $("accIn").addEventListener("click", signIn);
