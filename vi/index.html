@@ -4047,8 +4047,8 @@ document.addEventListener("click", function(e){
     </div>
     <div class="ac-note" id="acMsg">登入後按「上傳紀錄」，把這台的紀錄用你的密碼加密後存到雲端；換手機輸入同一組帳號密碼，按「取回紀錄」就回來。</div>
     <details class="ac-set" id="acSet">
-      <summary>服務位址設定（第一次使用才要填）</summary>
-      <p>Cloudflare Worker 部署好會得到一個 <b>https://worklog-acct.xxx.workers.dev</b> 網址，貼在下面；這個位址只存在這台裝置。</p>
+      <summary>服務位址（已內建，一般不用改）</summary>
+      <p>預設已指向本系統的帳號服務 <b>worklog-acct.jcmtea.workers.dev</b>；只有在服務搬家時才需要改這個欄位。</p>
       <div class="ac-in"><input id="acApi" placeholder="https://worklog-acct.xxx.workers.dev" autocomplete="off" spellcheck="false"></div>
       <div class="ac-row"><button type="button" id="acApiSave" class="gh">儲存位址</button></div>
     </details>
@@ -4057,10 +4057,10 @@ document.addEventListener("click", function(e){
 <script>
 /* ===== 帳號（帳密歸帳密、紀錄歸紀錄，紀錄加密後才上傳） ===== */
 (function(){
-  var K="worklog.acct.v1", S={api:"",u:"",token:""};
+  var K="worklog.acct.v1", DEFAULT_API="https://worklog-acct.jcmtea.workers.dev", S={api:DEFAULT_API,u:"",token:""};
   function $(id){ return document.getElementById(id); }
   function note(t, cls){ var b=$("acMsg"); if(!b) return; b.className="ac-note"+(cls?" "+cls:""); b.textContent=t; }
-  function load(){ try{ S=Object.assign(S, JSON.parse(localStorage.getItem(K)||"{}")); }catch(e){} }
+  function load(){ try{ S=Object.assign(S, JSON.parse(localStorage.getItem(K)||"{}")); }catch(e){} if(!S.api) S.api=DEFAULT_API; }
   function save(){ try{ localStorage.setItem(K, JSON.stringify(S)); }catch(e){} }
 
   /* 快照：只收本系統的 worklog. 開頭資料 */
