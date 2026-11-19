@@ -63,7 +63,7 @@ a.link{color:var(--green)}
   <ul>
     <li>可隨時在帳號面板「匯出紀錄檔」帶走全部資料。</li>
     <li>清除瀏覽器資料、或解除安裝 App，即會刪除本機紀錄。</li>
-    <li>雲端備份可自行在 Google 雲端硬碟的「應用程式資料」中刪除，或登出後停止使用。</li>
+    <li>雲端備份可自行在 Google 雲端硬碟的「Worklog」資料夾中刪除，或登出後停止使用。</li>
   </ul>
 
   <h2 id="google">二、Google 登入與雲端備份</h2>
@@ -71,10 +71,10 @@ a.link{color:var(--green)}
     <p class="k">使用的 Google 授權範圍</p>
     <ul>
       <li><b>openid／email／profile</b>：僅用來顯示「已登入的帳號」。</li>
-      <li><b>drive.appdata</b>：只能存取本系統自己在你的雲端硬碟中建立的隱藏資料夾，<b>看不到你其他的檔案</b>。</li>
+      <li><b>drive.file</b>：只能存取本系統自己建立的檔案與「Worklog」資料夾，<b>看不到你其他的檔案</b>。</li>
     </ul>
     <p class="k">備份內容</p>
-    <p>一份 JSON 檔（worklog-backup.json），內含你的勤務紀錄與介面設定；檔案只存在你的 Google 帳號底下，其他人（包含本系統作者）無法讀取。</p>
+    <p>一份 JSON 檔，放在「我的雲端硬碟 → Worklog → worklog-backup.json」，內含你的勤務紀錄與介面設定；你可自行開啟、下載或刪除，其他人（包含本系統作者）無法讀取。</p>
     <p class="k">撤回授權</p>
     <p>可在 <a class="link" href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google 帳號的第三方應用程式權限</a> 頁面移除本系統，或在帳號面板按「登出」。</p>
   </div>
