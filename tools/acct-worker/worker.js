@@ -97,7 +97,7 @@ export default {
         const key = "acc:" + u;
         if (await env.KV.get(key)) return j({ err: "這個帳號已經有人用了" }, 409);
         const salt = crypto.randomUUID();
-        await env.KV.put(key, JSON.stringify({ salt, hash: await pbkdf2(pass, salt, 120000), at: Date.now() }));
+        await env.KV.put(key, JSON.stringify({ salt, hash: await pbkdf2(pass, salt, 100000), at: Date.now() }));
         return j({ ok: true, u });
       }
 
@@ -108,7 +108,7 @@ export default {
         const rec = await env.KV.get("acc:" + u);
         if (!rec) return j({ err: "找不到這個帳號，先註冊" }, 404);
         const o = JSON.parse(rec);
-        if ((await pbkdf2(pass, o.salt, 120000)) !== o.hash) return j({ err: "密碼不對" }, 401);
+        if ((await pbkdf2(pass, o.salt, 100000)) !== o.hash) return j({ err: "密碼不對" }, 401);
         const exp = Date.now() + 30 * 864e5;
         const token = u + "." + exp + "." + (await hmac(env.SECRET, u + "|" + exp));
         return j({ ok: true, u, exp, token });
