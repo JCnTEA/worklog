@@ -993,7 +993,7 @@ img,svg,canvas,video{max-width:100%}
       <button type="button" id="scanX" aria-label="關閉">×</button>
     </div>
     <div class="sc-body">
-      <div class="sc-tip">用<b>截圖</b>最準（正面、不要反光、不要翻拍螢幕）；也可以直接貼上文字。</div>
+      <div class="sc-tip">PDA 只能拍：螢幕填滿、開燈、正對不斜；也可以直接貼上文字。</div>
       <div class="sc-acts">
         <button type="button" id="scanPick" class="sc-btn">選擇圖片／截圖</button>
         <button type="button" id="scanPaste" class="sc-btn ghost">貼上文字</button>
@@ -1004,7 +1004,13 @@ img,svg,canvas,video{max-width:100%}
         <button type="button" id="scanGo" class="sc-btn">解析文字</button>
       </div>
       <div id="scanState">—</div>
-      <button type="button" id="scanCount" class="sc-btn" hidden style="margin-top:8px">以筆數帶入</button>
+      <button type="button" id="scanCount" class="sc-btn" hidden style="margin-top:8px">以筆數帶入</button>      <div id="scanManual" style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <span class="sc-tip" style="margin:0">手動筆數</span>
+        <input id="scanCountIn" type="text" inputmode="numeric" maxlength="2" placeholder="4"
+          style="width:56px;text-align:center;font-size:19px;font-weight:700;padding:5px 8px;border-radius:8px;
+          border:1px solid var(--line,#DCD5C4);background:#fff;color:inherit">
+        <button type="button" id="scanCountGo" class="sc-btn">帶入待排障</button>
+      </div>
       <div id="scanRawWrap" hidden><div class="sc-tip" style="margin-top:10px">辨識到的文字（可長按複製）</div><pre id="scanRaw"></pre></div>
       <div id="scanBarWrap" hidden><div id="scanBar"></div></div>
       <img id="scanImg" alt="" hidden>
@@ -4277,55 +4283,128 @@ img,svg,canvas,video{max-width:100%}
       items = []; listEl.innerHTML = ""; addB.hidden = true;
       say("準備影像…"); prog(8);
       var im = new Image();
-      im.onload = function(){
-        var maxW = 2000, k = Math.min(2.2, maxW / im.width);
-        var w = Math.round(im.width * k), h = Math.round(im.height * k);
-        var c = document.createElement("canvas"); c.width = w; c.height = h;
-        var g = c.getContext("2d");
-        g.drawImage(im, 0, 0, w, h);
-        /* 預覽一律用原圖（保留彩色）；灰階只做給辨識引擎看，不再顯示出去 */
-        imgEl.src = c.toDataURL("image/png"); imgEl.hidden = false;
-        var gc = document.createElement("canvas"); gc.width = w; gc.height = h;
-        var gg = gc.getContext("2d"); gg.drawImage(c, 0, 0);
+      im.onload=function(){
+        var maxW=2000, k=Math.min(2.4, maxW/im.width);
+        var w=Math.round(im.width*k), h=Math.round(im.height*k);
+        var c=document.createElement("canvas"); c.width=w; c.height=h;
+        var g=c.getContext("2d"); g.drawImage(im,0,0,w,h);
+        /* 1) 找畫面（翻拍 PDA 時螢幕範圍）：取亮暗分界後裁切，去掉背景雜物 */
         try{
-          var gpx=gg.getImageData(0,0,w,h), d=gpx.data;
-          /* 2%–98% 拉對比：翻拍反光、昏暗都能救 */
+          var px0=g.getImageData(0,0,w,h), d0=px0.data;
+          var gray0=new Uint8Array(Math.floor(d0.length/4)), hist0=new Uint32Array(256);
+          for(var i0=0,q0=0;i0<d0.length;i0+=4,q0++){
+            var v0=Math.round(0.299*d0[i0]+0.587*d0[i0+1]+0.114*d0[i0+2]);
+            v0=v0<0?0:(v0>255?255:v0); gray0[q0]=v0; hist0[v0]++;
+          }
+          /* Otsu */
+          var tot0=gray0.length, sum0=0;
+          for(var t0=0;t0<256;t0++) sum0+=t0*hist0[t0];
+          var wB=0,sumB=0,best=0,bestT=127;
+          for(var t1=0;t1<256;t1++){
+            wB+=hist0[t1]; if(!wB) continue;
+            var wF=tot0-wB; if(!wF) break;
+            sumB+=t1*hist0[t1];
+            var mB=sumB/wB, mF=(sum0-sumB)/wF;
+            var vv=wB*wF*(mB-mF)*(mB-mF);
+            if(vv>best){ best=vv; bestT=t1; }
+          }
+          var above=0; for(var t2=bestT+1;t2<256;t2++) above+=hist0[t2];
+          var brightIsContent = above >= tot0*0.18;
+          var x1=w,y1=h,x2=0,y2=0,cnt=0;
+          for(var yy=0;yy<h;yy+=2){
+            for(var xx=0;xx<w;xx+=2){
+              var val=gray0[yy*w+xx];
+              var isOc = brightIsContent ? (val>bestT) : (val<bestT);
+              if(isOc){ cnt++; if(xx<x1)x1=xx; if(xx>x2)x2=xx; if(yy<y1)y1=yy; if(yy>y2)y2=yy; }
+            }
+          }
+          var box=brightIsContent?"bright":"dark";
+          var area=(x2-x1)*(y2-y1), fullArea=w*h;
+          if(cnt>0 && area>fullArea*0.10 && area<fullArea*0.94){
+            var mx=Math.round((x2-x1)*0.03)+6, my=Math.round((y2-y1)*0.04)+6;
+            var nx=Math.max(0,x1-mx), ny=Math.max(0,y1-my);
+            var nw=Math.min(w-nx,(x2-x1)+mx*2), nh=Math.min(h-ny,(y2-y1)+my*2);
+            var cc=document.createElement("canvas"); cc.width=nw; cc.height=nh;
+            cc.getContext("2d").drawImage(c,nx,ny,nw,nh,0,0,nw,nh);
+            c=cc; w=nw; h=nh;
+            window.__scanBox=box;
+          } else { window.__scanBox="full"; }
+        }catch(e4){ window.__scanBox="full"; }
+
+        /* 預覽保留原圖彩色 */
+        imgEl.src=c.toDataURL("image/png"); imgEl.hidden=false;
+
+        /* 2) 兩套前處理：A 拉對比灰階、B Otsu 二值化（白底黑字最佳，若反相則自動翻轉） */
+        var gc=document.createElement("canvas"); gc.width=w; gc.height=h;
+        var gg=gc.getContext("2d"); gg.drawImage(c,0,0);
+        var gb=document.createElement("canvas"); gb.width=w; gb.height=h;
+        var gbg=gb.getContext("2d");
+        try{
+          var px=gg.getImageData(0,0,w,h), d=px.data;
           var hist=new Uint32Array(256), gray=new Uint8Array(Math.floor(d.length/4));
           for(var j=0,k2=0;j<d.length;j+=4,k2++){
-            var g0=Math.round(0.299*d[j]+0.587*d[j+1]+0.114*d[j+2]);
-            g0=g0<0?0:(g0>255?255:g0); gray[k2]=g0; hist[g0]++;
+            var g0b=Math.round(0.299*d[j]+0.587*d[j+1]+0.114*d[j+2]);
+            g0b=g0b<0?0:(g0b>255?255:g0b); gray[k2]=g0b; hist[g0b]++;
           }
           var total=gray.length,acc=0,lo=0,hi=255;
-          for(var a=0;a<256;a++){ acc+=hist[a]; if(acc>=total*0.02){ lo=a; break; } }
+          for(var a1=0;a1<256;a1++){ acc+=hist[a1]; if(acc>=total*0.02){ lo=a1; break; } }
           acc=0;
-          for(var b2=255;b2>=0;b2--){ acc+=hist[b2]; if(acc>=total*0.02){ hi=b2; break; } }
+          for(var a2=255;a2>=0;a2--){ acc+=hist[a2]; if(acc>=total*0.02){ hi=a2; break; } }
           if(hi-lo<24){ lo=0; hi=255; }
           var span=(hi-lo)||1;
-          for(var j2=0,k3=0;j2<d.length;j2+=4,k3++){
-            var v=(gray[k3]-lo)*(235/span)+10;
-            v=v<0?0:(v>255?255:v);
-            d[j2]=d[j2+1]=d[j2+2]=v;
+          /* Otsu（同一份直方圖） */
+          var tO=127,sAll=0;
+          for(var t3=0;t3<256;t3++) sAll+=t3*hist[t3];
+          var wB2=0,sB2=0,best2=0;
+          for(var t4=0;t4<256;t4++){
+            wB2+=hist[t4]; if(!wB2) continue;
+            var wF2=total-wB2; if(!wF2) break;
+            sB2+=t4*hist[t4];
+            var mB2=sB2/wB2, mF2=(sAll-sB2)/wF2;
+            var vv2=wB2*wF2*(mB2-mF2)*(mB2-mF2);
+            if(vv2>best2){ best2=vv2; tO=t4; }
           }
-          gg.putImageData(gpx,0,0);
-        }catch(err2){ gc = c; }
+          var darkBg=gray[0] < tO && lo < 60;   /* 深色底 → 反相 */
+          var binPx=gbg.createImageData(w,h), bd=binPx.data;
+          for(var j3=0,k4=0;j3<d.length;j3+=4,k4++){
+            var v=(gray[k4]-lo)*(235/span)+10;
+            v=v<0?0:(v>255?255:v);
+            d[j3]=d[j3+1]=d[j3+2]=v;
+            var bw=gray[k4]>tO?255:0;
+            if(darkBg) bw=255-bw;
+            bd[j3]=bd[j3+1]=bd[j3+2]=bw; bd[j3+3]=255;
+          }
+          gg.putImageData(px,0,0);
+          gbg.putImageData(binPx,0,0);
+        }catch(e3){ gc=c; gb=c; }
+
         prog(26);
-        say("載入辨識引擎…（第一次約 20–40 秒，之後會快很多）");
+        say("載入辨識引擎…（第一次約 20–40 秒）");
         loadTess(function(ok){
-          if (!ok){ say("辨識引擎載入失敗，可改用「貼上文字」或稍後再試。"); return; }
+          if(!ok){ say("辨識引擎載入失敗，可改用「貼上文字」。"); return; }
           say("辨識中…");
-          window.Tesseract.recognize(gc, "chi_tra+eng", {
-            logger: function(m){
-              if (m && m.status === "recognizing text" && m.progress != null){
-                prog(30 + Math.round(m.progress * 62));
-              }
-            }
-          }).then(function(res){
+          var tried=0, got=null;
+          function pass(cv,label,next){
+            tried++;
+            say("辨識中…（第 "+tried+" 次，"+(label||"")+"）");
+            window.Tesseract.recognize(cv, "chi_tra+eng", {
+              logger:function(m){ if(m&&m.status==="recognizing text"&&m.progress!=null) prog(30+tried*5+Math.round(m.progress*40)); }
+            }).then(function(res){
+              var txt=(res&&res.data&&res.data.text)||"";
+              var n=parse(txt).length;
+              var exp=expectedCount(txt);
+              if(!got || n>got.n || (exp && n>=exp)) got={txt:txt,n:n};
+              if(got.n>0 && (!exp || got.n>=exp)){ finish(); }
+              else if(next) next();
+              else finish();
+            }).catch(function(){ if(next) next(); else finish(); });
+          }
+          function finish(){
             prog(100);
-            var txt = (res && res.data && res.data.text) || "";
-            run(txt);
-          }).catch(function(){
-            say("辨識失敗，請改用較清楚的截圖，或貼上文字。");
-          });
+            if(!got){ say("辨識失敗，請改用清楚一點的影像，或貼上文字。"); return; }
+            run(got.txt);
+          }
+          pass(gb,"白底黑字",function(){ pass(gc,"對比灰階",null); });
         });
       };
       im.onerror = function(){ say("這張圖片讀不進來，換一張試試。"); };
@@ -4523,6 +4602,16 @@ img,svg,canvas,video{max-width:100%}
       persist(); paintPend();
       say("已按筆數加入：待排障 +" + n + "（會同有幾筆請自己補）");
       this.hidden = true;
+    });
+    var cg=document.getElementById("scanCountGo"), ci=document.getElementById("scanCountIn");
+    if(cg) cg.addEventListener("click", function(){
+      var n=Number((ci && ci.value || "").replace(/[^0-9]/g,""));
+      if(!n || n>60){ say("請輸入 1–60 的筆數。"); return; }
+      var pd=todayData.pend||{p:0,c:0,at:0,dp:0,dc:0}, done=sumsOf(todayData);
+      todayData.pend={p:(pd.p||0)+n, c:(pd.c||0), at:Date.now(), dp:done.p, dc:done.c};
+      persist(); paintPend();
+      say("已帶入：待排障 +"+n+"（會同有幾筆請自己補）");
+      if(ci) ci.value="";
     });
   })();
 
