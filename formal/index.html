@@ -4279,23 +4279,26 @@ img,svg,canvas,video{max-width:100%}
         var c = document.createElement("canvas"); c.width = w; c.height = h;
         var g = c.getContext("2d");
         g.drawImage(im, 0, 0, w, h);
-        try{
-          var px = g.getImageData(0, 0, w, h), d = px.data;
-          for (var i = 0; i < d.length; i += 4){
-            var v = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-            v = (v - 128) * 1.45 + 128;
-            v = v < 0 ? 0 : (v > 255 ? 255 : v);
-            d[i] = d[i+1] = d[i+2] = v;
-          }
-          g.putImageData(px, 0, 0);
-        }catch(err){}
+        /* 預覽一律用原圖（保留彩色）；灰階只做給辨識引擎看，不再顯示出去 */
         imgEl.src = c.toDataURL("image/png"); imgEl.hidden = false;
+        var gc = document.createElement("canvas"); gc.width = w; gc.height = h;
+        var gg = gc.getContext("2d"); gg.drawImage(c, 0, 0);
+        try{
+          var gpx = gg.getImageData(0, 0, w, h), gd = gpx.data;
+          for (var j = 0; j < gd.length; j += 4){
+            var gv = 0.299*gd[j] + 0.587*gd[j+1] + 0.114*gd[j+2];
+            gv = (gv - 128) * 1.35 + 128;
+            gv = gv < 0 ? 0 : (gv > 255 ? 255 : gv);
+            gd[j] = gd[j+1] = gd[j+2] = gv;
+          }
+          gg.putImageData(gpx, 0, 0);
+        }catch(err2){ gc = c; }
         prog(26);
         say("載入辨識引擎…（第一次約 20–40 秒，之後會快很多）");
         loadTess(function(ok){
           if (!ok){ say("辨識引擎載入失敗，可改用「貼上文字」或稍後再試。"); return; }
           say("辨識中…");
-          window.Tesseract.recognize(c, "chi_tra+eng", {
+          window.Tesseract.recognize(gc, "chi_tra+eng", {
             logger: function(m){
               if (m && m.status === "recognizing text" && m.progress != null){
                 prog(30 + Math.round(m.progress * 62));
