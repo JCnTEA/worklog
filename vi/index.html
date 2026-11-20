@@ -3906,8 +3906,15 @@ document.addEventListener("click", function(e){
         ch.style.display = closed ? "none" : "";
       });
     }
-    hd.addEventListener("click", toggle);
-    hd.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+    /* 標題內的控制項（重新定位／開關等）不可觸發收折 */
+    function isCtl(t){
+      return !!(t && t.closest && t.closest("button,input,select,textarea,a,label,.fold-no"));
+    }
+    hd.addEventListener("click", function(e){ if(isCtl(e.target)) return; toggle(); });
+    hd.addEventListener("keydown", function(e){
+      if(isCtl(e.target)) return;
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); }
+    });
     /* 捷運站點資料庫：每次開頁一律預設收起，不佔版面（不記狀態） */
     if(sec.classList.contains("mrt-card")){
       sec.classList.add("closed");
