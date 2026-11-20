@@ -882,7 +882,7 @@ document.addEventListener("touchend", function(e){
       <span class="place-name" id="placeName">尚未定位</span>
       <span class="place-meta" id="placeMeta">按上方按鈕取得最後位置，或直接在下方填寫</span>
       <div class="place-acts" id="placeActs" hidden>
-        <button type="button" class="place-act" id="retryBtn">重新查詢附近</button>
+        <button type="button" class="place-act" id="retryBtn" hidden style="display:none">重新查詢附近</button>
         <button type="button" class="place-act" id="copyBtn">複製座標</button>
         <button type="button" class="place-act" id="dataUpdBtn">更新資料</button>
         <button type="button" class="place-act" id="clearBtn">清除座標</button>
@@ -894,7 +894,7 @@ document.addEventListener("touchend", function(e){
       <button type="button" id="placeSet">套用</button>
     </div>
     <div class="sugs" id="placeSugs" hidden></div>
-    <div class="place-cands" id="placeCands"></div>
+    <div class="place-cands" id="placeCands" hidden style="display:none"></div>
     <div class="place-near" id="nearWrap" hidden>
       <div class="near-hd" id="nearShHd">最近的蝦皮智取店</div>
       <div class="place-cands" id="nearSh"></div>
@@ -2553,6 +2553,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       + '</button>';
   }
   function renderCands(selected){
+    if (!elCands || elCands.hidden) return;
     var near = [], far = [];
     for (var i = 0; i < cands.length; i++){
       if (cands[i].dist == null || cands[i].dist <= 300) near.push(i);
@@ -2602,61 +2603,15 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     setTip("");
     renderPlaceActs();
 
-    /* 附近地點候選：只用內建名單（蝦皮／便利商店／超市／量販／銀行），不再列地圖隨機店家 */
-    var LOCAL_RADIUS = 2000, PER_GROUP = 3, LOCAL_MAX = 12;
-    var groups = [
-      { chip: function(){ return "蝦皮"; }, list: function(){ return SHOPEE; },
-        label: function(x){ return shName(x.n); }, addr: function(x){ return x.s || ""; } },
-      { chip: function(x){ return x.b; }, list: function(){ return PSEN; },
-        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
-      { chip: function(x){ return x.b; }, list: function(){ return MKEN; },
-        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
-      { chip: function(x){ return x.b; }, list: function(){ return HVEN; },
-        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
-      { chip: function(x){ return x.b; }, list: function(){ return BKEN; },
-        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } }
-    ];
-    var out = [], gi, pi, k;
-    for (gi = 0; gi < groups.length; gi++){
-      var G = groups[gi], arr = [], pool = G.list();
-      for (pi = 0; pi < pool.length; pi++){
-        var st = pool[pi];
-        if (st.x == null || st.y == null) continue;
-        var dd = haversine(lat, lng, st.x, st.y);
-        if (dd > LOCAL_RADIUS) continue;
-        arr.push({ s: st, d: dd });
-      }
-      arr.sort(function(a, b){ return a.d - b.d; });
-      for (k = 0; k < arr.length && k < PER_GROUP; k++){
-        var t = arr[k], chip = G.chip(t.s) || "";
-        out.push({
-          name: (chip ? chip + " " : "") + G.label(t.s),
-          addr: G.addr(t.s),
-          lat: t.s.x, lng: t.s.y,
-          dist: t.d, brand: true, transit: false, street: "", num: 0
-        });
-      }
-    }
-    out.sort(function(a, b){ return a.dist - b.dist; });
-    cands = out.slice(0, LOCAL_MAX);
+    /* 附近地點候選已移除：GPS 只記座標，附近店家改看下方「最近的蝦皮／便利商店…」區塊 */
+    cands = [];
     MORE_OPEN = false;
-    renderCands(-1);
-    if (!cands.length){
-      elPlaceBox.classList.remove("empty");
-      elPlaceName.textContent = "座標已記錄";
-      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
-        + accNote(acc) + " · 2 公里內沒有名單店家，請手動填寫";
-      setTip("附近沒有名單店家", true, true);
-    } else if (cands.length === 1){
-      selectCand(0);
-      setTip("已帶入 " + cands[0].name);
-    } else {
-      elPlaceBox.classList.add("empty");
-      elPlaceName.textContent = "請選擇地點";
-      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
-        + " · 附近 " + cands.length + " 間名單店家，請點選";
-      setTip("已列出附近名單店家");
-    }
+    if (elCands){ elCands.innerHTML = ""; elCands.hidden = true; }
+    elPlaceBox.classList.remove("empty");
+    elPlaceName.textContent = "座標已記錄";
+    elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
+      + accNote(acc) + " · 附近店家看下方「最近的…」清單";
+    setTip("已取得座標");
   }
 
   /* ---------- 開頁／回前景自動刷新定位（未定位模式自動重試） ---------- */
