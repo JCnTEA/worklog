@@ -1017,7 +1017,7 @@ document.addEventListener("touchend", function(e){
   <div id="scanMask" hidden>
     <div id="scanCard" role="dialog" aria-label="掃描待處理">
       <div class="sc-head">
-        <strong>掃描待處理</strong>
+        <strong>掃描待處理</strong><span style="font-size:10px;color:#7B8A9D;letter-spacing:.04em;margin-left:6px">v2</span>
         <button type="button" id="scanX" aria-label="關閉">×</button>
       </div>
       <div class="sc-body">
@@ -2546,12 +2546,22 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
           rg2.translate(h,0); rg2.rotate(Math.PI/2); rg2.drawImage(gc,0,0);
         }catch(e6){ grot2=gc; }
 
+        /* 上半放大：PDA 的「待處理(4)」字最大，裁上半再放大最容易讀到 */
+        var gtop=document.createElement("canvas");
+        try{
+          var th2=Math.max(60, Math.round(h*0.46));
+          var z2=Math.min(2.2, Math.max(1.2, 900/Math.max(1,th2)));
+          gtop.width=Math.round(w*z2); gtop.height=Math.round(th2*z2);
+          var tg=gtop.getContext("2d"); tg.imageSmoothingQuality="high";
+          tg.drawImage(gb,0,0,w,th2,0,0,gtop.width,gtop.height);
+        }catch(e7){ gtop=gb; }
+
         prog(26);
         say("載入辨識引擎…（第一次約 20–40 秒）");
         loadTess(function(ok){
           if(!ok){ say("辨識引擎載入失敗，可改用「貼上文字」。"); return; }
           say("辨識中…");
-          var queue=[{c:gb,l:"白底黑字"},{c:gc,l:"對比灰階"},{c:grot,l:"旋轉 90°"},{c:grot2,l:"旋轉＋灰階"}];
+          var queue=[{c:gtop,l:"上半放大"},{c:gb,l:"白底黑字"},{c:gc,l:"對比灰階"},{c:grot,l:"旋轉 90°"},{c:grot2,l:"旋轉＋灰階"}];
           var step=0, best={txt:"",score:-1};
           function next(){
             if(step>=queue.length){ finish(); return; }
@@ -2563,8 +2573,11 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
               var txt=(res&&res.data&&res.data.text)||"";
               var sc=scoreTxt(txt);
               if(sc>best.score) best={txt:txt,score:sc};
-              /* 已經抓到 ATM 筆數又有會同線索 → 不用再跑 */
-              if(best.score>=12) finish(); else next();
+              /* 有筆數＋有會同才早停；只有筆數就再跑一趟全圖找「會同」 */
+              var ft2=flatT(txt);
+              var gotN=readCount(ft2);
+              var gotC=(ft2.replace(/會同廠商/g,"").match(/會同|會司|会同|会司/g)||[]).length;
+              if(gotN && ((sc>=12 && gotC) || (gotC && step>=2) || step>=3)) finish(); else next();
             }).catch(function(){ next(); });
           }
           function finish(){
@@ -2652,34 +2665,45 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
         .replace(/[ＯOo]/g,"0").replace(/[（]/g,"(").replace(/[）]/g,")")
         .replace(/[：]/g,":").replace(/[－–—]/g,"-");
     }
+    /* 去掉字間空白（OCR 常把「待 處 理 (4)」拆開） */
+    function flatT(t){ return normT(t).replace(/[ \u3000]+/g,""); }
+    /* 筆數：ATM(4) 或待處理(4) 都算 */
+    function readCount(tc){
+      var m = tc.match(/ATM\(?(\d{1,2})/) || tc.match(/ATN\(?(\d{1,2})/)
+           || tc.match(/待處理\(?(\d{1,2})/) || tc.match(/待処理\(?(\d{1,2})/);
+      return m ? Number(m[1]) : 0;
+    }
     function scoreTxt(txt){
-      var t=normT(txt), sc=0;
-      if(/ATM\s*\(?\s*[0-9]{1,2}/i.test(t)) sc+=10;
-      var c=(t.replace(/會同廠商/g,"").match(/會同|会同/g)||[]).length;
+      var t=flatT(txt), sc=0;
+      if(readCount(t)) sc+=10;
+      var c=(t.replace(/會同廠商/g,"").match(/會同|會司|会同|会司/g)||[]).length;
       sc+=Math.min(c,6)*2;
-      if((t.match(/[0-9]{4,6}\s*-/g)||[]).length) sc+=3;
+      if((t.match(/\d{4,6}-/g)||[]).length) sc+=3;
       return sc;
     }
     function analyze(txt){
-      var t=normT(txt);
-      var mN=t.match(/ATM\s*\(?\s*([0-9]{1,2})/i);
-      var n=mN?Number(mN[1]):0;
-      if(!n) n=(t.match(/[0-9]{4,6}\s*-/g)||[]).length;
-      var bare=t.replace(/會同廠商/g,"");
-      var c=(bare.match(/會同|会同/g)||[]).length;
+      var tc=flatT(txt);
+      var n=readCount(tc);
+      if(!n) n=(tc.match(/\d{4,6}-/g)||[]).length;
+      var bare=tc.replace(/會同廠商/g,"");
+      var c=(bare.match(/會同|會司|会同|会司/g)||[]).length;
       if(n && c>n) c=n;
       if(!n && c) n=c;
       var p=Math.max(0,n-c);
       var ci=document.getElementById("scanCountIn"), cc=document.getElementById("scanCountCIn");
-      if(ci && (p||n)) ci.value=p?String(p):"";
-      if(cc && c) cc.value=String(c);
+      if(ci) ci.value = n?String(p):"";
+      if(cc) cc.value = c?String(c):"";
       showRaw(txt);
       run(txt);
-      if(n||c){
-        var okTxt = (ci&&cc) ? "兩格已自動填好，按「帶入待處理」即可。" : "";
-        say("讀到 ATM("+n+")、會同 "+c+" 筆 → 待排障 "+p+"／待會同 "+c+"。"+okTxt);
+      var scB=document.getElementById("scanCount"); if(scB && n) scB.hidden=true;
+      if(n){
+        var why = n ? "（畫面「待處理/ATM("+n+")」）" : "";
+        var msg = "讀到 "+n+" 筆"+why+"、數到會同 "+c+" 筆 → 待排障 "+p+"／待會同 "+c+"。";
+        if(!c) msg += "畫面沒讀到「會同」字樣，會同格先留 0，有的話改右邊那格。";
+        else msg += "兩格已填好，按「帶入待處理」即可。";
+        say(msg);
       } else {
-        say("這張讀不出 ATM 筆數，直接看 PDA 上的 ATM(?) 填下面兩格。");
+        say("這張讀不出筆數，直接看 PDA 上的「待處理(?)」填下面兩格。");
       }
     }
     function showRaw(t){
