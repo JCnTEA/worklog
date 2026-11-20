@@ -896,12 +896,14 @@ document.addEventListener("touchend", function(e){
     <div class="sugs" id="placeSugs" hidden></div>
     <div class="place-cands" id="placeCands" hidden style="display:none"></div>
     <div class="place-near" id="nearWrap" hidden>
-      <div class="near-hd" id="nearShHd">最近的蝦皮智取店</div>
-      <div class="place-cands" id="nearSh"></div>
-      <div class="near-hd" id="nearPsHd" hidden>最近的便利商店</div>
-      <div class="place-cands" id="nearPs" hidden></div>
       <div class="near-hd" id="nearMkHd" hidden>最近的超市</div>
       <div class="place-cands" id="nearMk" hidden></div>
+      <div class="near-hd" id="nearHvHd" hidden>最近的量販</div>
+      <div class="place-cands" id="nearHv" hidden></div>
+      <div class="near-hd" id="nearShHd" hidden>最近的蝦皮智取店</div>
+      <div class="place-cands" id="nearSh" hidden></div>
+      <div class="near-hd" id="nearPsHd" hidden>最近的便利商店</div>
+      <div class="place-cands" id="nearPs" hidden></div>
       <div class="near-hd" id="nearBkHd" hidden>最近的銀行</div>
       <div class="place-cands" id="nearBk" hidden></div>
       <div class="near-hd" id="nearMxHd" hidden>最近的捷運出口</div>
@@ -3621,9 +3623,10 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   /* ---------- GPS 最近的門市（蝦皮／便利商店／超市／銀行／捷運） ---------- */
   var elNearWrap = document.getElementById("nearWrap");
   var NEAR_GROUPS = [
+    { hd:"nearMkHd", box:"nearMk", title:"超市", list:function(){ return MKEN; }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
+    { hd:"nearHvHd", box:"nearHv", title:"量販", list:function(){ return HVEN; }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearShHd", box:"nearSh", title:"蝦皮智取店", list:function(){ return SHOPEE; }, full:function(x){ return shFull(x.n); }, tag:function(){ return ""; }, chip:function(){ return "蝦皮"; }, label:function(x){ return shName(x.n); }, addr:function(x){ return x.s || ""; } },
     { hd:"nearPsHd", box:"nearPs", title:"便利商店", list:function(){ return PSEN; }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
-    { hd:"nearMkHd", box:"nearMk", title:"超市", list:function(){ return MKEN; }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearBkHd", box:"nearBk", title:"銀行", list:function(){ return BKEN; }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearMxHd", box:"nearMx", title:"捷運出口", list:function(){ return EXIT_ROWS.filter(function(r){ return !!r.stn; }); },
       full:function(r){ return "捷運" + r.stn.n + " " + r.lab; }, tag:function(r){ return r.stn.c; },
