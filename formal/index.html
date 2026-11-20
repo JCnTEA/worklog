@@ -2919,93 +2919,61 @@ img,svg,canvas,video{max-width:100%}
     setTip("");
     renderPlaceActs();
 
-    var url = "https://photon.komoot.io/reverse?lat=" + lat + "&lon=" + lng + "&limit=15";
-    function fetchPhoton(){
-      return fetch(url).then(function(res){
-        if (!res.ok) throw new Error("http " + res.status);
-        return res.json();
-      });
-    }
-
-    fetchPhoton()
-      .catch(function(){
-        return new Promise(function(r){ setTimeout(r, 1200); }).then(fetchPhoton);
-      })
-      .then(function(data){
-        var feats = (data && data.features) || [];
-        var list = [];
-        for (var i = 0; i < feats.length; i++){
-          var p = (feats[i] && feats[i].properties) || {};
-          var geo = feats[i].geometry && feats[i].geometry.coordinates;
-          var pname = p.name || "";
-          if (!pname || pname.length > 40) continue;
-          var cLat = null, cLng = null, dist = null;
-          if (geo && geo.length >= 2){
-            cLng = Number(geo[0]); cLat = Number(geo[1]);
-            if (Number.isFinite(cLat) && Number.isFinite(cLng)) dist = haversine(lat, lng, cLat, cLng);
-          }
-          var isTransit = TRANSIT_VALUES.indexOf(p.osm_value || "") >= 0;
-          list.push({
-            name: pname,
-            addr: composeAddr(p),
-            street: p.street || "",
-            num: houseNum(p.housenumber),
-            lat: Number.isFinite(cLat) ? cLat : lat,
-            lng: Number.isFinite(cLng) ? cLng : lng,
-            dist: dist,
-            brand: isBrand(pname) || isTransit,
-            transit: isTransit
-          });
-        }
-        list.sort(function(a, b){
-          /* 1) 300 公尺內先 2) 同街道按門牌 1→900 3) 街道名 4) 距離 */
-          var na = (a.dist == null || a.dist > 300) ? 1 : 0;
-          var nb = (b.dist == null || b.dist > 300) ? 1 : 0;
-          if (na !== nb) return na - nb;
-          if (a.street !== b.street) return String(a.street).localeCompare(String(b.street), "zh-Hant");
-          if (a.num !== b.num) return a.num - b.num;
-          if (a.dist == null && b.dist == null) return 0;
-          if (a.dist == null) return 1;
-          if (b.dist == null) return -1;
-          return a.dist - b.dist;
+    /* 附近地點候選：只用內建名單（蝦皮／便利商店／超市／量販／銀行），不再列 OSM 隨機店家 */
+    var LOCAL_RADIUS = 2000, PER_GROUP = 3, LOCAL_MAX = 12;
+    var groups = [
+      { chip: function(){ return "蝦皮"; }, list: function(){ return SHOPEE; },
+        label: function(x){ return shName(x.n); }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return PSEN.concat(addedOf("ps")); },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return MKEN.concat(addedOf("mk")); },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return HVEN.concat(addedOf("hv")); },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return BKEN.concat(addedOf("bk")); },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } }
+    ];
+    var out = [], gi, pi, k;
+    for (gi = 0; gi < groups.length; gi++){
+      var G = groups[gi], arr = [], pool = G.list();
+      for (pi = 0; pi < pool.length; pi++){
+        var st = pool[pi];
+        if (st.x == null || st.y == null) continue;
+        var dd = haversine(lat, lng, st.x, st.y);
+        if (dd > LOCAL_RADIUS) continue;
+        arr.push({ s: st, d: dd });
+      }
+      arr.sort(function(a, b){ return a.d - b.d; });
+      for (k = 0; k < arr.length && k < PER_GROUP; k++){
+        var t = arr[k], chip = G.chip(t.s) || "";
+        out.push({
+          name: (chip ? chip + " " : "") + G.label(t.s),
+          addr: G.addr(t.s),
+          lat: t.s.x, lng: t.s.y,
+          dist: t.d, brand: true, transit: false, street: "", num: 0
         });
-        cands = list.slice(0, 20);
-        MORE_OPEN = false;
-
-        var nearBrands = [];
-        for (var k = 0; k < cands.length; k++){
-          if (cands[k].brand && cands[k].dist != null && cands[k].dist <= 200) nearBrands.push(k);
-        }
-        var hasBrand = false;
-        for (var b = 0; b < cands.length; b++){ if (cands[b].brand) hasBrand = true; }
-
-        var auto = nearBrands.length === 1 ? nearBrands[0] : -1;
-        if (auto >= 0){
-          selectCand(auto);
-        } else if (cands.length && hasBrand){
-          renderCands(-1);
-          elPlaceBox.classList.add("empty");
-          elPlaceName.textContent = "請選擇地點";
-          elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m · 附近有多個地點，請點選";
-        } else {
-          renderCands(-1);
-          elPlaceBox.classList.remove("empty");
-          elPlaceName.textContent = "座標已記錄";
-          elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m · 附近無名單店家，請在上方點選或手動填寫";
-        }
-        setTip("地圖服務正常");
-      })
-      .catch(function(err){
-        cands = [];
-        renderCands(-1);
-        renderPlaceActs();
-        elPlaceBox.classList.add("empty");
-        elPlaceName.textContent = "座標已記錄";
-        var code = (err && err.message) ? err.message.replace("http ", "") : "";
-        elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
-          + accNote(acc) + " · 附近店家查不到（地圖服務" + (code ? " " + code : "暫時不通") + "），可手動填寫";
-        setTip("地圖服務暫時不通，可稍後按「重新查詢附近」", true, true);
-      });
+      }
+    }
+    out.sort(function(a, b){ return a.dist - b.dist; });
+    cands = out.slice(0, LOCAL_MAX);
+    MORE_OPEN = false;
+    renderCands(-1);
+    if (!cands.length){
+      elPlaceBox.classList.remove("empty");
+      elPlaceName.textContent = "座標已記錄";
+      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
+        + accNote(acc) + " · 2 公里內沒有名單店家，請手動填寫";
+      setTip("附近沒有名單店家", true, true);
+    } else if (cands.length === 1){
+      selectCand(0);
+      setTip("已帶入 " + cands[0].name);
+    } else {
+      elPlaceBox.classList.add("empty");
+      elPlaceName.textContent = "請選擇地點";
+      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
+        + " · 附近 " + cands.length + " 間名單店家，請點選";
+      setTip("已列出附近名單店家");
+    }
   }
 
   /* ---------- 開頁／回前景自動刷新定位（未定位模式自動重試） ---------- */
