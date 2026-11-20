@@ -3908,6 +3908,15 @@ document.addEventListener("click", function(e){
     }
     hd.addEventListener("click", toggle);
     hd.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+    /* 捷運站點資料庫：每次開頁一律預設收起，不佔版面（不記狀態） */
+    if(sec.classList.contains("mrt-card")){
+      sec.classList.add("closed");
+      hd.setAttribute("aria-expanded","false");
+      Array.prototype.forEach.call(sec.children, function(ch){
+        if(ch===hd) return;
+        ch.style.display="none";
+      });
+    }
   });
 })();
 </script>
