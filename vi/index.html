@@ -2659,7 +2659,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
 
   /* ---------- 開頁／回前景自動刷新定位（未定位模式自動重試） ---------- */
   var _autoGpsBusy = false, _autoGpsLast = 0;
-  function autoGpsRefresh(){
+  function autoGpsRefresh(){ return; /* 停用：GPS 一律手動按鈕觸發 */
     if (_autoGpsBusy || !navigator.geolocation) return;
     var now = Date.now();
     if (now - _autoGpsLast < 60000) return;
@@ -2721,10 +2721,8 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     renderPlace();
   }
 
-  window.addEventListener("load", function(){ setTimeout(function(){ resetPlaceOnEnter(); autoGpsRefresh(); }, 200); });
-  document.addEventListener("visibilitychange", function(){
-    if (document.visibilityState === "visible") autoGpsRefresh();
-  });
+  /* 定位一律手動：開頁、回前景都不自動抓 GPS，只有按「取得 GPS 位置／重新定位」才定位 */
+  window.addEventListener("load", function(){ setTimeout(resetPlaceOnEnter, 200); });
 
   elGpsBtn.addEventListener("click", function(){
     if (!navigator.geolocation){
@@ -3758,6 +3756,9 @@ document.addEventListener("click", function(e){
   border:1.5px solid rgba(255,246,232,.8);display:flex;flex-direction:column;justify-content:center;
   align-items:center;gap:5px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:120}
 #navBtn span{display:block;width:24px;height:2.8px;background:#FFF6E8;border-radius:2px}
+#navBtn{transition:opacity .22s ease}
+#navBtn.dim{opacity:.26}
+#navBtn.dim:active{opacity:1}
 #navMask{position:fixed;inset:0;background:rgba(4,8,16,.55);z-index:128;opacity:0;pointer-events:none;transition:opacity .18s}
 #navDrawer{position:fixed;left:0;top:0;bottom:0;width:250px;max-width:80vw;z-index:130;background:#101B2E;
   border-right:1px solid #24344F;transform:translateX(-102%);transition:transform .2s ease;padding:18px 14px;
@@ -3837,6 +3838,21 @@ document.addEventListener("click", function(e){
 (function(){
   /* 抽屜 */
   var btn=document.getElementById("navBtn"), dr=document.getElementById("navDrawer"), mk=document.getElementById("navMask");
+  /* 捲動時選單鈕淡出，避免蓋住內文；停手約 1.4 秒再回來 */
+  (function(){
+    var btnEl=document.getElementById("navBtn");
+    if (!btnEl) return;
+    var t=null;
+    function dim(){ btnEl.classList.add("dim"); }
+    function wake(){ btnEl.classList.remove("dim"); clearTimeout(t); }
+    window.addEventListener("scroll", function(){
+      dim();
+      clearTimeout(t);
+      t=setTimeout(wake, 1400);
+    }, {passive:true});
+    btnEl.addEventListener("pointerdown", function(){ btnEl.classList.remove("dim"); clearTimeout(t); });
+  })();
+
   function openD(){ dr.classList.add("on"); mk.classList.add("on"); if (typeof paintSw === "function") paintSw(); }
   function closeD(){ dr.classList.remove("on"); mk.classList.remove("on");  }
   /* 抽屜內主題切換：與右上圓鈕同一套 */
