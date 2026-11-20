@@ -204,10 +204,12 @@ img,svg,canvas,video{max-width:100%}
     <a class="chip" href="#pages">版本說明</a>
     <a class="chip" href="#slot">時段與計件</a>
     <a class="chip" href="#gps">出勤地點</a>
-    <a class="chip" href="#pend">待處理</a>
+    <a class="chip" href="#pend">待處理／掃描</a>
     <a class="chip" href="#sum">合計</a>
     <a class="chip" href="#save">保存與記錄</a>
     <a class="chip" href="#history">近期日誌</a>
+    <a class="chip" href="#mrt">捷運站點</a>
+    <a class="chip" href="#ui">選單與收折</a>
     <a class="chip" href="#theme">主題</a>
     <a class="chip" href="#refresh">下拉重整</a>
     <a class="chip" href="#update">更新</a>
@@ -253,42 +255,51 @@ img,svg,canvas,video{max-width:100%}
 
 <section id="slot">
   <div class="eyebrow"><span class="num">03</span><h2>時段與計件</h2></div>
-  <p>一天三個主要時段，換段會自動把上一段結算成一筆；半夜是選用的第四段。</p>
-  <figure class="figure"><img src="https://aka.doubaocdn.com/s/cxVatg8EPF" width="724" height="794" alt="目前時段可編輯，其他時段鎖住（灰）"><figcaption>目前時段可編輯，其他時段鎖住（灰）</figcaption></figure>
-
+  <p>上午、下午、晚上三段都<b>可以直接編輯</b>，沒有鎖住；半夜是選用的第四段。換段時會自動把上一段結算成一筆。</p>
+  <figure class="figure"><img src="https://aka.doubaocdn.com/s/p9HBVxM4N1" width="780" height="1200" alt="上午／下午／晚上三格都標可編輯"><figcaption>三段都標「可編輯」，隨時能補記</figcaption></figure>
   <ul>
-    <li><b>非當前時段會鎖住</b>，按鈕上會標「不可編輯」，避免記錯段。</li>
-    <li>半夜時段預設關閉；有需要把「半夜時段」開關打開再記。</li>
-    <li>每個數字格有 <kbd>－</kbd>／<kbd>＋</kbd>，長按不會跳號，點一次加一件。</li>
+    <li>不用等時間走到那一段，記錯段就直接改那一格。</li>
+    <li>按 <kbd>＋</kbd> 加一件、<kbd>－</kbd> 減一件；也可以直接點數字改。</li>
     <li>排障與會同分開算，互不影響。</li>
+    <li>半夜（00:00–07:59）預設收起；要記就先把那列開關往右切。</li>
   </ul>
 </section>
 
 <section id="gps">
   <div class="eyebrow"><span class="num">04</span><h2>出勤地點 / GPS</h2></div>
-  <h3>取得位置</h3>
-  <p>按「取得 GPS 位置」，抓到座標後會自動列出 300 公尺內最近的店家，點一下即套用。</p>
-<figure class="figure"><img src="https://aka.doubaocdn.com/s/KBQCs2tccJ" width="780" height="350" alt="出勤地點：貼座標、取得 GPS、搜尋店名、新增門市"><figcaption>出勤地點：貼座標、取得 GPS、搜尋店名、新增門市</figcaption></figure>
+  <p>按「重新定位」抓一次座標。抓到後<b>只記下座標</b>，不會自動幫你選店；附近有哪些店，看下面的清單。</p>
+<figure class="figure"><img src="https://aka.doubaocdn.com/s/HIr5JOYwLz" width="780" height="1220" alt="座標已記錄，下面是最近的蝦皮智取店"><figcaption>座標已記錄；下方列出最近的店家，點一下即套用</figcaption></figure>
 
-  <h3>貼座標</h3>
-  <p>手上只有一組座標時，按「貼座標」把 <kbd>x=緯度</kbd>、<kbd>y=經度</kbd> 貼進去即可。</p>
-  <h3>搜尋店名</h3>
-  <p>搜尋欄可以打店名、品牌或地區（例：<kbd>天母</kbd>、<kbd>全聯</kbd>、<kbd>南京復興</kbd>），按「套用」把名稱與地點帶進今天的記錄。</p>
-  <h3>新增門市</h3>
-  <p>清單裡沒有的店，按「＋ 新增門市／銀行」自己加一筆，之後搜尋就找得到。</p>
-  <div class="note tip">找不到位置時，直接在下方的框手動填寫也可以，GPS 只是輔助。</div>
+  <h3>最近的店家</h3>
+  <p>依座標列出五組最近的點：<b>蝦皮智取店、便利商店、超市、銀行、捷運出口</b>，每筆都標距離（<kbd>19 m</kbd>、<kbd>1.1 km</kbd>），點一下就把店名帶進今天的記錄。</p>
+  <h3>貼座標 / 搜尋店名</h3>
+  <p>手上只有一組座標，按「複製座標」或直接把 <kbd>緯度</kbd>、<kbd>經度</kbd> 貼進去；搜尋欄可以打店名、品牌或地區（例：<kbd>天母</kbd>、<kbd>全聯</kbd>、<kbd>南京復興</kbd>），按「套用」帶入。</p>
+  <h3>清除座標</h3>
+  <p>按「清除座標」把這台記下的位置清掉。每天重開頁面也會自動清一次，不會沿用昨天的座標。</p>
+  <div class="note tip">搜尋不到就自己按「＋ 新增門市／銀行」加一筆，之後搜尋就找得到。</div>
 </section>
 
 <section id="pend">
   <div class="eyebrow"><span class="num">05</span><h2>待處理</h2></div>
-  <p>還沒做完的排障／會同先掛在這裡，做的時候再轉成件數。</p>
-  <figure class="figure"><img src="https://aka.doubaocdn.com/s/YJPhCMmcFF" width="724" height="76" alt="待處理：可直接填數字，右邊清除"><figcaption>待處理：可直接填數字，右邊清除</figcaption></figure>
-
+  <p>還沒做完的排障／會同先掛在這裡，做完再轉成件數。</p>
+  <figure class="figure"><img src="https://aka.doubaocdn.com/s/2FIezT8viD" width="780" height="620" alt="待處理列：待排障、待會同、掃描、清除"><figcaption>待處理：待排障／待會同，右邊「掃描」「清除」</figcaption></figure>
   <ul>
-    <li>數字可以直接點進去自己填，不用按加減。</li>
-    <li>完成一件時會自動遞減，不會重複算。</li>
+    <li>兩個數字可以直接點進去改，不用按加減。</li>
     <li>按「清除」把待處理歸零，合計不受影響。</li>
+    <li>「掃描」＝把 PDA 畫面拍下來或貼上文字，自動算筆數。</li>
   </ul>
+
+  <h3>掃描：只讀 ATM 那一行的數字</h3>
+  <p>PDA 的「車隊勤務／勤務表」上方會寫 <kbd>ATM(4)</kbd>，那就是待處理總筆數。掃描<b>只抓這個數字</b>，再用「會同」關鍵字數幾筆要會同，剩下的就是待排障。</p>
+  <figure class="figure"><img src="https://aka.doubaocdn.com/s/4LkHy9CQCV" width="716" height="1450" alt="掃描視窗：ATM(4)、會同 2 筆、兩格自動填 2／2"><figcaption>拍到 ATM(4)、數到 2 筆會同 → 待排障 2／待會同 2，兩格自動填好</figcaption></figure>
+  <ol class="steps">
+    <li>按「掃描」→「選擇圖片／截圖」，選 PDA 的翻拍照。<b>拍歪、反光、摩爾紋、糊掉都可以</b>：程式會轉正、拉對比、灰階、二值化各試一次。</li>
+    <li>等辨識跑完。第一次會先下載辨識引擎（約 20–40 秒），之後就快很多。</li>
+    <li>下面「排障／會同」兩格會自動填好；數字不對就自己改。</li>
+    <li>按「帶入待處理」，筆數就進到今天。</li>
+  </ol>
+  <div class="note">只認 <kbd>ATM(?)</kbd> 這個數字，不會逐筆讀店名。要逐筆清單就把 PDA 文字用「貼上文字」貼進去，或用「解析文字」；辨識原文可長按複製。</div>
+  <div class="note tip">「會同廠商」這四個字不算一筆會同，程式會自動排除，所以會同筆數不會虛胖。</div>
 </section>
 
 <section id="sum">
@@ -298,6 +309,7 @@ img,svg,canvas,video{max-width:100%}
 
   <ul>
     <li>合計會隨每次加減即時更新，不需要重整。</li>
+    <li><b>總數量</b>那一格可以直接改，右邊「剩」＝總數量扣掉今天已記的件數。</li>
     <li>紅色印章就是今天總件數，交付或回報時看這個數字。</li>
     <li>跨日自動歸零，新的工作日從 0 開始。</li>
   </ul>
@@ -306,22 +318,26 @@ img,svg,canvas,video{max-width:100%}
 <section id="save">
   <div class="eyebrow"><span class="num">07</span><h2>保存與時段記錄</h2></div>
   <h3>保存目前時段</h3>
-  <p>按下去會把當前時段的件數寫成一筆記錄，右邊顯示上次保存時間。換段（08:00、13:00、18:00、00:00）也會自動記一筆。</p>
+  <p>按下去會把當前時段的件數結算一次，右邊顯示上次保存時間。換段（08:00、13:00、18:00、00:00）也會自動結算。</p>
   <h3>時段記錄</h3>
-<figure class="figure"><img src="https://aka.doubaocdn.com/s/SXtcqRh6uE" width="724" height="116" alt="時段記錄：時間、地點、時段標籤與件數"><figcaption>時段記錄：時間、地點、時段標籤與件數</figcaption></figure>
+<figure class="figure"><img src="https://aka.doubaocdn.com/s/l7guj8vzAA" width="780" height="458" alt="時段記錄：上午／下午／晚上各一列"><figcaption>時段記錄：三段各一列；標題列有「下班」與「匯入」</figcaption></figure>
 
   <ul>
-    <li>每筆顯示時間、地點、時段標籤與排障／會同件數。</li>
+    <li>每段固定一列，<b>沒有件數也會留著</b>（顯示「合計 0 件」），補記時直接點那一列。</li>
+    <li>每列左邊是時段標籤、地點、排障／會同件數。</li>
     <li><b>往左滑</b>該筆會露出紅色「刪除」，按下會先跳確認。</li>
-    <li>沒有件數時不會產生記錄，按鈕會顯示「尚無件數可保存」。</li>
   </ul>
+  <h3>下班時間</h3>
+  <p>標題列右邊的 <kbd>下班 21:00</kbd> 可以直接改；近期日誌會多一欄記每天的下班時間。</p>
+  <h3>匯入清單</h3>
+  <p>按「匯入」把整段勤務清單貼進去，程式會依每一行的時間自動分到上午／下午／晚上，並算好排障／會同件數；<kbd>排休</kbd>、<kbd>休假</kbd>、<kbd>請假</kbd> 這種沒有時間的只列不計。</p>
   <div class="note warn"><strong>刪掉就沒了。</strong>刪除前先確認是要刪哪一筆。</div>
 </section>
 
 <section id="history">
   <div class="eyebrow"><span class="num">08</span><h2>近期日誌 Last 7</h2></div>
-  <p>最近 7 天的排障、會同與合計，今天那一列會標「今日」並以藍底標示。</p>
-<figure class="figure"><img src="https://aka.doubaocdn.com/s/OBvpLVNceP" width="724" height="74" alt="近期日誌 Last 7，今天那列標「今日」"><figcaption>近期日誌 Last 7，今天那列標「今日」</figcaption></figure>
+  <p>最近 7 天的排障、會同、合計與<b>下班時間</b>；今天那一列會標「今日」並以藍底標示。</p>
+<figure class="figure"><img src="https://aka.doubaocdn.com/s/UtNKkHz5BM" width="780" height="260" alt="近期日誌多了下班欄"><figcaption>近期日誌：日期、排障、會同、合計、下班</figcaption></figure>
   <table class="tbl">
     <tr><th>按鈕</th><th>作用</th></tr>
     <tr><td class="k">下載截圖</td><td>把這一頁存成一張圖。App 版本會直接存到相簿。</td></tr>
@@ -329,8 +345,32 @@ img,svg,canvas,video{max-width:100%}
   </table>
 </section>
 
+<section id="mrt">
+  <div class="eyebrow"><span class="num">09</span><h2>捷運站點資料庫</h2></div>
+  <p>台北捷運 5 條線、109 站、439 個出口，座標取自 TDX 官方。開頁<b>預設收起</b>，要查再按一下展開，避免平常佔版面。</p>
+  <figure class="figure"><img src="https://aka.doubaocdn.com/s/cAmHc8b0aw" width="780" height="114" alt="捷運站點資料庫收起狀態"><figcaption>收起時只有一行，右邊寫「共 109 站」</figcaption></figure>
+  <h3>找站與出口</h3>
+  <p>用線別標籤（淡水信義、板南、松山新店、中和新蘆、文湖）先篩，或直接打站名、站號、線別（例：<kbd>中山</kbd>、<kbd>R11</kbd>、<kbd>淡水</kbd>）。</p>
+  <figure class="figure"><img src="https://aka.doubaocdn.com/s/DPespbVUAK" width="780" height="1228" alt="展開後：線別、搜尋、出口下拉與站點清單"><figcaption>展開後：線別標籤、搜尋、出口下拉與站點清單</figcaption></figure>
+  <ul>
+    <li>每站有站號與線別色塊，右邊是行政區。</li>
+    <li>「出口」下拉可指定出口；取得 GPS 後會自動選最近的出口。</li>
+    <li>底部「資料規則（後台測試用）」是調資料用的開關，平常不用動。</li>
+  </ul>
+</section>
+
+<section id="ui">
+  <div class="eyebrow"><span class="num">10</span><h2>選單與收折</h2></div>
+  <p>左上角那顆圓鈕是選單：首頁、正式版、實驗版、更新紀錄、教學，都在裡面。</p>
+  <ul>
+    <li>點標題列或卡片標題可以<b>收折</b>那一區；標題列裡的按鈕（重新定位、下載截圖、下班、匯入…）不會誤觸收折。</li>
+    <li>收折狀態會記住，重新整理也維持。</li>
+    <li>往下滑會出現「回到頂端」，滑回上方自動收起。</li>
+  </ul>
+</section>
+
 <section id="theme">
-  <div class="eyebrow"><span class="num">09</span><h2>主題</h2></div>
+  <div class="eyebrow"><span class="num">11</span><h2>主題</h2></div>
   <p>首頁、主頁、後台都掛著同一顆圓形主題鈕：<b>44px、固定右上角、貼在日期旁邊</b>。三頁共用同一份主題設定，在後台換色，正式版打開就是同一個色。</p>
 <figure class="figure"><img src="https://aka.doubaocdn.com/s/MSSA7aYOKT" width="780" height="1688" alt="主題相片面板：長按圓鈕 2 秒開啟，可從相簿上傳相片當背景"><figcaption>長按右上角圓鈕 2 秒 → 主題相片面板</figcaption></figure>
   <ol class="steps">
@@ -346,7 +386,7 @@ img,svg,canvas,video{max-width:100%}
 </section>
 
 <section id="refresh">
-  <div class="eyebrow"><span class="num">10</span><h2>下拉重整</h2></div>
+  <div class="eyebrow"><span class="num">12</span><h2>下拉重整</h2></div>
   <p>頁面在最頂端往下拉，會出現白色膠囊提示，放手才動作。</p>
 <figure class="figure"><img src="https://aka.doubaocdn.com/s/kViTEH7vze" width="780" height="300" alt="下拉時頂端的提示膠囊"><figcaption>下拉時頂端的提示膠囊</figcaption></figure>
 
@@ -360,7 +400,7 @@ img,svg,canvas,video{max-width:100%}
 </section>
 
 <section id="update">
-  <div class="eyebrow"><span class="num">11</span><h2>更新</h2></div>
+  <div class="eyebrow"><span class="num">13</span><h2>更新</h2></div>
   <p>每天第一次打開時自動抓一次最新版本，跳出更新視窗（轉圈＋進度條動畫）；同一天再開、按重新整理都不會再跳。</p>
 <figure class="figure"><img src="https://aka.doubaocdn.com/s/K8C4vDE549" width="656" height="356" alt="更新視窗（每天第一次開啟才跳一次）"><figcaption>更新視窗（每天第一次開啟才跳一次）</figcaption></figure>
   <table class="tbl">
@@ -373,7 +413,7 @@ img,svg,canvas,video{max-width:100%}
 </section>
 
 <section id="contact">
-  <div class="eyebrow"><span class="num">12</span><h2>回報與下載</h2></div>
+  <div class="eyebrow"><span class="num">14</span><h2>回報與下載</h2></div>
   <h3>建議與回報問題</h3>
 <figure class="figure"><img src="https://aka.doubaocdn.com/s/7DM3vQdXLH" width="780" height="540" alt="頁尾三顆：使用說明／建議與回報／Android 下載"><figcaption>頁尾三顆：使用說明／建議與回報／Android 下載</figcaption></figure>
 
@@ -389,7 +429,7 @@ img,svg,canvas,video{max-width:100%}
 </section>
 
 <section id="faq">
-  <div class="eyebrow"><span class="num">14</span><h2>帳號與跨裝置</h2></div>
+  <div class="eyebrow"><span class="num">15</span><h2>帳號與跨裝置</h2></div>
   <div class="sec">
     <p>實驗版（開發版 2）多了「帳號」功能，可以自己取一組帳號密碼，把紀錄加密備份到雲端，換手機或換電腦再取回。不需要 Google、不需要申請任何東西。</p>
     <ol>
@@ -402,7 +442,7 @@ img,svg,canvas,video{max-width:100%}
     <p class="note">紀錄是用你的密碼加密後才上傳，伺服器只存密文；密碼忘記沒有救援，請自己記好。重開瀏覽器後要再輸入一次密碼，自動備份才會繼續運作。這個功能只在實驗版，正式版仍是純本機；手機（Android App 內的實驗版、或 iOS 瀏覽器）同樣適用。</p>
   </div>
 
-<div class="eyebrow"><span class="num">13</span><h2>常見問題</h2></div>
+<div class="eyebrow"><span class="num">16</span><h2>常見問題</h2></div>
   <details><summary>資料會不會傳到別的地方？</summary>
     <div class="body">不會。件數、地點、座標都只存在這台裝置的瀏覽器，換裝置就看不到舊資料。</div>
   </details>
@@ -433,13 +473,31 @@ img,svg,canvas,video{max-width:100%}
   <details><summary>長按主題鈕沒反應？</summary>
     <div class="body">要按住約 2 秒且手指不要滑動；若 iPhone 跳出系統選字選單，改連點圓鈕兩下就會開面板。</div>
   </details>
+  <details><summary>附近地點的候選清單怎麼不見了？</summary>
+    <div class="body">GPS 抓到座標後不再自動把「300 公尺內的店」一次列出來挑，只記座標；要看附近有哪些店，捲到出勤地點下方的「最近的蝦皮智取店／便利商店／超市／銀行／捷運出口」，點一筆就套用。</div>
+  </details>
+  <details><summary>時段怎麼全部都可以改了？</summary>
+    <div class="body">改成三段都能直接編輯，記錯段不用等時間到，也不會出現「不可編輯」。自動結算還是有：換段時會把上一段記一筆。</div>
+  </details>
+  <details><summary>掃描很慢，或讀不到怎麼辦？</summary>
+    <div class="body">第一次要下載辨識引擎（20–40 秒），之後快很多。讀不到就把下面「排障／會同」兩格自己填，按「帶入待處理」就好；也可以改用「貼上文字」。</div>
+  </details>
+  <details><summary>掃描後照片會變灰嗎？</summary>
+    <div class="body">不會。辨識用的灰階圖只在背景計算，畫面上預覽永遠是原圖彩色。</div>
+  </details>
+  <details><summary>會同筆數為什麼以前要自己補？</summary>
+    <div class="body">以前是逐筆讀店名，PDA 翻拍照幾乎讀不到，才會漏。現在只要 <kbd>ATM(?)</kbd> 那個數字＋數「會同」關鍵字，兩格會自動填好。</div>
+  </details>
+  <details><summary>捷運站點資料庫為什麼一開頁就收起？</summary>
+    <div class="body">109 站展開會佔掉整個畫面，所以預設收起，要查再按一下標題。收折狀態會記住。</div>
+  </details>
   <details><summary>右下角的「回到頂端」不見了？</summary>
     <div class="body">它只在往下滑超過一段距離時出現，滑回上方會自動收起；按一下就會平滑捲回最上面。</div>
   </details>
 </section>
 
 <footer>
-  勤務日誌 · 使用說明　｜　版本 V0.9　｜　建議與回報：奶茶　LINE jcmtea168
+  勤務日誌 · 使用說明　｜　版本 V0.10　｜　建議與回報：奶茶　LINE jcmtea168
   <br><a class="back" href="./index.html">回到正式版 ↗</a>
 </footer>
 
