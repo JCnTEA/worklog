@@ -1021,7 +1021,7 @@ document.addEventListener("touchend", function(e){
         <button type="button" id="scanX" aria-label="關閉">×</button>
       </div>
       <div class="sc-body">
-        <div class="sc-tip">PDA 只能拍：螢幕填滿、開燈、正對不斜；也可以貼上文字。預覽保留原圖彩色。</div>
+        <div class="sc-tip">拍歪、反光、摩爾紋都可以試——只讀畫面上 ATM(?) 的數字，再用「會同」關鍵字算筆數。預覽保留原圖彩色。</div>
         <div class="sc-acts">
           <button type="button" id="scanPick" class="sc-btn">選擇圖片／截圖</button>
           <button type="button" id="scanPaste" class="sc-btn ghost">貼上文字</button>
@@ -2534,33 +2534,45 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
           gbg.putImageData(binPx,0,0);
         }catch(e3){ gc=c; gb=c; }
 
+        /* 旋轉 90° 版本：照片轉向時也能讀 */
+        var grot=document.createElement("canvas"); grot.width=h; grot.height=w;
+        try{
+          var rg=grot.getContext("2d");
+          rg.translate(h,0); rg.rotate(Math.PI/2); rg.drawImage(gb,0,0);
+        }catch(e5){ grot=gb; }
+        var grot2=document.createElement("canvas"); grot2.width=h; grot2.height=w;
+        try{
+          var rg2=grot2.getContext("2d");
+          rg2.translate(h,0); rg2.rotate(Math.PI/2); rg2.drawImage(gc,0,0);
+        }catch(e6){ grot2=gc; }
+
         prog(26);
         say("載入辨識引擎…（第一次約 20–40 秒）");
         loadTess(function(ok){
           if(!ok){ say("辨識引擎載入失敗，可改用「貼上文字」。"); return; }
           say("辨識中…");
-          var tried=0, got=null;
-          function pass(cv,label,next){
-            tried++;
-            say("辨識中…（第 "+tried+" 次，"+(label||"")+"）");
-            window.Tesseract.recognize(cv, "chi_tra+eng", {
-              logger:function(m){ if(m&&m.status==="recognizing text"&&m.progress!=null) prog(30+tried*5+Math.round(m.progress*40)); }
+          var queue=[{c:gb,l:"白底黑字"},{c:gc,l:"對比灰階"},{c:grot,l:"旋轉 90°"},{c:grot2,l:"旋轉＋灰階"}];
+          var step=0, best={txt:"",score:-1};
+          function next(){
+            if(step>=queue.length){ finish(); return; }
+            var it=queue[step++];
+            say("辨識中…（第 "+step+" 次，"+(it.l||"")+"）");
+            window.Tesseract.recognize(it.c, "chi_tra+eng", {
+              logger:function(m){ if(m&&m.status==="recognizing text"&&m.progress!=null) prog(26+step*3+Math.round(m.progress*30)); }
             }).then(function(res){
               var txt=(res&&res.data&&res.data.text)||"";
-              var n=parse(txt).length;
-              var exp=expectedCount(txt);
-              if(!got || n>got.n || (exp && n>=exp)) got={txt:txt,n:n};
-              if(got.n>0 && (!exp || got.n>=exp)){ finish(); }
-              else if(next) next();
-              else finish();
-            }).catch(function(){ if(next) next(); else finish(); });
+              var sc=scoreTxt(txt);
+              if(sc>best.score) best={txt:txt,score:sc};
+              /* 已經抓到 ATM 筆數又有會同線索 → 不用再跑 */
+              if(best.score>=12) finish(); else next();
+            }).catch(function(){ next(); });
           }
           function finish(){
             prog(100);
-            if(!got){ say("辨識失敗，請改用清楚一點的影像，或貼上文字。"); return; }
-            run(got.txt);
+            if(!best.txt){ say("這張讀不到字，可改用貼上文字或下面兩格自己填。"); return; }
+            analyze(best.txt);
           }
-          pass(gb,"白底黑字",function(){ pass(gc,"對比灰階",null); });
+          next();
         });
       };
       im.onerror=function(){ say("這張圖片讀不進來，換一張試試。"); };
@@ -2633,6 +2645,42 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       if(m) return Number(m[1]);
       m=t.match(/[（(]\s*([0-9]{1,2})\s*[)）]\s*(?=已|不)/);
       return m ? Number(m[1]) : 0;
+    }
+    /* 只讀「ATM(N)」筆數，再用「會同」關鍵字推算待排障／待會同 */
+    function normT(t){
+      return String(t||"").replace(/[０-９]/g,function(ch){ return String.fromCharCode(ch.charCodeAt(0)-65248); })
+        .replace(/[ＯOo]/g,"0").replace(/[（]/g,"(").replace(/[）]/g,")")
+        .replace(/[：]/g,":").replace(/[－–—]/g,"-");
+    }
+    function scoreTxt(txt){
+      var t=normT(txt), sc=0;
+      if(/ATM\s*\(?\s*[0-9]{1,2}/i.test(t)) sc+=10;
+      var c=(t.replace(/會同廠商/g,"").match(/會同|会同/g)||[]).length;
+      sc+=Math.min(c,6)*2;
+      if((t.match(/[0-9]{4,6}\s*-/g)||[]).length) sc+=3;
+      return sc;
+    }
+    function analyze(txt){
+      var t=normT(txt);
+      var mN=t.match(/ATM\s*\(?\s*([0-9]{1,2})/i);
+      var n=mN?Number(mN[1]):0;
+      if(!n) n=(t.match(/[0-9]{4,6}\s*-/g)||[]).length;
+      var bare=t.replace(/會同廠商/g,"");
+      var c=(bare.match(/會同|会同/g)||[]).length;
+      if(n && c>n) c=n;
+      if(!n && c) n=c;
+      var p=Math.max(0,n-c);
+      var ci=document.getElementById("scanCountIn"), cc=document.getElementById("scanCountCIn");
+      if(ci && (p||n)) ci.value=p?String(p):"";
+      if(cc && c) cc.value=String(c);
+      showRaw(txt);
+      run(txt);
+      if(n||c){
+        var okTxt = (ci&&cc) ? "兩格已自動填好，按「帶入待處理」即可。" : "";
+        say("讀到 ATM("+n+")、會同 "+c+" 筆 → 待排障 "+p+"／待會同 "+c+"。"+okTxt);
+      } else {
+        say("這張讀不出 ATM 筆數，直接看 PDA 上的 ATM(?) 填下面兩格。");
+      }
     }
     function showRaw(t){
       var box=document.getElementById("scanRaw");
