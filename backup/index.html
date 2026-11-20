@@ -1249,12 +1249,14 @@ body.updOpen #notice{display:none!important}
     <div class="sugs" id="placeSugs" hidden></div>
     <div class="place-cands" id="placeCands"></div>
     <div class="place-near" id="nearWrap" hidden>
-      <div class="near-hd" id="nearShHd">最近的蝦皮智取店</div>
-      <div class="place-cands" id="nearSh"></div>
-      <div class="near-hd" id="nearPsHd" hidden>最近的便利商店</div>
-      <div class="place-cands" id="nearPs" hidden></div>
       <div class="near-hd" id="nearMkHd" hidden>最近的超市</div>
       <div class="place-cands" id="nearMk" hidden></div>
+      <div class="near-hd" id="nearHvHd" hidden>最近的量販</div>
+      <div class="place-cands" id="nearHv" hidden></div>
+      <div class="near-hd" id="nearShHd" hidden>最近的蝦皮智取店</div>
+      <div class="place-cands" id="nearSh" hidden></div>
+      <div class="near-hd" id="nearPsHd" hidden>最近的便利商店</div>
+      <div class="place-cands" id="nearPs" hidden></div>
       <div class="near-hd" id="nearBkHd" hidden>最近的銀行</div>
       <div class="place-cands" id="nearBk" hidden></div>
     </div>
@@ -3089,9 +3091,10 @@ body.updOpen #notice{display:none!important}
     });
   }
   var NEAR_GROUPS = [
+    { hd:"nearMkHd", box:"nearMk", title:"超市", list:function(){ return MKEN.concat(addedOf("mk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
+    { hd:"nearHvHd", box:"nearHv", title:"量販", list:function(){ return HVEN.concat(addedOf("hv")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearShHd", box:"nearSh", title:"蝦皮智取店", list:function(){ return SHOPEE; }, full:function(x){ return shFull(x.n); }, tag:function(){ return ""; }, chip:function(){ return "蝦皮"; }, label:function(x){ return shName(x.n); }, addr:function(x){ return x.s || ""; } },
     { hd:"nearPsHd", box:"nearPs", title:"便利商店", list:function(){ return PSEN.concat(addedOf("ps")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
-    { hd:"nearMkHd", box:"nearMk", title:"超市", list:function(){ return MKEN.concat(addedOf("mk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearBkHd", box:"nearBk", title:"銀行", list:function(){ return BKEN.concat(addedOf("bk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } }
   ];
 
@@ -3108,9 +3111,11 @@ body.updOpen #notice{display:none!important}
       if (s.x == null || s.y == null) continue;
       arr.push({ s: s, d: haversine(lat, lng, s.x, s.y) });
     }
-    arr = arr.filter(function(t){ return t.d <= NEAR_RADIUS; });   /* 只列 300 公尺內 */
     arr.sort(function(a, b){ return a.d - b.d; });
-    return arr.slice(0, 5);
+    /* 300 公尺內不足 3 間就放寬到 3 公里（附近四類都要列得出來） */
+    var near = arr.filter(function(t){ return t.d <= NEAR_RADIUS; });
+    if (near.length < 3) return arr.filter(function(t){ return t.d <= 3000; }).slice(0, 5);
+    return near.slice(0, 5);
   }
   function nearOne(g, lat, lng){
     var hd = document.getElementById(g.hd), box = document.getElementById(g.box);
