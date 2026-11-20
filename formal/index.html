@@ -1004,12 +1004,16 @@ img,svg,canvas,video{max-width:100%}
         <button type="button" id="scanGo" class="sc-btn">解析文字</button>
       </div>
       <div id="scanState">—</div>
-      <button type="button" id="scanCount" class="sc-btn" hidden style="margin-top:8px">以筆數帶入</button>      <div id="scanManual" style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <span class="sc-tip" style="margin:0">手動筆數</span>
+      <button type="button" id="scanCount" class="sc-btn" hidden style="margin-top:8px">以筆數帶入</button>      <div id="scanManual" style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span class="sc-tip" style="margin:0">排障</span>
         <input id="scanCountIn" type="text" inputmode="numeric" maxlength="2" placeholder="4"
-          style="width:56px;text-align:center;font-size:19px;font-weight:700;padding:5px 8px;border-radius:8px;
-          border:1px solid var(--line,#DCD5C4);background:#fff;color:inherit">
-        <button type="button" id="scanCountGo" class="sc-btn">帶入待排障</button>
+          style="width:52px;text-align:center;font-size:19px;font-weight:700;padding:5px 6px;border-radius:8px;
+          border:1px solid rgba(127,127,127,.4);background:rgba(127,127,127,.08);color:inherit">
+        <span class="sc-tip" style="margin:0">會同</span>
+        <input id="scanCountCIn" type="text" inputmode="numeric" maxlength="2" placeholder="0"
+          style="width:52px;text-align:center;font-size:19px;font-weight:700;padding:5px 6px;border-radius:8px;
+          border:1px solid rgba(127,127,127,.4);background:rgba(127,127,127,.08);color:inherit">
+        <button type="button" id="scanCountGo" class="sc-btn">帶入待處理</button>
       </div>
       <div id="scanRawWrap" hidden><div class="sc-tip" style="margin-top:10px">辨識到的文字（可長按複製）</div><pre id="scanRaw"></pre></div>
       <div id="scanBarWrap" hidden><div id="scanBar"></div></div>
@@ -4603,15 +4607,18 @@ img,svg,canvas,video{max-width:100%}
       say("已按筆數加入：待排障 +" + n + "（會同有幾筆請自己補）");
       this.hidden = true;
     });
-    var cg=document.getElementById("scanCountGo"), ci=document.getElementById("scanCountIn");
+    var cg=document.getElementById("scanCountGo"), ci=document.getElementById("scanCountIn"),
+        cc=document.getElementById("scanCountCIn");
     if(cg) cg.addEventListener("click", function(){
-      var n=Number((ci && ci.value || "").replace(/[^0-9]/g,""));
-      if(!n || n>60){ say("請輸入 1–60 的筆數。"); return; }
+      var nP=Number((ci && ci.value || "").replace(/[^0-9]/g,""));
+      var nC=Number((cc && cc.value || "").replace(/[^0-9]/g,""));
+      if(!nP && !nC){ say("排障／會同至少填一個筆數。"); return; }
+      if(nP>60 || nC>60){ say("筆數請在 1–60 之間。"); return; }
       var pd=todayData.pend||{p:0,c:0,at:0,dp:0,dc:0}, done=sumsOf(todayData);
-      todayData.pend={p:(pd.p||0)+n, c:(pd.c||0), at:Date.now(), dp:done.p, dc:done.c};
+      todayData.pend={p:(pd.p||0)+nP, c:(pd.c||0)+nC, at:Date.now(), dp:done.p, dc:done.c};
       persist(); paintPend();
-      say("已帶入：待排障 +"+n+"（會同有幾筆請自己補）");
-      if(ci) ci.value="";
+      say("已帶入：待排障 +"+nP+"、待會同 +"+nC);
+      if(ci) ci.value=""; if(cc) cc.value="";
     });
   })();
 
