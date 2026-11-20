@@ -676,6 +676,16 @@
 .mrt-name{font-size:14px;font-weight:600;color:var(--ink,#16222E)}
 .mrt-line{font-size:11px;color:var(--muted,#7C8895)}
 .mrt-town{margin-left:auto;font-size:11px;color:var(--muted,#7C8895)}
+  .mrt-rules-tg{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin:14px 0 0;padding:10px 2px;border:0;border-top:1px dashed #C9D6E2;background:transparent;
+    color:#16222E;font-size:13px;font-weight:700;cursor:pointer;text-align:left}
+  .mrt-sw{position:relative;width:40px;height:22px;border-radius:999px;background:#C9D6E2;flex:none;
+    transition:background .18s ease}
+  .mrt-sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 3px rgba(12,20,28,.28);transition:transform .18s ease}
+  .mrt-rules-tg[aria-expanded="true"] .mrt-sw{background:#1D5F9E}
+  .mrt-rules-tg[aria-expanded="true"] .mrt-sw::after{transform:translateX(18px)}
+
 .mrt-rules{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line-soft,#E7E1D2)}
 .mrt-rules-t{font-size:13px;font-weight:700;margin-bottom:6px}
 .mrt-rules ol{margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--ink2,#495867)}
@@ -913,8 +923,11 @@ document.addEventListener("touchend", function(e){
       <em id="mrtExitNote">取得 GPS 後會自動選最近出口</em>
     </div>
     <div class="mrt-list" id="mrtList"></div>
-    <div class="mrt-rules">
-      <div class="mrt-rules-t">資料規則（後台測試用）</div>
+    <button type="button" class="mrt-rules-tg" id="mrtRulesTg" aria-expanded="false" aria-controls="mrtRules">
+      <span>資料規則（後台測試用）</span>
+      <i class="mrt-sw" aria-hidden="true"></i>
+    </button>
+    <div class="mrt-rules" id="mrtRules" hidden>
       <ol>
         <li>一站一筆：轉乘站（台北車站、中山、忠孝復興…）合併成一筆，不重複列；清單由淡水（R28）起沿淡水信義線往下，再排板南、松山新店、中和新蘆、文湖。</li>
         <li>出口由 GPS 判斷：有座標就自動選最近的出口、下拉依距離由近到遠排（每項附距離），也可自己改或留空。</li>
@@ -2587,93 +2600,61 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     setTip("");
     renderPlaceActs();
 
-    var url = "https://photon.komoot.io/reverse?lat=" + lat + "&lon=" + lng + "&limit=15";
-    function fetchPhoton(){
-      return fetch(url).then(function(res){
-        if (!res.ok) throw new Error("http " + res.status);
-        return res.json();
-      });
-    }
-
-    fetchPhoton()
-      .catch(function(){
-        return new Promise(function(r){ setTimeout(r, 1200); }).then(fetchPhoton);
-      })
-      .then(function(data){
-        var feats = (data && data.features) || [];
-        var list = [];
-        for (var i = 0; i < feats.length; i++){
-          var p = (feats[i] && feats[i].properties) || {};
-          var geo = feats[i].geometry && feats[i].geometry.coordinates;
-          var pname = p.name || "";
-          if (!pname || pname.length > 40) continue;
-          var cLat = null, cLng = null, dist = null;
-          if (geo && geo.length >= 2){
-            cLng = Number(geo[0]); cLat = Number(geo[1]);
-            if (Number.isFinite(cLat) && Number.isFinite(cLng)) dist = haversine(lat, lng, cLat, cLng);
-          }
-          var isTransit = TRANSIT_VALUES.indexOf(p.osm_value || "") >= 0;
-          list.push({
-            name: pname,
-            addr: composeAddr(p),
-            street: p.street || "",
-            num: houseNum(p.housenumber),
-            lat: Number.isFinite(cLat) ? cLat : lat,
-            lng: Number.isFinite(cLng) ? cLng : lng,
-            dist: dist,
-            brand: isBrand(pname) || isTransit,
-            transit: isTransit
-          });
-        }
-        list.sort(function(a, b){
-          /* 1) 300 公尺內先 2) 同街道按門牌 1→900 3) 街道名 4) 距離 */
-          var na = (a.dist == null || a.dist > 300) ? 1 : 0;
-          var nb = (b.dist == null || b.dist > 300) ? 1 : 0;
-          if (na !== nb) return na - nb;
-          if (a.street !== b.street) return String(a.street).localeCompare(String(b.street), "zh-Hant");
-          if (a.num !== b.num) return a.num - b.num;
-          if (a.dist == null && b.dist == null) return 0;
-          if (a.dist == null) return 1;
-          if (b.dist == null) return -1;
-          return a.dist - b.dist;
+    /* 附近地點候選：只用內建名單（蝦皮／便利商店／超市／量販／銀行），不再列地圖隨機店家 */
+    var LOCAL_RADIUS = 2000, PER_GROUP = 3, LOCAL_MAX = 12;
+    var groups = [
+      { chip: function(){ return "蝦皮"; }, list: function(){ return SHOPEE; },
+        label: function(x){ return shName(x.n); }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return PSEN; },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return MKEN; },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return HVEN; },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } },
+      { chip: function(x){ return x.b; }, list: function(){ return BKEN; },
+        label: function(x){ return x.n; }, addr: function(x){ return x.s || ""; } }
+    ];
+    var out = [], gi, pi, k;
+    for (gi = 0; gi < groups.length; gi++){
+      var G = groups[gi], arr = [], pool = G.list();
+      for (pi = 0; pi < pool.length; pi++){
+        var st = pool[pi];
+        if (st.x == null || st.y == null) continue;
+        var dd = haversine(lat, lng, st.x, st.y);
+        if (dd > LOCAL_RADIUS) continue;
+        arr.push({ s: st, d: dd });
+      }
+      arr.sort(function(a, b){ return a.d - b.d; });
+      for (k = 0; k < arr.length && k < PER_GROUP; k++){
+        var t = arr[k], chip = G.chip(t.s) || "";
+        out.push({
+          name: (chip ? chip + " " : "") + G.label(t.s),
+          addr: G.addr(t.s),
+          lat: t.s.x, lng: t.s.y,
+          dist: t.d, brand: true, transit: false, street: "", num: 0
         });
-        cands = list.slice(0, 20);
-        MORE_OPEN = false;
-
-        var nearBrands = [];
-        for (var k = 0; k < cands.length; k++){
-          if (cands[k].brand && cands[k].dist != null && cands[k].dist <= 200) nearBrands.push(k);
-        }
-        var hasBrand = false;
-        for (var b = 0; b < cands.length; b++){ if (cands[b].brand) hasBrand = true; }
-
-        var auto = nearBrands.length === 1 ? nearBrands[0] : -1;
-        if (auto >= 0){
-          selectCand(auto);
-        } else if (cands.length && hasBrand){
-          renderCands(-1);
-          elPlaceBox.classList.add("empty");
-          elPlaceName.textContent = "請選擇地點";
-          elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m · 附近有多個地點，請點選";
-        } else {
-          renderCands(-1);
-          elPlaceBox.classList.remove("empty");
-          elPlaceName.textContent = "座標已記錄";
-          elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m · 附近無名單店家，請在上方點選或手動填寫";
-        }
-        setTip("地圖服務正常");
-      })
-      .catch(function(err){
-        cands = [];
-        renderCands(-1);
-        renderPlaceActs();
-        elPlaceBox.classList.add("empty");
-        elPlaceName.textContent = "座標已記錄";
-        var code = (err && err.message) ? err.message.replace("http ", "") : "";
-        elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
-          + accNote(acc) + " · 附近店家查不到（地圖服務" + (code ? " " + code : "暫時不通") + "），可手動填寫";
-        setTip("地圖服務暫時不通，可稍後按「重新查詢附近」", true, true);
-      });
+      }
+    }
+    out.sort(function(a, b){ return a.dist - b.dist; });
+    cands = out.slice(0, LOCAL_MAX);
+    MORE_OPEN = false;
+    renderCands(-1);
+    if (!cands.length){
+      elPlaceBox.classList.remove("empty");
+      elPlaceName.textContent = "座標已記錄";
+      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
+        + accNote(acc) + " · 2 公里內沒有名單店家，請手動填寫";
+      setTip("附近沒有名單店家", true, true);
+    } else if (cands.length === 1){
+      selectCand(0);
+      setTip("已帶入 " + cands[0].name);
+    } else {
+      elPlaceBox.classList.add("empty");
+      elPlaceName.textContent = "請選擇地點";
+      elPlaceMeta.textContent = fmtCoord(lat, lng) + " · ±" + Math.round(acc) + " m"
+        + " · 附近 " + cands.length + " 間名單店家，請點選";
+      setTip("已列出附近名單店家");
+    }
   }
 
   /* ---------- 開頁／回前景自動刷新定位（未定位模式自動重試） ---------- */
@@ -3513,6 +3494,25 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   document.getElementById("noticeOk").addEventListener("click", function(){
     closeNotice(elNoticeNever.checked ? "month" : "session");
   });
+
+  /* ---------- 捷運資料規則開關（內建關閉） ---------- */
+  (function(){
+    var tg = document.getElementById("mrtRulesTg");
+    var box = document.getElementById("mrtRules");
+    if (!tg || !box) return;
+    var KEY2 = "worklog.dev.mrt.rules";
+    function apply(open){
+      tg.setAttribute("aria-expanded", open ? "true" : "false");
+      box.hidden = !open;
+      try{ localStorage.setItem(KEY2, open ? "1" : "0"); }catch(err){}
+    }
+    var saved = null;
+    try{ saved = localStorage.getItem(KEY2); }catch(err){}
+    apply(saved === "1");
+    tg.addEventListener("click", function(){
+      apply(box.hidden);
+    });
+  })();
 
   /* ---------- 下班確認 ---------- */
   var OFF_KEY = "worklog.dev.offwork.v1";
