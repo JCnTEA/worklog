@@ -3506,17 +3506,15 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     var tg = document.getElementById("mrtRulesTg");
     var box = document.getElementById("mrtRules");
     if (!tg || !box) return;
-    var KEY2 = "worklog.dev.mrt.rules";
     function apply(open){
       tg.setAttribute("aria-expanded", open ? "true" : "false");
       box.hidden = !open;
-      try{ localStorage.setItem(KEY2, open ? "1" : "0"); }catch(err){}
     }
-    var saved = null;
-    try{ saved = localStorage.getItem(KEY2); }catch(err){}
-    apply(saved === "1");
+    apply(false); /* 預設一律收起，不記住上次狀態 */
     tg.addEventListener("click", function(){
-      apply(box.hidden);
+      var open = box.hidden;
+      tg.setAttribute("aria-expanded", open ? "true" : "false");
+      box.hidden = !open;
     });
   })();
 
