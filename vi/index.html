@@ -2708,6 +2708,15 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   }
 
   /* ---------- 重新進入頁面：清掉上次座標（件數與已保存紀錄不動） ---------- */
+  function clearPlaceCoords(){
+    var p = todayData.place;
+    if (!p) return;
+    if (!p.name && p.lat == null) return;
+    lastCoords = null;
+    p.name = ""; p.addr = ""; p.lat = null; p.lng = null; p.acc = 0; p.at = null;
+    persist();
+  }
+
   function resetPlaceOnEnter(){
     var p = todayData.place;
     if (!p) return;
@@ -2726,11 +2735,20 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     renderPlace();
   }
 
-  /* GPS 自動取得：開頁就抓一次，回到前景再刷新（最多每 60 秒一次）；按鈕只是手動重抓 */
+  /* GPS 自動取得：每次開啟頁面都先清掉上次座標，再自動重抓；回到前景也刷新 */
   window.addEventListener("load", function(){ setTimeout(function(){ resetPlaceOnEnter(); autoGpsRefresh(); }, 200); });
+  /* 從 bfcache 回來（用返回鍵／切回分頁）也要重來一次，避免顯示舊座標 */
+  window.addEventListener("pageshow", function(ev){
+    if (!ev.persisted) return;
+    resetPlaceOnEnter();
+    _autoGpsLast = 0;
+    autoGpsRefresh();
+  });
   document.addEventListener("visibilitychange", function(){
     if (document.visibilityState === "visible"){ _autoGpsLast = 0; autoGpsRefresh(); }
   });
+  /* 關掉／離開頁面時把座標清掉，下次開啟不會沿用上次的位置 */
+  window.addEventListener("pagehide", function(){ clearPlaceCoords(); });
 
   elGpsBtn.addEventListener("click", function(){
     if (!navigator.geolocation){
