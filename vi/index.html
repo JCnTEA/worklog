@@ -511,6 +511,31 @@
   }
   .rec-row.armed .rec-del{background:#7C1610;box-shadow:inset 0 0 0 2px #FFD9D4;font-size:11.5px;letter-spacing:0}
   .rec-row.gone .rec-item{transform:translateX(-100%);transition:transform .22s ease}
+  .rec-row.idle{opacity:.55}
+  .offcfg{margin-left:8px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
+    background:transparent;color:var(--ink2);font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .offedit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 2px 4px;font-size:12.5px;color:var(--ink2)}
+  .offedit[hidden]{display:none}
+  .offedit input[type=time]{height:32px;padding:0 6px;border:1px solid var(--line);border-radius:7px;
+    background:#fff;color:var(--ink);font-size:13px}
+  .offedit button{height:32px;padding:0 12px;border:1px solid #1D5F9E;background:#1D5F9E;color:#fff;
+    border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .offedit-tip{font-size:11.5px}
+  #offMask{position:fixed;inset:0;z-index:330;display:none;align-items:center;justify-content:center;
+    background:rgba(12,20,28,.55);backdrop-filter:blur(2px)}
+  #offMask.on{display:flex}
+  #offCard{width:min(340px,86vw);background:#FFFDF7;color:#16222E;border:1px solid #E3E9EF;border-radius:14px;
+    padding:20px 18px 12px;box-shadow:0 18px 48px rgba(12,20,28,.34)}
+  #offCard h3{margin:0 0 8px;font-size:18px;font-weight:900;color:#16222E}
+  #offSub{margin:0 0 15px;font-size:13px;line-height:1.7;color:#495867}
+  #offActs{display:flex;gap:8px}
+  #offActs button{flex:1;height:44px;border-radius:9px;border:1px solid #C8D5E0;background:#fff;
+    color:#16222E;font-weight:700;font-size:13px;cursor:pointer}
+  #offYes{background:#1D5F9E !important;border-color:#1D5F9E !important;color:#fff !important}
+  #offX{margin-top:8px;width:100%;height:34px;border:0;background:transparent;color:#7A8794;
+    font-size:12.5px;cursor:pointer}
+  .offt{color:#1D5F9E;font-weight:700}
+  .history table th:last-child,.history table td:last-child{padding-left:2px;padding-right:6px;white-space:nowrap}
   .rec-row.gone{height:0;border-bottom:0;transition:height .22s ease .18s}
   .rec-item .rec-time{font-weight:600;color:var(--ink);letter-spacing:.03em}
   .rec-item .rec-detail{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -974,6 +999,13 @@ document.addEventListener("touchend", function(e){
     <div class="rec-head">
       <h2>時段記錄</h2>
       <span class="cnt" id="recCount">今日 0 段</span>
+      <button type="button" class="offcfg" id="offCfg">下班 21:00</button>
+    </div>
+    <div class="offedit" id="offEdit" hidden>
+      <label for="offTimeIn">下班時間</label>
+      <input type="time" id="offTimeIn" value="21:00" step="60">
+      <button type="button" id="offSave">儲存</button>
+      <span class="offedit-tip">時間到會問一次「你下班了嗎」</span>
     </div>
     <ul class="rec-list" id="recList"></ul>
   </section>
@@ -997,6 +1029,7 @@ document.addEventListener("touchend", function(e){
           <th scope="col">排障</th>
           <th scope="col">會同</th>
           <th scope="col">合計</th>
+          <th scope="col">下班</th>
         </tr>
       </thead>
       <tbody id="histBody"></tbody>
@@ -1017,6 +1050,18 @@ document.addEventListener("touchend", function(e){
       <button type="button" class="notice-ok" id="noticeOk">知道了</button>
     </div>
   </aside>
+
+<div id="offMask">
+  <div id="offCard" role="dialog" aria-label="下班確認">
+    <h3>你下班了嗎？</h3>
+    <p id="offSub"></p>
+    <div id="offActs">
+      <button type="button" id="offNo">還沒，30 分鐘後再問</button>
+      <button type="button" id="offYes">下班了</button>
+    </div>
+    <button type="button" id="offX">今天不再提醒</button>
+  </div>
+</div>
 </main>
 
 
@@ -1258,7 +1303,7 @@ document.addEventListener("touchend", function(e){
     for (var i = 0; i < SLOTS.length; i++){ o[SLOTS[i].key] = { p:0, c:0 }; }
     return o;
   }
-  function blank(){ return { slots: zeroSlots(), saves: [], place: null, active: null, total: 0 }; }
+  function blank(){ return { slots: zeroSlots(), saves: [], place: null, active: null, total: 0, offAt: 0 }; }
 
   function normalizeCounts(o){
     var x = o && typeof o === "object" ? o : {};
@@ -1328,7 +1373,8 @@ document.addEventListener("touchend", function(e){
       saves: normalizeSaves(d.saves),
       place: normalizePlace(d.place),
       active: (typeof d.active === "string" && slotOf(d.active)) ? d.active : null,
-      total: (typeof d.total === "number" && isFinite(d.total) && d.total >= 0) ? Math.floor(d.total) : 0
+      total: (typeof d.total === "number" && isFinite(d.total) && d.total >= 0) ? Math.floor(d.total) : 0,
+      offAt: (Number(d.offAt) > 0 && isFinite(Number(d.offAt))) ? Number(d.offAt) : 0
     };
   }
 
@@ -1991,10 +2037,13 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       var p, c, t, cls;
 
       if (!isToday && !data) continue; /* 沒記錄的日子不顯示 */
+      var off = 0, offTxt = "—";
       if (data){
         var day = normalize(data);
         var s = sumsOf(day);
         p = s.p; c = s.c; t = p + c;
+        off = day.offAt || 0;
+        if (off) offTxt = hhmm(off);
         cls = "";
       } else {
         p = c = t = "—";
@@ -2006,6 +2055,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
         + '<td data-h="p" class="' + cls + '">' + p + "</td>"
         + '<td data-h="c" class="' + cls + '">' + c + "</td>"
         + '<td data-h="t" class="' + cls + '">' + t + "</td>"
+        + '<td data-h="off" class="' + cls + (off ? " offt" : "") + '">' + offTxt + "</td>"
         + "</tr>";
     }
     elHist.innerHTML = html;
@@ -2187,28 +2237,30 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   }
 
   function renderRecords(){
-    var saves = todayData.saves;
-    elRecCount.textContent = "今日 " + saves.length + " 段";
-    if (!saves.length){
-      elRecList.innerHTML = '<li class="rec-empty">每個時段結束（08:00、13:00、18:00、24:00）會自動記一筆；也可隨時按「保存目前時段」。</li>';
-      return;
-    }
+    var list = activeSlots();
+    var curKey = currentSlotKey(new Date());
+    elRecCount.textContent = "今日 " + list.length + " 段";
     var html = "";
-    for (var i = 0; i < saves.length; i++){
-      var r = saves[i];
-      var s = slotOf(r.slot);
-      var hasPlace = !!(r.place && r.place.name);
-      var placeText = hasPlace ? r.place.name : "未記錄地點";
-      html += '<li class="rec-row" data-ts="' + r.ts + '">'
+    for (var i = 0; i < list.length; i++){
+      var sl = list[i], key = sl.key;
+      var c = todayData.slots[key] || { p: 0, c: 0 };
+      var ri = findRecordIndex(key);
+      var r = ri >= 0 ? todayData.saves[ri] : null;
+      var total = clean(c.p) + clean(c.c);
+      var fallback = (key === curKey && todayData.place && todayData.place.name) ? todayData.place.name : "";
+      var hasPlace = !!(r && r.place && r.place.name);
+      var placeText = hasPlace ? r.place.name : (fallback || "未記錄地點");
+      html += '<li class="rec-row' + (total ? "" : " idle") + '"'
+        + (r ? ' data-ts="' + r.ts + '"' : ' data-slot="' + key + '"') + '>'
         + '<div class="rec-item">'
-        + '<span class="rec-time">' + hhmm(r.ts) + '</span>'
+        + '<span class="rec-time">' + (r ? hhmm(r.ts) : "—") + '</span>'
         + '<span class="rec-body">'
-        +   '<span class="rec-place' + (hasPlace ? "" : " none") + '">' + esc(placeText) + '</span>'
-        +   '<span class="rec-detail"><i class="rec-slot">' + (s ? s.label : "") + '</i>排障 ' + r.p + ' ／ 會同 ' + r.c + '</span>'
+        +   '<span class="rec-place' + ((hasPlace || fallback) ? "" : " none") + '">' + esc(placeText) + '</span>'
+        +   '<span class="rec-detail"><i class="rec-slot">' + sl.label + '</i>排障 ' + clean(c.p) + ' ／ 會同 ' + clean(c.c) + '</span>'
         + '</span>'
-        + '<span class="rec-total">合計 ' + (r.p + r.c) + '<em>件</em></span>'
+        + '<span class="rec-total">合計 ' + total + '<em>件</em></span>'
         + '</div>'
-        + '<span class="rec-del">刪除</span>'
+        + (r ? '<span class="rec-del">刪除</span>' : '')
         + '</li>';
     }
     elRecList.innerHTML = html;
@@ -3462,6 +3514,96 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     closeNotice(elNoticeNever.checked ? "month" : "session");
   });
 
+  /* ---------- 下班確認 ---------- */
+  var OFF_KEY = "worklog.dev.offwork.v1";
+  var elOffMask = document.getElementById("offMask");
+  var elOffSub  = document.getElementById("offSub");
+  var elOffCfg  = document.getElementById("offCfg");
+  var elOffEdit = document.getElementById("offEdit");
+  var elOffTimeIn = document.getElementById("offTimeIn");
+  function offCfgGet(){
+    try{ return JSON.parse(localStorage.getItem(OFF_KEY) || "null") || {}; }catch(err){ return {}; }
+  }
+  function offCfgSet(o){
+    try{ localStorage.setItem(OFF_KEY, JSON.stringify(o)); }catch(err){}
+  }
+  function offTimeStr(){
+    var v = offCfgGet();
+    return /^\d{1,2}:\d{2}$/.test(v.time || "") ? v.time : "21:00";
+  }
+  function offTimeMin(){
+    var t = offTimeStr().split(":");
+    return Number(t[0]) * 60 + Number(t[1]);
+  }
+  function refreshOffCfg(){
+    if (elOffCfg) elOffCfg.textContent = "下班 " + offTimeStr();
+    if (elOffTimeIn) elOffTimeIn.value = offTimeStr();
+  }
+  function showOff(){
+    var now = new Date();
+    var t = sumsOf(todayData);
+    elOffSub.innerHTML = "現在 " + pad(now.getHours()) + ":" + pad(now.getMinutes())
+      + "，今天已登記 <b>" + (t.p + t.c) + "</b> 件。<br>按「下班了」會把下班時間記在今天的近期日誌。";
+    elOffMask.classList.add("on");
+  }
+  function hideOff(){ if (elOffMask) elOffMask.classList.remove("on"); }
+  function checkOffWork(){
+    if (!elOffMask || elOffMask.classList.contains("on")) return;
+    if (todayData.offAt) return;
+    var now = new Date();
+    if (now.getHours() * 60 + now.getMinutes() < offTimeMin()) return;
+    var t = sumsOf(todayData);
+    if (!t.p && !t.c) return;
+    var v = offCfgGet();
+    if (v.snoozeUntil && Date.now() < v.snoozeUntil) return;
+    if (v.askedFor === TODAY) return;
+    showOff();
+  }
+  document.getElementById("offYes").addEventListener("click", function(){
+    todayData.offAt = Date.now();
+    persist();
+    hideOff();
+    renderHistory();
+    renderRecords();
+    updateLastSaved();
+  });
+  document.getElementById("offNo").addEventListener("click", function(){
+    var v = offCfgGet();
+    v.snoozeUntil = Date.now() + 30 * 60 * 1000;
+    v.askedFor = "";
+    offCfgSet(v);
+    hideOff();
+  });
+  document.getElementById("offX").addEventListener("click", function(){
+    var v = offCfgGet();
+    v.askedFor = TODAY;
+    offCfgSet(v);
+    hideOff();
+  });
+  if (elOffCfg) elOffCfg.addEventListener("click", function(){
+    if (elOffEdit) elOffEdit.hidden = !elOffEdit.hidden;
+  });
+  (function(){
+    var btn = document.getElementById("offSave");
+    if (!btn) return;
+    btn.addEventListener("click", function(){
+      var v = elOffTimeIn ? String(elOffTimeIn.value || "").trim() : "";
+      var m = v.match(/^(\d{1,2}):(\d{2})$/);
+      if (!m){ if (elOffCfg) elOffCfg.textContent = "時間格式不對"; return; }
+      var h = Number(m[1]), mi = Number(m[2]);
+      if (h > 23 || mi > 59){ if (elOffCfg) elOffCfg.textContent = "時間不對"; return; }
+      var cfg = offCfgGet();
+      cfg.time = pad(h) + ":" + pad(mi);
+      cfg.askedFor = "";
+      cfg.snoozeUntil = 0;
+      offCfgSet(cfg);
+      refreshOffCfg();
+      if (elOffEdit) elOffEdit.hidden = true;
+      checkOffWork();
+    });
+  })();
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) checkOffWork(); });
+
   /* ---------- 初始化 ---------- */
   renderRows();
   renderSession();
@@ -3469,6 +3611,9 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   updateTotals();
   renderRecords();
   updateLastSaved();
+  refreshOffCfg();
+  setTimeout(checkOffWork, 1200);
+  setInterval(checkOffWork, 30000);
   renderPlace();
   renderCands(-1);
   if (lastCoords && lastCoords.lat != null) nearRenderAll(lastCoords.lat, lastCoords.lng);
