@@ -1015,6 +1015,7 @@ document.addEventListener("touchend", function(e){
       <h2>時段記錄</h2>
       <span class="cnt" id="recCount">今日 0 段</span>
       <button type="button" class="offcfg" id="offCfg">下班 21:00</button>
+      <button type="button" class="offcfg" id="impBtn" aria-controls="impPanel">匯入</button>
     </div>
     <div class="offedit" id="offEdit" hidden>
       <label for="offTimeIn">下班時間</label>
@@ -1023,6 +1024,21 @@ document.addEventListener("touchend", function(e){
       <span class="offedit-tip">時間到會問一次「你下班了嗎」</span>
     </div>
     <ul class="rec-list" id="recList"></ul>
+    <div class="imp-panel" id="impPanel" hidden>
+      <div class="imp-hd">貼上清單自動帶入（每行一筆，有時間就自動分時段）</div>
+      <textarea id="impTA" rows="6" placeholder="例：
+12:08 振興醫院NO 排障
+13:25 全聯北投捷運店 排障
+14:42 HL北市北崗店 排障,會同
+排休"></textarea>
+      <div class="imp-prev" id="impPrev"></div>
+      <div class="imp-acts">
+        <button type="button" id="impApply">套用</button>
+        <button type="button" id="impClear">清空</button>
+        <button type="button" id="impClose">關閉</button>
+      </div>
+      <div class="imp-tip">每筆算 1 件排障；項目含「會同」再多記 1 件會同；「排休」只列清單不計件數。</div>
+    </div>
   </section>
 
   <!-- ===== 近期日誌 ===== -->
@@ -2279,6 +2295,65 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
         + '</li>';
     }
     elRecList.innerHTML = html;
+  }
+
+  /* ---------- 貼上清單自動帶入（會同／排休…） ---------- */
+  var elImpBtn=document.getElementById("impBtn"), elImpPanel=document.getElementById("impPanel"),
+      elImpTA=document.getElementById("impTA"), elImpPrev=document.getElementById("impPrev");
+  function slotLabelOf(k){ var s=slotOf(k); return s?s.label:k; }
+  function impParse(text){
+    var out=[], leave=0;
+    String(text||"").split(/\r?\n/).forEach(function(line){
+      var t=line.trim(); if(!t) return;
+      if(/排休|休假|請假/.test(t) && !/\d{1,2}[:：]\d{2}/.test(t)){ leave++; out.push({line:t,tag:"休"}); return; }
+      var m=t.match(/(\d{1,2})[:：](\d{2})/);
+      if(!m) return;
+      var mins=Number(m[1])*60+Number(m[2]);
+      if(mins>1439) return;
+      var key=null;
+      for(var i=0;i<SLOTS.length;i++){ var sl=SLOTS[i]; if(mins>=sl.from && mins<=sl.to){ key=sl.key; break; } }
+      if(!key) return;
+      out.push({line:t,tag:slotLabelOf(key),key:key,also:/會同/.test(t)});
+    });
+    return {items:out,leave:leave};
+  }
+  function impRender(){
+    var r=impParse(elImpTA.value), sum={};
+    r.items.forEach(function(it){
+      if(!it.key) return;
+      sum[it.key]=sum[it.key]||{p:0,c:0};
+      sum[it.key].p++; if(it.also) sum[it.key].c++;
+    });
+    var parts=Object.keys(sum).map(function(k){ return slotLabelOf(k)+" 排障 "+sum[k].p+"／會同 "+sum[k].c; });
+    var head=r.items.length?("<b>讀到 "+r.items.length+" 筆</b>"+(r.leave?"（含排休 "+r.leave+" 筆不計）":"")+"<br>"+parts.join("；")):"尚無可讀取的內容";
+    var rows=r.items.map(function(it){ return '<div><span class="imp-sl">'+(it.tag||"—")+'</span>'+esc(it.line.slice(0,44))+'</div>'; }).join("");
+    elImpPrev.innerHTML=head+rows;
+    return sum;
+  }
+  if(elImpBtn){
+    elImpBtn.addEventListener("click", function(){
+      elImpPanel.hidden=!elImpPanel.hidden;
+      if(!elImpPanel.hidden){ impRender(); elImpTA.focus(); }
+    });
+    if(elImpTA) elImpTA.addEventListener("input", impRender);
+    var elImpApply=document.getElementById("impApply"),
+        elImpClear=document.getElementById("impClear"),
+        elImpClose=document.getElementById("impClose");
+    if(elImpClear) elImpClear.addEventListener("click", function(){ elImpTA.value=""; impRender(); });
+    if(elImpClose) elImpClose.addEventListener("click", function(){ elImpPanel.hidden=true; });
+    if(elImpApply) elImpApply.addEventListener("click", function(){
+      var sum=impRender(), any=false;
+      Object.keys(sum).forEach(function(k){
+        var s2=todayData.slots[k]; if(!s2) return;
+        s2.p=clean(s2.p+sum[k].p); s2.c=clean(s2.c+sum[k].c); any=true;
+        var i1=elRows.querySelector('.count[data-slot="'+k+'"][data-kind="p"]'); if(i1) i1.value=String(s2.p);
+        var i2=elRows.querySelector('.count[data-slot="'+k+'"][data-kind="c"]'); if(i2) i2.value=String(s2.c);
+      });
+      if(!any){ setTip("沒有可套用的件數", true, true); return; }
+      persist(); updateTotals(); renderRecords(); updateLastSaved();
+      setTip("已帶入 "+Object.keys(sum).filter(function(k){return sum[k].p||sum[k].c;}).length+" 個時段");
+      elImpPanel.hidden=true;
+    });
   }
 
   function updateLastSaved(){
@@ -3785,6 +3860,19 @@ document.addEventListener("click", function(e){
 .sec-fold .fold-hd{cursor:pointer;user-select:none;-webkit-user-select:none}
 .sec-fold .fold-hd .fold-arrow{display:inline-flex;align-items:center;margin-left:8px;transition:transform .16s;color:#8FA6C6;font-size:12px}
 .sec-fold.closed .fold-hd .fold-arrow{transform:rotate(-90deg)}
+/* ===== 匯入面板 ===== */
+.imp-panel{margin:10px 0 2px;padding:12px;border:1px solid var(--line-soft,#E7E1D2);border-radius:12px;background:rgba(127,127,127,.06)}
+.imp-hd{font-size:13px;opacity:.85;margin-bottom:8px}
+#impTA{width:100%;box-sizing:border-box;min-height:96px;padding:10px;border-radius:10px;border:1px solid rgba(127,127,127,.35);
+  background:rgba(127,127,127,.08);color:inherit;font-size:16px;line-height:1.6;resize:vertical}
+.imp-prev{margin:8px 0;font-size:12.5px;line-height:1.7;opacity:.9}
+.imp-prev b{font-weight:600}
+.imp-prev .imp-sl{margin-right:6px;opacity:.75}
+.imp-acts{display:flex;gap:8px;flex-wrap:wrap}
+.imp-acts button{flex:1 1 auto;min-width:88px;padding:9px 12px;border-radius:10px;border:1px solid rgba(127,127,127,.35);
+  background:rgba(127,127,127,.12);color:inherit;font-size:14px}
+#impApply{font-weight:600}
+.imp-tip{margin-top:8px;font-size:11.5px;line-height:1.6;opacity:.7}
 </style>
 
 <div id="navMask"></div>
