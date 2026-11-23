@@ -3239,7 +3239,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     if (d < 1000) return Math.round(d) + " m";
     return (d / 1000).toFixed(1) + " km";
   }
-  var NEAR_RADIUS = 300;   /* 附近門檻（公尺） */
+  var NEAR_RADIUS = 50;    /* 最近門檻（公尺）：只列 50 公尺內的店，不足不補遠店（2026-11-23） */
   function nearestTop(lat, lng, list){
     var arr = [];
     for (var i = 0; i < list.length; i++){
@@ -3248,9 +3248,8 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
       arr.push({ s: s, d: haversine(lat, lng, s.x, s.y) });
     }
     arr.sort(function(a, b){ return a.d - b.d; });
-    /* 300 公尺內不足 3 間就放寬到 3 公里（附近四類都要列得出來） */
+    /* 只列門檻內的店（嚴格）：不足不補遠店，一間都沒有就整組隱藏 */
     var near = arr.filter(function(t){ return t.d <= NEAR_RADIUS; });
-    if (near.length < 3) return arr.filter(function(t){ return t.d <= 3000; }).slice(0, 5);
     return near.slice(0, 5);
   }
   function nearOne(g, lat, lng){
