@@ -3228,7 +3228,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     { hd:"nearShHd", box:"nearSh", title:"蝦皮智取店", list:function(){ return SHOPEE; }, full:function(x){ return shFull(x.n); }, tag:function(){ return ""; }, chip:function(){ return "蝦皮"; }, label:function(x){ return shName(x.n); }, addr:function(x){ return x.s || ""; } },
     { hd:"nearPsHd", box:"nearPs", title:"便利商店", list:function(){ return PSEN.concat(addedOf("ps")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearBkHd", box:"nearBk", title:"銀行", list:function(){ return BKEN.concat(addedOf("bk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
-    { hd:"nearMxHd", box:"nearMx", title:"捷運出口", list:function(){ return MRT_EXITS; },
+    { hd:"nearMxHd", box:"nearMx", title:"捷運出口", radius:300, list:function(){ return MRT_EXITS; },
       full:function(r){ return "捷運" + r.stn.n + " " + r.lab; }, tag:function(){ return ""; },
       tagHTML:function(r){ return mrtCodeHTML(r.stn); }, label:function(r){ return r.stn.n + " " + r.lab; },
       addr:function(r){ return "捷運 " + r.stn.l + "・" + r.stn.t; } }
@@ -3240,7 +3240,8 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     return (d / 1000).toFixed(1) + " km";
   }
   var NEAR_RADIUS = 100;   /* 最近門檻（公尺）：只列 100 公尺內的店，不足不補遠店（2026-11-23） */
-  function nearestTop(lat, lng, list){
+  function nearestTop(lat, lng, list, radius){
+    var R = (radius == null) ? NEAR_RADIUS : radius;   /* 各組可用自己的門檻（捷運出口 300 m） */
     var arr = [];
     for (var i = 0; i < list.length; i++){
       var s = list[i];
@@ -3249,7 +3250,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     }
     arr.sort(function(a, b){ return a.d - b.d; });
     /* 只列門檻內的店（嚴格）：不足不補遠店，一間都沒有就整組隱藏 */
-    var near = arr.filter(function(t){ return t.d <= NEAR_RADIUS; });
+    var near = arr.filter(function(t){ return t.d <= R; });
     return near.slice(0, 5);
   }
   function nearOne(g, lat, lng){
@@ -3259,7 +3260,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     if (lat == null || lng == null || !list.length){
       box.innerHTML = ""; box.hidden = true; hd.hidden = true; return false;
     }
-    var top = nearestTop(lat, lng, list);
+    var top = nearestTop(lat, lng, list, g.radius);
     if (!top.length){ box.innerHTML = ""; box.hidden = true; hd.hidden = true; return false; }
     hd.textContent = "最近的" + g.title;
     hd.hidden = false; box.hidden = false;
