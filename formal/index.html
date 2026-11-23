@@ -2964,7 +2964,8 @@ img,svg,canvas,video{max-width:100%}
       elGpsBtn.textContent = "重新定位";
       var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy || 0;
       var p = todayData.place;
-      if (p && p.name && p.lat != null && haversine(p.lat, p.lng, lat, lng) < 300){
+      /* GPS 位移門檻：行動超過 5 公尺就視為換位置、重新定位（2026-11-23 由 300 m 改為 5 m） */
+      if (p && p.name && p.lat != null && haversine(p.lat, p.lng, lat, lng) < 5){
         lastCoords = { lat: lat, lng: lng, acc: acc };
         p.lat = lat; p.lng = lng; p.acc = acc; p.at = Date.now();
         persist(); renderPlace(); nearRenderAll(lat, lng);
