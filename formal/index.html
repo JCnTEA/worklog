@@ -2549,11 +2549,16 @@ img,svg,canvas,video{max-width:100%}
     var d = new Date(ts);
     return pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
-  function findRecordIndex(key){
+  function findRecordIndex(key, ts){
+    var last = -1;
     for (var i = 0; i < todayData.saves.length; i++){
-      if (todayData.saves[i].slot === key) return i;
+      var r = todayData.saves[i];
+      if (r.slot !== key) continue;
+      last = i;
+      /* 同一分鐘（±60 秒）才算同一筆：重複按保存會更新該筆；不同分鐘各自新增一筆，不覆蓋 */
+      if (ts != null && Math.abs((Number(r.ts) || 0) - Number(ts)) <= 60000) return i;
     }
-    return -1;
+    return ts == null ? last : -1;
   }
   function placeSnapshot(){
     var p = todayData.place;
@@ -2569,7 +2574,7 @@ img,svg,canvas,video{max-width:100%}
       place: placeSnapshot(),
       auto: !!isAuto
     };
-    var i = findRecordIndex(key);
+    var i = findRecordIndex(key, rec.ts);
     if (i >= 0) todayData.saves[i] = rec;
     else todayData.saves.push(rec);
     todayData.saves.sort(function(a, b){ return a.ts - b.ts; });
@@ -2580,6 +2585,7 @@ img,svg,canvas,video{max-width:100%}
     if (!key) return;
     var c = todayData.slots[key];
     if (!c || (!c.p && !c.c)) return;
+    if (findRecordIndex(key) >= 0) return;   /* 這一段已存過就不再重複結算 */
     var ts = slotEndTs(key);
     if (ts > Date.now()) ts = Date.now();
     upsertSave(key, c, true, ts);
@@ -2597,7 +2603,7 @@ img,svg,canvas,video{max-width:100%}
 
   function renderRecords(){
     var saves = todayData.saves;
-    elRecCount.textContent = "今日 " + saves.length + " 段";
+    elRecCount.textContent = "今日 " + saves.length + " 筆";
     if (!saves.length){
       elRecList.innerHTML = '<li class="rec-empty">每個時段結束（08:00、13:00、18:00、24:00）會自動記一筆；也可隨時按「保存目前時段」。</li>';
       return;
