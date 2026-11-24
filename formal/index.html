@@ -3244,7 +3244,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     if (d < 1000) return Math.round(d) + " m";
     return (d / 1000).toFixed(1) + " km";
   }
-  var NEAR_RADIUS = 100;   /* 最近門檻（公尺）：只列 100 公尺內的店，不足不補遠店（2026-11-23） */
+  var NEAR_RADIUS = 300;   /* 最近門檻（公尺）：預設 300 公尺，只列門檻內的店，不足不補遠店（2026-11-24 由 100 改 300） */
   function nearestTop(lat, lng, list, radius){
     var R = (radius == null) ? NEAR_RADIUS : radius;   /* 各組可用自己的門檻（捷運出口 300 m） */
     var arr = [];
