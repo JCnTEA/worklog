@@ -1629,6 +1629,19 @@ img,svg,canvas,video{max-width:100%}
     }
     return null;
   }
+  /* 保存要用哪一段：先看正在編輯的段，再看現在時間的段，最後往前找最近有件數的段 */
+  function saveSlotKey(){
+    var now = new Date();
+    var cur = currentSlotKey(now);
+    var act = (typeof todayData.active === "string" && slotOf(todayData.active)) ? todayData.active : null;
+    function has(k){ var c = k && todayData.slots[k]; return !!(c && (c.p || c.c)); }
+    if (act && has(act)) return act;
+    if (cur && has(cur)) return cur;
+    var idx = cur ? slotIndex(cur) : SLOTS.length;
+    for (var j = idx; j >= 0; j--){ if (SLOTS[j] && has(SLOTS[j].key)) return SLOTS[j].key; }
+    for (var k = SLOTS.length - 1; k >= 0; k--){ if (has(SLOTS[k].key)) return SLOTS[k].key; }
+    return act || cur || SLOTS[0].key;
+  }
   function slotEndTs(key, baseDate){
     var s = slotOf(key), d = baseDate || new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(s.to / 60), s.to % 60, 0).getTime();
@@ -2324,7 +2337,7 @@ img,svg,canvas,video{max-width:100%}
     todayData.active = key;
     persist();
     updateTotals();
-    syncSlotRecord(key);
+    /* 不再把「現在編輯中的件數」回寫到既有紀錄：每筆紀錄是保存當下的快照，避免多筆被同一組件數蓋掉 */
   }
   function bump(inp){
     if (!inp) return;
@@ -3243,8 +3256,8 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     { hd:"nearShHd", box:"nearSh", title:"蝦皮智取店", list:function(){ return SHOPEE; }, full:function(x){ return shFull(x.n); }, tag:function(){ return ""; }, chip:function(){ return "蝦皮"; }, label:function(x){ return shName(x.n); }, addr:function(x){ return x.s || ""; } },
     { hd:"nearPsHd", box:"nearPs", title:"便利商店", list:function(){ return PSEN.concat(addedOf("ps")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearBkHd", box:"nearBk", title:"銀行", list:function(){ return BKEN.concat(addedOf("bk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
-    { hd:"nearUniHd", box:"nearUni", title:"大學", radius:3000, list:function(){ return UNI_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
-    { hd:"nearHosHd", box:"nearHos", title:"醫院", radius:3000, list:function(){ return HOS_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
+    { hd:"nearUniHd", box:"nearUni", title:"大學", radius:3000, noPrefix:true, list:function(){ return UNI_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
+    { hd:"nearHosHd", box:"nearHos", title:"醫院", radius:3000, noPrefix:true, list:function(){ return HOS_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
     { hd:"nearMxHd", box:"nearMx", title:"捷運出口", radius:300, list:function(){ return MRT_EXITS; },
       full:function(r){ return "捷運" + r.stn.n + " " + r.lab; }, tag:function(){ return ""; },
       tagHTML:function(r){ return mrtCodeHTML(r.stn); }, label:function(r){ return r.stn.n + " " + r.lab; },
@@ -3285,7 +3298,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
       var nm = g.full(t.s), ad = g.addr(t.s) || "", tg = g.tag(t.s) || "";
       var ck = g.tagHTML ? null : (g.chip ? g.chip(t.s) : tg);
       var lb = g.label ? g.label(t.s) : nm;
-      var full = tg ? (tg + nm) : nm;
+      var full = (!g.noPrefix && tg && nm.indexOf(tg) < 0) ? (tg + nm) : nm;
       return '<button type="button" class="cand" data-name="' + esc(full) + '">'
         + '<span class="cand-top">' + (g.tagHTML ? g.tagHTML(t.s) : (ck ? btagHTML(ck) : ''))
         + '<b>' + esc(lb) + '</b><em>' + shDistTxt(t.d) + '</em></span>'
@@ -3449,7 +3462,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
   }
   elSaveBtn.addEventListener("click", function(){
     commitAllInputs();
-    var cur = currentSlotKey(new Date());
+    var cur = saveSlotKey();
     if (!cur){
       elSaveBtn.textContent = "可保存目前時段";
       elSaveBtn.classList.add("done");
