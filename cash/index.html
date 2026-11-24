@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新台幣現金點鈔與零錢計算機</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #0f766e;
+      --primary-hover: #0d9488;
+      --accent: #f0fdfa;
+      --danger: #dc2626;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      padding-bottom: 110px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    header p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    button:hover {
+      background: #f9fafb;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-preset {
+      background: var(--accent);
+      color: var(--primary);
+      border-color: #99f6e4;
+    }
+
+    .btn-preset:hover {
+      background: #ccfbf1;
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-subtotal {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .denom-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .denom-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 125px;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .denom-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    /* TWD Bill & Coin Color Themes */
+    .d-2000 { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+    .d-1000 { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+    .d-500  { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+    .d-200  { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .d-100  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .d-50   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .d-10   { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+    .d-5    { background: #e5e7eb; color: #1f2937; border: 1px solid #9ca3af; }
+    .d-1    { background: #ffedd5; color: #7c2d12; border: 1px solid #fed7aa; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .stepper button {
+      border: none;
+      border-radius: 0;
+      width: 34px;
+      height: 36px;
+      font-size: 1.1rem;
+      padding: 0;
+      background: #f9fafb;
+    }
+
+    .stepper button:hover {
+      background: #e5e7eb;
+    }
+
+    .stepper input {
+      width: 68px;
+      height: 36px;
+      border: none;
+      border-left: 1px solid #e5e7eb;
+      border-right: 1px solid #e5e7eb;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      -moz-appearance: textfield;
+    }
+
+    .stepper input::-webkit-outer-spin-button,
+    .stepper input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .quick-btns {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .quick-btns button {
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      color: #374151;
+      background: #fff;
+    }
+
+    .row-subtotal {
+      text-align: right;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sticky-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111827;
+      color: #fff;
+      padding: 14px 20px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+    }
+
+    .footer-inner {
+      max-width: 780px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .grand-label {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .grand-amount {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #34d399;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #1f2937;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 200;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .denom-row {
+        grid-template-columns: 95px 1fr;
+        grid-template-rows: auto auto;
+      }
+      .row-subtotal {
+        grid-column: 1 / -1;
+        text-align: right;
+        padding-top: 6px;
+        border-top: 1px dashed #e5e7eb;
+        font-size: 0.95rem;
+      }
+      .grand-amount {
+        font-size: 1.4rem;
+      }
+    }
+  
+    .backhome{
+      display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;
+      padding:9px 14px;border-radius:12px;
+      background:rgba(255,255,255,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      border:1px solid rgba(15,118,110,.18);
+      color:#0f766e;font-size:.82rem;font-weight:600;text-decoration:none;
+      box-shadow:0 2px 10px rgba(15,118,110,.06);
+    }
+    .backhome:active{transform:translateY(1px)}
+      /* ===== 計算機模式 ===== */
+    .calc{
+      background:var(--card);border-radius:16px;padding:16px;
+      margin-bottom:16px;box-shadow:var(--shadow);
+    }
+    .calc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .calc-title{font-size:.95rem;font-weight:700;color:var(--text)}
+    .calc-clear{
+      border:1px solid var(--border);background:#fff;color:var(--muted);
+      font-size:.75rem;padding:6px 10px;border-radius:10px;cursor:pointer;
+    }
+    .calc-clear:active{transform:translateY(1px)}
+    .calc-screen{
+      background:var(--accent);border:1px solid rgba(15,118,110,.14);
+      border-radius:12px;padding:12px 14px;text-align:right;margin-bottom:10px;
+    }
+    .calc-sub{font-size:.78rem;color:var(--muted);letter-spacing:.02em}
+    .calc-sub b{color:var(--primary);font-size:.92rem}
+    .calc-main{
+      font-size:1.9rem;font-weight:800;color:var(--text);line-height:1.15;
+      font-variant-numeric:tabular-nums;word-break:break-all;
+    }
+    .calc-tape{
+      display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;
+      max-height:78px;overflow-y:auto;
+    }
+    .calc-tape span{
+      font-size:.72rem;color:var(--primary);background:var(--accent);
+      border:1px solid rgba(15,118,110,.14);border-radius:8px;padding:3px 8px;
+      font-variant-numeric:tabular-nums;
+    }
+    .calc-tape:empty{display:none}
+    .calc-hint{font-size:.72rem;color:var(--muted);margin:8px 2px 0;line-height:1.45}
+    .calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .calc-keys button{
+      height:52px;border-radius:12px;border:1px solid var(--border);background:#fff;
+      font-size:1.15rem;font-weight:700;color:var(--text);cursor:pointer;
+      font-variant-numeric:tabular-nums;transition:transform .08s ease, background .15s ease;
+    }
+    .calc-keys button:active{transform:translateY(1px);background:var(--accent)}
+    .calc-keys .k-fn{background:#f8fafc;color:var(--muted);font-size:1rem}
+    .calc-keys .k-plus{background:var(--primary);border-color:var(--primary);color:#fff}
+    .calc-keys .k-eq{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff}
+    .calc-keys .k-zero{grid-column:span 2}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast">已複製明細到剪貼簿</div>
+
+  <div class="container">
+    <a class="backhome" href="../formal/">← 回勤務記錄系統</a>
+    <header>
+      <div>
+        <h1>新台幣現金點鈔與零錢計算機</h1>
+        <p>支援紙鈔與硬幣即時加總、自動記憶與一鍵複製明細</p>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn-preset" onclick="loadPreset()">帶入剛才紀錄 (98,900)</button>
+        <button type="button" class="btn-primary" onclick="copySummary()">複製明細</button>
+        <button type="button" class="btn-danger" onclick="resetAll()">全部歸零</button>
+      </div>
+    </header>
+    <!-- 計算機模式 -->
+    <div class="calc" id="calcCard">
+      <div class="calc-head">
+        <div class="calc-title">🧮 計算機模式：打數字往上加</div>
+        <button type="button" class="calc-clear" id="calcTapeClear">清空明細</button>
+      </div>
+      <div class="calc-screen">
+        <div class="calc-sub">累計 <b id="calcTotal">NT$ 0</b></div>
+        <div class="calc-main" id="calcInput">0</div>
+      </div>
+      <div class="calc-tape" id="calcTape"></div>
+      <div class="calc-keys" id="calcKeys">
+        <button type="button" data-k="7">7</button>
+        <button type="button" data-k="8">8</button>
+        <button type="button" data-k="9">9</button>
+        <button type="button" class="k-fn" data-k="C">C</button>
+        <button type="button" data-k="4">4</button>
+        <button type="button" data-k="5">5</button>
+        <button type="button" data-k="6">6</button>
+        <button type="button" class="k-fn" data-k="DEL">⌫</button>
+        <button type="button" data-k="1">1</button>
+        <button type="button" data-k="2">2</button>
+        <button type="button" data-k="3">3</button>
+        <button type="button" class="k-plus" data-k="PLUS">＋</button>
+        <button type="button" class="k-zero" data-k="0">0</button>
+        <button type="button" data-k="00">00</button>
+        <button type="button" class="k-eq" data-k="EQ">＝</button>
+      </div>
+      <p class="calc-hint">打金額後按「＋」往上累加，明細會列出每一筆；按「＝」同「＋」，按 C 全部歸零。這區是快速加總，與下方按面額逐張點鈔各自獨立。</p>
+    </div>
+
+    <!-- 紙鈔區 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">💵 紙鈔面額</div>
+        <div class="section-subtotal" id="bills-subtotal">小計：0 元（0 張）</div>
+      </div>
+      <div class="denom-list" id="bills-list"></div>
+    </section>
+
+    <!-- 硬幣區 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">🪙 硬幣零錢</div>
+        <div class="section-subtotal" id="coins-subtotal">小計：0 元（0 枚）</div>
+      </div>
+      <div class="denom-list" id="coins-list"></div>
+    </section>
+  </div>
+
+  <div class="sticky-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="grand-label" id="grand-counts">紙鈔 0 張 ＋ 硬幣 0 枚</div>
+        <div class="grand-amount" id="grand-total">NT$ 0</div>
+      </div>
+      <button type="button" class="btn-primary" style="padding: 10px 18px; font-size: 0.95rem;" onclick="copySummary()">
+        複製結算明細
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const DENOMINATIONS = [
+      { value: 2000, type: "bill", label: "2,000 元", unit: "張", css: "d-2000", quicks: [10, 50, 100] },
+      { value: 1000, type: "bill", label: "1,000 元", unit: "張", css: "d-1000", quicks: [10, 50, 100] },
+      { value: 500,  type: "bill", label: "500 元",   unit: "張", css: "d-500",  quicks: [10, 50, 100] },
+      { value: 200,  type: "bill", label: "200 元",   unit: "張", css: "d-200",  quicks: [10, 50, 100] },
+      { value: 100,  type: "bill", label: "100 元",   unit: "張", css: "d-100",  quicks: [10, 50, 100] },
+      { value: 50,   type: "coin", label: "50 元",    unit: "枚", css: "d-50",   quicks: [10, 40] },
+      { value: 10,   type: "coin", label: "10 元",    unit: "枚", css: "d-10",   quicks: [10, 50] },
+      { value: 5,    type: "coin", label: "5 元",     unit: "枚", css: "d-5",    quicks: [10, 50] },
+      { value: 1,    type: "coin", label: "1 元",     unit: "枚", css: "d-1",    quicks: [10, 50] }
+    ];
+
+    const STORAGE_KEY = "twd_cash_counter_v1";
+    let counts = {};
+
+    function init() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        DENOMINATIONS.forEach(d => {
+          counts[d.value] = Math.max(0, parseInt(saved[d.value], 10) || 0);
+        });
+      } catch (e) {
+        DENOMINATIONS.forEach(d => { counts[d.value] = 0; });
+      }
+      renderRows();
+      recalculate();
+    }
+
+    function renderRows() {
+      const billsContainer = document.getElementById("bills-list");
+      const coinsContainer = document.getElementById("coins-list");
+      billsContainer.innerHTML = "";
+      coinsContainer.innerHTML = "";
+
+      DENOMINATIONS.forEach((d, idx) => {
+        const row = document.createElement("div");
+        row.className = "denom-row";
+
+        const quickHtml = d.quicks.map(q => {
+          const isRoll = d.type === "coin" && ((d.value === 50 && q === 40) || (d.value !== 50 && q === 50));
+          const text = isRoll ? `+${q}(捲)` : `+${q}`;
+          return `<button type="button" onclick="adjustCount(${d.value}, ${q})">${text}</button>`;
+        }).join("");
+
+        row.innerHTML = `
+          <div class="denom-badge ${d.css}">${d.label}</div>
+          <div class="controls">
+            <div class="stepper">
+              <button type="button" aria-label="減少" onclick="adjustCount(${d.value}, -1)">−</button>
+              <input
+                type="number"
+                min="0"
+                inputmode="numeric"
+                id="input-${d.value}"
+                data-index="${idx}"
+                value="${counts[d.value] || ''}"
+                placeholder="0"
+                oninput="handleInput(${d.value}, this.value)"
+                onkeydown="handleKeyNav(event, ${idx})"
+              />
+              <button type="button" aria-label="增加" onclick="adjustCount(${d.value}, 1)">＋</button>
+            </div>
+            <div class="quick-btns">${quickHtml}</div>
+          </div>
+          <div class="row-subtotal" id="sub-${d.value}">0 元</div>
+        `;
+
+        if (d.type === "bill") {
+          billsContainer.appendChild(row);
+        } else {
+          coinsContainer.appendChild(row);
+        }
+      });
+    }
+
+    function handleInput(denom, rawVal) {
+      const parsed = Math.max(0, parseInt(rawVal, 10) || 0);
+      counts[denom] = parsed;
+      saveAndCalc();
+    }
+
+    function adjustCount(denom, delta) {
+      const next = Math.max(0, (counts[denom] || 0) + delta);
+      counts[denom] = next;
+      const input = document.getElementById(`input-${denom}`);
+      if (input) input.value = next === 0 ? "" : next;
+      saveAndCalc();
+    }
+
+    function handleKeyNav(e, idx) {
+      if (e.key === "Enter" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const nextIdx = (idx + 1) % DENOMINATIONS.length;
+        const nextInput = document.getElementById(`input-${DENOMINATIONS[nextIdx].value}`);
+        if (nextInput) { nextInput.focus(); nextInput.select(); }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const prevIdx = (idx - 1 + DENOMINATIONS.length) % DENOMINATIONS.length;
+        const prevInput = document.getElementById(`input-${DENOMINATIONS[prevIdx].value}`);
+        if (prevInput) { prevInput.focus(); prevInput.select(); }
+      }
+    }
+
+    function saveAndCalc() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
+      } catch (e) {}
+      recalculate();
+    }
+
+    function recalculate() {
+      let billSum = 0, billQty = 0;
+      let coinSum = 0, coinQty = 0;
+
+      DENOMINATIONS.forEach(d => {
+        const qty = counts[d.value] || 0;
+        const sub = qty * d.value;
+        const subEl = document.getElementById(`sub-${d.value}`);
+        if (subEl) subEl.textContent = `${sub.toLocaleString()} 元`;
+
+        if (d.type === "bill") {
+          billSum += sub;
+          billQty += qty;
+        } else {
+          coinSum += sub;
+          coinQty += qty;
+        }
+      });
+
+      const grandTotal = billSum + coinSum;
+      document.getElementById("bills-subtotal").textContent = `小計：${billSum.toLocaleString()} 元（${billQty.toLocaleString()} 張）`;
+      document.getElementById("coins-subtotal").textContent = `小計：${coinSum.toLocaleString()} 元（${coinQty.toLocaleString()} 枚）`;
+      document.getElementById("grand-counts").textContent = `紙鈔 ${billQty.toLocaleString()} 張 ＋ 硬幣 ${coinQty.toLocaleString()} 枚`;
+      document.getElementById("grand-total").textContent = `NT$ ${grandTotal.toLocaleString()}`;
+    }
+
+    function loadPreset() {
+      DENOMINATIONS.forEach(d => { counts[d.value] = 0; });
+      counts[1000] = 82;
+      counts[500] = 25;
+      counts[100] = 44;
+      syncInputs();
+      saveAndCalc();
+      showToast("已帶入 98,900 元紙鈔紀錄");
+    }
+
+    function resetAll() {
+      DENOMINATIONS.forEach(d => { counts[d.value] = 0; });
+      syncInputs();
+      saveAndCalc();
+      showToast("已全部歸零");
+    }
+
+    function syncInputs() {
+      DENOMINATIONS.forEach(d => {
+        const input = document.getElementById(`input-${d.value}`);
+        if (input) input.value = counts[d.value] === 0 ? "" : counts[d.value];
+      });
+    }
+
+    function copySummary() {
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      let lines = [`【新台幣現金點算明細】(${timeStr})`];
+      let grandTotal = 0;
+      let hasItem = false;
+
+      DENOMINATIONS.forEach(d => {
+        const qty = counts[d.value] || 0;
+        if (qty > 0) {
+          hasItem = true;
+          const sub = qty * d.value;
+          grandTotal += sub;
+          lines.push(`• ${d.label} × ${qty} ${d.unit} ＝ ${sub.toLocaleString()} 元`);
+        }
+      });
+
+      if (!hasItem) {
+        lines.push("（目前無輸入任何金額）");
+      }
+      lines.push("--------------------");
+      lines.push(`總計金額：NT$ ${grandTotal.toLocaleString()} 元`);
+
+      const text = lines.join("\n");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast("已複製明細到剪貼簿"));
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("已複製明細到剪貼簿");
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    init();
+  </script>
+  <script>
+  /* ===== 計算機模式：輸入金額 → ＋ 往上累加 ===== */
+  (function(){
+    var buf = "", total = 0, tape = [];
+    var elIn   = document.getElementById("calcInput");
+    var elTot  = document.getElementById("calcTotal");
+    var elTape = document.getElementById("calcTape");
+    var elKeys = document.getElementById("calcKeys");
+    var elClr  = document.getElementById("calcTapeClear");
+    if (!elIn || !elKeys) return;
+
+    function comma(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function render(){
+      elIn.textContent = buf === "" ? "0" : comma(Number(buf));
+      elTot.textContent = "NT$ " + comma(total);
+      elTape.innerHTML = "";
+      tape.forEach(function(v){
+        var s = document.createElement("span");
+        s.textContent = "＋" + comma(v);
+        elTape.appendChild(s);
+      });
+      elTape.scrollTop = elTape.scrollHeight;
+    }
+    function pushDigit(d){
+      if (buf.length >= 9) return;
+      if (buf === "") buf = (d === "00" ? "0" : d);
+      else buf = buf + d;
+      buf = buf.replace(/^0+(?=\d)/, "");
+      render();
+    }
+    function commit(){
+      var v = Number(buf || 0);
+      if (!v) return;
+      total += v;
+      tape.push(v);
+      buf = "";
+      render();
+    }
+    elKeys.addEventListener("click", function(e){
+      var b = e.target.closest("button[data-k]");
+      if (!b) return;
+      var k = b.getAttribute("data-k");
+      if (/^\d/.test(k) || k === "00") return pushDigit(k);
+      if (k === "PLUS" || k === "EQ") return commit();
+      if (k === "DEL") { buf = buf.slice(0, -1); return render(); }
+      if (k === "C") { buf = ""; total = 0; tape = []; return render(); }
+    });
+    if (elClr) elClr.addEventListener("click", function(){ tape = []; render(); });
+    render();
+  })();
+  </script>
+</body>
+</body>
+</html>
