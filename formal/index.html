@@ -1305,6 +1305,10 @@ img,svg,canvas,video{max-width:100%}
       <div class="place-cands" id="nearPs" hidden></div>
       <div class="near-hd" id="nearBkHd" hidden>最近的銀行</div>
       <div class="place-cands" id="nearBk" hidden></div>
+      <div class="near-hd" id="nearUniHd" hidden>最近的大學</div>
+      <div class="place-cands" id="nearUni" hidden></div>
+      <div class="near-hd" id="nearHosHd" hidden>最近的醫院</div>
+      <div class="place-cands" id="nearHos" hidden></div>
       <div class="near-hd" id="nearMxHd" hidden>最近的捷運出口</div>
       <div class="place-cands" id="nearMx" hidden></div>
     </div>
@@ -3239,6 +3243,8 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
     { hd:"nearShHd", box:"nearSh", title:"蝦皮智取店", list:function(){ return SHOPEE; }, full:function(x){ return shFull(x.n); }, tag:function(){ return ""; }, chip:function(){ return "蝦皮"; }, label:function(x){ return shName(x.n); }, addr:function(x){ return x.s || ""; } },
     { hd:"nearPsHd", box:"nearPs", title:"便利商店", list:function(){ return PSEN.concat(addedOf("ps")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
     { hd:"nearBkHd", box:"nearBk", title:"銀行", list:function(){ return BKEN.concat(addedOf("bk")); }, full:function(x){ return x.n; }, tag:function(x){ return x.b; }, addr:function(x){ return x.s; } },
+    { hd:"nearUniHd", box:"nearUni", title:"大學", list:function(){ return UNI_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
+    { hd:"nearHosHd", box:"nearHos", title:"醫院", list:function(){ return HOS_DEFAULT; }, full:function(x){ return x.n; }, tag:function(x){ return x.t; }, addr:function(x){ return x.s; } },
     { hd:"nearMxHd", box:"nearMx", title:"捷運出口", radius:300, list:function(){ return MRT_EXITS; },
       full:function(r){ return "捷運" + r.stn.n + " " + r.lab; }, tag:function(){ return ""; },
       tagHTML:function(r){ return mrtCodeHTML(r.stn); }, label:function(r){ return r.stn.n + " " + r.lab; },
