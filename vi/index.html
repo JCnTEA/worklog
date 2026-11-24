@@ -1379,6 +1379,19 @@ document.addEventListener("touchend", function(e){
     }
     return null;
   }
+  /* 保存要用哪一段：先看正在編輯的段，再看現在時間的段，最後往前找最近有件數的段 */
+  function saveSlotKey(){
+    var now = new Date();
+    var cur = currentSlotKey(now);
+    var act = (typeof todayData.active === "string" && slotOf(todayData.active)) ? todayData.active : null;
+    function has(k){ var c = k && todayData.slots[k]; return !!(c && (c.p || c.c)); }
+    if (act && has(act)) return act;
+    if (cur && has(cur)) return cur;
+    var idx = cur ? slotIndex(cur) : SLOTS.length;
+    for (var j = idx; j >= 0; j--){ if (SLOTS[j] && has(SLOTS[j].key)) return SLOTS[j].key; }
+    for (var k = SLOTS.length - 1; k >= 0; k--){ if (has(SLOTS[k].key)) return SLOTS[k].key; }
+    return act || cur || SLOTS[0].key;
+  }
   function slotEndTs(key, baseDate){
     var s = slotOf(key), d = baseDate || new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(s.to / 60), s.to % 60, 0).getTime();
@@ -2060,7 +2073,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     todayData.active = key;
     persist();
     updateTotals();
-    syncSlotRecord(key);
+    /* 不再把「現在編輯中的件數」回寫到既有紀錄：每筆紀錄是保存當下的快照，避免多筆被同一組件數蓋掉 */
   }
   function bump(inp){
     if (!inp) return;
@@ -3701,7 +3714,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       var nm = g.full(t.s), ad = g.addr(t.s) || "", tg = g.tag(t.s) || "";
       var ck = g.tagHTML ? null : (g.chip ? g.chip(t.s) : tg);
       var lb = g.label ? g.label(t.s) : nm;
-      var full = tg ? (tg + nm) : nm;
+      var full = (tg && nm.indexOf(tg) < 0) ? (tg + nm) : nm;
       return '<button type="button" class="cand" data-name="' + esc(full) + '">'
         + '<span class="cand-top">' + (g.tagHTML ? g.tagHTML(t.s) : (ck ? btagHTML(ck) : ''))
         + '<b>' + esc(lb) + '</b><em>' + shDistTxt(t.d) + '</em></span>'
@@ -3800,7 +3813,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   }
   elSaveBtn.addEventListener("click", function(){
     commitAllInputs();
-    var cur = currentSlotKey(new Date());
+    var cur = saveSlotKey();
     if (!cur){
       elSaveBtn.textContent = "可保存目前時段";
       elSaveBtn.classList.add("done");
