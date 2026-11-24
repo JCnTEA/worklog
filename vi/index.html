@@ -1068,7 +1068,7 @@ document.addEventListener("touchend", function(e){
   <section class="records" aria-label="時段記錄">
     <div class="rec-head">
       <h2>時段記錄</h2>
-      <span class="cnt" id="recCount">今日 0 段</span>
+      <span class="cnt" id="recCount">今日 0 筆</span>
       <button type="button" class="offcfg" id="offCfg">下班 21:00</button>
       <button type="button" class="offcfg" id="impBtn" aria-controls="impPanel">匯入</button>
     </div>
@@ -2279,11 +2279,16 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     var d = new Date(ts);
     return pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
-  function findRecordIndex(key){
+  function findRecordIndex(key, ts){
+    var last = -1;
     for (var i = 0; i < todayData.saves.length; i++){
-      if (todayData.saves[i].slot === key) return i;
+      var r = todayData.saves[i];
+      if (r.slot !== key) continue;
+      last = i;
+      /* 同一分鐘（±60 秒）才算同一筆：重複按保存會更新該筆；不同分鐘各自新增一筆，不覆蓋 */
+      if (ts != null && Math.abs((Number(r.ts) || 0) - Number(ts)) <= 60000) return i;
     }
-    return -1;
+    return ts == null ? last : -1;
   }
   function placeSnapshot(){
     var p = todayData.place;
@@ -2299,7 +2304,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
       place: placeSnapshot(),
       auto: !!isAuto
     };
-    var i = findRecordIndex(key);
+    var i = findRecordIndex(key, rec.ts);
     if (i >= 0) todayData.saves[i] = rec;
     else todayData.saves.push(rec);
     todayData.saves.sort(function(a, b){ return a.ts - b.ts; });
@@ -2310,6 +2315,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
     if (!key) return;
     var c = todayData.slots[key];
     if (!c || (!c.p && !c.c)) return;
+    if (findRecordIndex(key) >= 0) return;   /* 這一段已存過就不再重複結算 */
     var ts = slotEndTs(key);
     if (ts > Date.now()) ts = Date.now();
     upsertSave(key, c, true, ts);
@@ -2328,7 +2334,7 @@ var CT_DEFAULT=[{"b":"國泰","n":"南門分行","m":"台北・中正區","s":"�
   function renderRecords(){
     var list = activeSlots();
     var curKey = currentSlotKey(new Date());
-    elRecCount.textContent = "今日 " + list.length + " 段";
+    elRecCount.textContent = "今日 " + list.length + " 筆";
     var html = "";
     for (var i = 0; i < list.length; i++){
       var sl = list[i], key = sl.key;
