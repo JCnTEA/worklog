@@ -848,6 +848,83 @@
 #dUpdOk{width:100%;border:0;border-radius:8px;background:var(--blue,#1D5F9E);color:#fff;padding:10px;font-weight:700;font-size:14px;cursor:pointer}
 .mrt-code{font:600 12px/1 ui-monospace,monospace;color:#fff;background:#0F7C56;border-radius:5px;padding:4px 6px;min-width:40px;text-align:center}
 .mrt-code + .mrt-code{margin-left:-4px}
+
+</style>
+<style id="ckCss">
+.ckpanel{--ckbg:#131E29;--ckcard:#1F2B37;--cktext:#EAEFF5;--ckmuted:#9FB0C0;--ckbd:#33465A;--ckp:#0F766E;--ckdanger:#F87171;
+margin:10px 0 6px;padding:12px;border-radius:14px;background:var(--ckbg);border:1px solid var(--ckbd)}
+.ckpanel[hidden]{display:none!important}
+.ckpanel,.ckpanel *{box-sizing:border-box;margin:0;padding:0;font-family:inherit}
+.ck-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:#243444;border-radius:12px;padding:11px 12px;margin-bottom:10px;border:1px solid var(--ckbd)}
+.ck-h{font-size:.92rem;font-weight:700;color:var(--cktext);line-height:1.45}
+.ck-h span{display:block;font-size:.74rem;font-weight:500;color:var(--ckmuted);margin-top:3px}
+.ck-tools{display:flex;flex-wrap:wrap;gap:6px}
+.ck-btn{cursor:pointer;border:1px solid #3E5266;background:#2B3D4E;color:#E8F1FA;padding:7px 11px;border-radius:8px;font-size:.79rem;font-weight:600;font-family:inherit;line-height:1.2}
+.ck-btn:active{transform:scale(.98)}
+.ck-primary{background:var(--ckp);border-color:var(--ckp);color:#fff}
+.ck-danger{background:#2B3D4E;border-color:#54343E;color:var(--ckdanger)}
+.ck-calc{background:var(--ckcard);border:1px solid var(--ckbd);border-radius:12px;padding:10px;margin-bottom:10px}
+.ck-calc-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ck-calc-title{font-size:.82rem;font-weight:700;color:var(--cktext)}
+.ck-calc-clear{padding:5px 9px;border-radius:7px;border:1px solid #3E5266;background:#263544;color:#B9C8D6;font-size:.72rem;font-weight:600;font-family:inherit;cursor:pointer}
+.ck-calc-screen{margin-top:8px;background:#0B1220;border-radius:10px;padding:9px 12px;color:#E8F1FF;border:1px solid #24343f}
+.ck-calc-sub{font-size:.73rem;opacity:.75}
+.ck-calc-sub b{font-weight:700}
+.ck-calc-main{font-size:1.55rem;font-weight:800;text-align:right;letter-spacing:.01em;overflow:hidden;white-space:nowrap}
+.ck-calc-tape{display:flex;gap:6px;overflow-x:auto;padding:8px 2px 0;min-height:28px}
+.ck-calc-tape span{flex:none;background:#22303F;border:1px solid #3A4D61;color:#B9C8D6;font-size:.74rem;font-weight:700;padding:4px 8px;border-radius:999px}
+.ck-calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.ck-calc-keys button{padding:12px 0;border-radius:10px;border:1px solid #3E5266;background:#263544;font-size:1.02rem;font-weight:700;color:#E8F1FA;font-family:inherit;cursor:pointer;transition:background .12s ease}
+.ck-calc-keys button:active{transform:scale(.97)}
+.ck-calc-keys .k-fn{background:#1B2836;color:#A9BACB}
+.ck-calc-keys .k-plus{background:#0F766E;color:#fff;border-color:#0F766E}
+.ck-calc-keys .k-eq{background:#0E9F8E;color:#fff;border-color:#0E9F8E;grid-column:span 2}
+.ck-calc-hint{font-size:.72rem;color:var(--ckmuted);line-height:1.6;margin-top:8px}
+.ck-sec{background:var(--ckcard);border:1px solid var(--ckbd);border-radius:12px;padding:10px;margin-bottom:10px}
+.ck-sec-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.ck-sec-t{font-size:.85rem;font-weight:700;color:var(--cktext)}
+.ck-sec-sub{font-size:.74rem;color:var(--ckmuted)}
+.ck-denom-list{display:flex;flex-direction:column;gap:8px}
+.ck-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #2A3A4A;border-radius:10px;background:#18242F;flex-wrap:wrap}
+.ck-badge{flex:none;min-width:62px;padding:5px 8px;border-radius:8px;font-size:.77rem;font-weight:700;text-align:center;color:#fff;background:#0F766E}
+.ck-badge.d-2000{background:#7C3AED}.ck-badge.d-1000{background:#2563EB}.ck-badge.d-500{background:#0E7490}.ck-badge.d-200{background:#15803D}.ck-badge.d-100{background:#4D7C0F}
+.ck-badge.d-50{background:#A16207}.ck-badge.d-10{background:#9A3412}.ck-badge.d-5{background:#526074}.ck-badge.d-1{background:#3F4C5C}
+.ck-controls{flex:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.ck-stepper{display:flex;align-items:center;gap:4px}
+.ck-stepper button{width:32px;height:32px;border-radius:8px;border:1px solid #3E5266;background:#263544;font-size:1rem;font-weight:700;color:#E8F1FA;font-family:inherit;cursor:pointer}
+.ck-stepper button:active{transform:scale(.96)}
+.ck-stepper input{width:62px;height:32px;border:1px solid #3E5266;border-radius:8px;text-align:center;font-size:16px;font-weight:700;color:#EAF2FB;background:#263544;font-family:inherit}
+.ck-quick{display:flex;gap:4px;flex-wrap:wrap}
+.ck-quick button{padding:4px 7px;border-radius:7px;border:1px solid #3A4D61;background:#22303F;font-size:.72rem;font-weight:600;color:#B9C8D6;font-family:inherit;cursor:pointer}
+.ck-quick button:active{transform:scale(.96)}
+.ck-row-sub{margin-left:auto;font-size:.79rem;font-weight:700;color:#5ED6C1;white-space:nowrap}
+.ck-grand{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0F766E;color:#fff;border-radius:12px;padding:11px 12px}
+.ck-glabel{font-size:.74rem;opacity:.88}
+.ck-gamount{font-size:1.28rem;font-weight:800;letter-spacing:.02em}
+.ck-grand .ck-btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.42);color:#fff}
+.ck-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:#EAEFF5;color:#0B1220;font-size:.8rem;font-weight:600;padding:9px 14px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .24s ease,transform .24s ease;z-index:9000;max-width:82vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.ck-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ckpanel.ck-light{--ckbg:#F3F4F6;--ckcard:#FFFFFF;--cktext:#111827;--ckmuted:#6B7280;--ckbd:#E5E7EB}
+.ckpanel.ck-light .ck-top{background:#FFFFFF;border-color:#E3E9EF}
+.ckpanel.ck-light .ck-btn{background:#FFFFFF;border-color:#E3E9EF;color:#111827}
+.ckpanel.ck-light .ck-btn.ck-primary{background:#0F766E;border-color:#0F766E;color:#fff}
+.ckpanel.ck-light .ck-btn.ck-danger{border-color:#F0C9C9;color:#DC2626}
+.ckpanel.ck-light .ck-calc-clear{background:#F8FAFC;border-color:#E3E9EF;color:#475569}
+.ckpanel.ck-light .ck-calc-tape span{background:#EEF2F6;border-color:#E2E8F0;color:#334155}
+.ckpanel.ck-light .ck-calc-keys button{background:#F8FAFC;border-color:#E3E9EF;color:#0F172A}
+.ckpanel.ck-light .ck-calc-keys .k-fn{background:#EEF2F6;color:#475569}
+.ckpanel.ck-light .ck-calc-keys .k-plus{background:#0F766E;border-color:#0F766E;color:#fff}
+.ckpanel.ck-light .ck-calc-keys .k-eq{background:#0D9488;border-color:#0D9488;color:#fff}
+.ckpanel.ck-light .ck-calc-hint{color:#6B7280}
+.ckpanel.ck-light .ck-sec{background:#FFFFFF;border-color:#E3E9EF}
+.ckpanel.ck-light .ck-sec-sub{color:#6B7280}
+.ckpanel.ck-light .ck-row{background:#FCFDFE;border-color:#EEF1F5}
+.ckpanel.ck-light .ck-stepper button{background:#FFFFFF;border-color:#E3E9EF;color:#334155}
+.ckpanel.ck-light .ck-stepper input{background:#FFFFFF;border-color:#E3E9EF;color:#0F172A}
+.ckpanel.ck-light .ck-quick button{background:#F1F5F9;border-color:#E3E9EF;color:#475569}
+.ckpanel.ck-light .ck-row-sub{color:#0F766E}
+.ckpanel.ck-light .ck-toast{background:#111827;color:#FFFFFF}
+@media (max-width:420px){.ck-row-sub{width:100%;margin-left:0;text-align:right}.ck-tools{width:100%}.ck-tools .ck-btn{flex:1}}
 </style>
 <style>
 body.updOpen #notice{display:none!important}
@@ -1449,10 +1526,332 @@ img,svg,canvas,video{max-width:100%}
     </button>
   </div>
   <div class="fb-row" style="padding-top:0">
-    <a class="fb-btn" href="../cash/" style="text-decoration:none;display:flex">
-      <span class="fb-dot"></span>新台幣現金點鈔機
-    </a>
+    <button type="button" class="fb-btn" id="ckToggle" aria-expanded="false" aria-controls="ckPanel">
+      <span class="fb-dot"></span><span id="ckToggleTxt">新台幣現金點鈔機</span>
+    </button>
   </div>
+
+  <div class="ckpanel" id="ckPanel" hidden>
+    <div class="ck-top">
+      <div class="ck-h">新台幣現金點鈔與零錢計算機
+        <span>紙鈔／硬幣可逐張加總，也能直接用計算機模式打金額往上加；數字存在這台裝置的瀏覽器</span>
+      </div>
+      <div class="ck-tools">
+        <button type="button" class="ck-btn ck-primary" id="ckCopy">複製明細</button>
+        <button type="button" class="ck-btn ck-danger" id="ckReset">全部歸零</button>
+      </div>
+    </div>
+
+    <div class="ck-calc">
+      <div class="ck-calc-head">
+        <div class="ck-calc-title">計算機模式：打數字往上加</div>
+        <button type="button" class="ck-calc-clear" id="ckCalcTapeClear">清空明細</button>
+      </div>
+      <div class="ck-calc-screen">
+        <div class="ck-calc-sub">累計 <b id="ckCalcTotal">NT$ 0</b></div>
+        <div class="ck-calc-main" id="ckCalcInput">0</div>
+      </div>
+      <div class="ck-calc-tape" id="ckCalcTape"></div>
+      <div class="ck-calc-keys" id="ckCalcKeys">
+        <button type="button" data-k="7">7</button>
+        <button type="button" data-k="8">8</button>
+        <button type="button" data-k="9">9</button>
+        <button type="button" class="k-fn" data-k="C">C</button>
+        <button type="button" data-k="4">4</button>
+        <button type="button" data-k="5">5</button>
+        <button type="button" data-k="6">6</button>
+        <button type="button" class="k-fn" data-k="DEL">⌫</button>
+        <button type="button" data-k="1">1</button>
+        <button type="button" data-k="2">2</button>
+        <button type="button" data-k="3">3</button>
+        <button type="button" class="k-plus" data-k="PLUS">＋</button>
+        <button type="button" data-k="0">0</button>
+        <button type="button" data-k="00">00</button>
+        <button type="button" class="k-eq" data-k="EQ">＝</button>
+      </div>
+      <p class="ck-calc-hint">打金額後按「＋」往上累加，明細會在右側列出每一筆；按「＝」同「＋」，按 C 全部歸零。這區與下方按面額逐張點鈔各自獨立。</p>
+    </div>
+
+    <div class="ck-sec">
+      <div class="ck-sec-hd">
+        <div class="ck-sec-t">紙鈔面額</div>
+        <div class="ck-sec-sub" id="ckBillsSubtotal">小計：0 元（0 張）</div>
+      </div>
+      <div class="ck-denom-list" id="ckBillsList"></div>
+    </div>
+
+    <div class="ck-sec">
+      <div class="ck-sec-hd">
+        <div class="ck-sec-t">硬幣零錢</div>
+        <div class="ck-sec-sub" id="ckCoinsSubtotal">小計：0 元（0 枚）</div>
+      </div>
+      <div class="ck-denom-list" id="ckCoinsList"></div>
+    </div>
+
+    <div class="ck-grand">
+      <div>
+        <div class="ck-glabel" id="ckGrandCounts">紙鈔 0 張 ＋ 硬幣 0 枚</div>
+        <div class="ck-gamount" id="ckGrandTotal">NT$ 0</div>
+      </div>
+      <button type="button" class="ck-btn" id="ckCopy2">複製結算明細</button>
+    </div>
+
+    <div class="ck-toast" id="ckToast">已複製明細到剪貼簿</div>
+  </div>
+
+<script id="ckJs">
+(function(){
+  var KEY = "twd_cash_counter_v1";
+  var D = [
+    {v:2000,t:"bill",label:"2,000 元",unit:"張",css:"d-2000",q:[10,50,100]},
+    {v:1000,t:"bill",label:"1,000 元",unit:"張",css:"d-1000",q:[10,50,100]},
+    {v:500, t:"bill",label:"500 元",  unit:"張",css:"d-500", q:[10,50,100]},
+    {v:200, t:"bill",label:"200 元",  unit:"張",css:"d-200", q:[10,50,100]},
+    {v:100, t:"bill",label:"100 元",  unit:"張",css:"d-100", q:[10,50,100]},
+    {v:50,  t:"coin",label:"50 元",   unit:"枚",css:"d-50",  q:[10,40]},
+    {v:10,  t:"coin",label:"10 元",   unit:"枚",css:"d-10",  q:[10,50]},
+    {v:5,   t:"coin",label:"5 元",    unit:"枚",css:"d-5",   q:[10,50]},
+    {v:1,   t:"coin",label:"1 元",    unit:"枚",css:"d-1",   q:[10,50]}
+  ];
+  function $(id){ return document.getElementById(id); }
+  var counts = {};
+  var panel = $("ckPanel"), toggle = $("ckToggle"), toggleTxt = $("ckToggleTxt");
+  if (!panel) return;
+
+  // ---- 展開／收起 ----
+  if (toggle) {
+    toggle.addEventListener("click", function(){
+      var isOpen = !panel.hasAttribute("hidden");
+      if (isOpen) {
+        panel.setAttribute("hidden","");
+        toggle.setAttribute("aria-expanded","false");
+        if (toggleTxt) toggleTxt.textContent = "新台幣現金點鈔機";
+      } else {
+        panel.removeAttribute("hidden");
+        toggle.setAttribute("aria-expanded","true");
+        if (toggleTxt) toggleTxt.textContent = "收起點鈔機";
+        try { panel.scrollIntoView({behavior:"smooth", block:"start"}); } catch(e) { panel.scrollIntoView(); }
+      }
+    });
+  }
+
+  // ---- 面額 ----
+  function init(){
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+      D.forEach(function(d){ counts[d.v] = Math.max(0, parseInt(saved[d.v],10) || 0); });
+    } catch(e) {
+      D.forEach(function(d){ counts[d.v] = 0; });
+    }
+    renderRows();
+    recalc();
+  }
+
+  function renderRows(){
+    var bills = $("ckBillsList"), coins = $("ckCoinsList");
+    if (!bills || !coins) return;
+    bills.innerHTML = ""; coins.innerHTML = "";
+    D.forEach(function(d, idx){
+      var row = document.createElement("div");
+      row.className = "ck-row";
+      var quickHtml = d.q.map(function(q){
+        var isRoll = d.t === "coin" && ((d.v === 50 && q === 40) || (d.v !== 50 && q === 50));
+        var text = (isRoll ? "+" + q + "(捲)" : "+" + q);
+        return '<button type="button" data-act="adj" data-d="' + d.v + '" data-q="' + q + '">' + text + '</button>';
+      }).join("");
+      row.innerHTML =
+        '<div class="ck-badge ' + d.css + '">' + d.label + '</div>' +
+        '<div class="ck-controls">' +
+          '<div class="ck-stepper">' +
+            '<button type="button" aria-label="減少" data-act="adj" data-d="' + d.v + '" data-q="-1">−</button>' +
+            '<input type="number" min="0" inputmode="numeric" id="ckInput-' + d.v + '" data-d="' + d.v + '" data-idx="' + idx + '" value="' + (counts[d.v] || "") + '" placeholder="0">' +
+            '<button type="button" aria-label="增加" data-act="adj" data-d="' + d.v + '" data-q="1">＋</button>' +
+          '</div>' +
+          '<div class="ck-quick">' + quickHtml + '</div>' +
+        '</div>' +
+        '<div class="ck-row-sub" id="ckSub-' + d.v + '">0 元</div>';
+      (d.t === "bill" ? bills : coins).appendChild(row);
+    });
+  }
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(counts)); } catch(e) {} }
+  function adj(dv, delta){
+    counts[dv] = Math.max(0, (counts[dv] || 0) + delta);
+    var inp = $("ckInput-" + dv);
+    if (inp) inp.value = counts[dv] === 0 ? "" : counts[dv];
+    save(); recalc(); calcTotalRefresh();
+  }
+  function setVal(dv, raw){
+    counts[dv] = Math.max(0, parseInt(raw,10) || 0);
+    save(); recalc(); calcTotalRefresh();
+  }
+  function recalc(){
+    var bSum = 0, bQty = 0, cSum = 0, cQty = 0;
+    D.forEach(function(d){
+      var qty = counts[d.v] || 0, sub = qty * d.v;
+      var el = $("ckSub-" + d.v);
+      if (el) el.textContent = sub.toLocaleString() + " 元";
+      if (d.t === "bill") { bSum += sub; bQty += qty; } else { cSum += sub; cQty += qty; }
+    });
+    var gt = bSum + cSum;
+    if ($("ckBillsSubtotal")) $("ckBillsSubtotal").textContent = "小計：" + bSum.toLocaleString() + " 元（" + bQty.toLocaleString() + " 張）";
+    if ($("ckCoinsSubtotal")) $("ckCoinsSubtotal").textContent = "小計：" + cSum.toLocaleString() + " 元（" + cQty.toLocaleString() + " 枚）";
+    if ($("ckGrandCounts")) $("ckGrandCounts").textContent = "紙鈔 " + bQty.toLocaleString() + " 張 ＋ 硬幣 " + cQty.toLocaleString() + " 枚";
+    if ($("ckGrandTotal")) $("ckGrandTotal").textContent = "NT$ " + gt.toLocaleString();
+  }
+
+  function toast(msg){
+    var t = $("ckToast");
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  function copySummary(){
+    var now = new Date();
+    var ts = now.getFullYear() + "/" + String(now.getMonth()+1).padStart(2,"0") + "/" + String(now.getDate()).padStart(2,"0") + " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+    var lines = ["【新台幣現金點算明細】(" + ts + ")"], gt = 0, has = false;
+    D.forEach(function(d){
+      var qty = counts[d.v] || 0;
+      if (qty > 0) { has = true; var sub = qty * d.v; gt += sub; lines.push("• " + d.label + " × " + qty + " " + d.unit + " ＝ " + sub.toLocaleString() + " 元"); }
+    });
+    if (!has) lines.push("（目前無輸入任何金額）");
+    lines.push("--------------------");
+    lines.push("紙鈔／硬幣總計：NT$ " + gt.toLocaleString() + " 元");
+    var calc = calcState();
+    if (calc.total > 0) lines.push("計算機累計：NT$ " + calc.total.toLocaleString() + " 元（" + calc.n + " 筆）");
+    var text = lines.join("\n");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ toast("已複製明細到剪貼簿"); }, function(){ fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text){
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); toast("已複製明細到剪貼簿"); } catch(e) { toast("複製失敗，請長按選取"); }
+    document.body.removeChild(ta);
+  }
+
+  function resetAll(){
+    D.forEach(function(d){ counts[d.v] = 0; });
+    D.forEach(function(d){ var inp = $("ckInput-" + d.v); if (inp) inp.value = ""; });
+    save(); recalc(); calcReset();
+    toast("已全部歸零");
+  }
+
+  // ---- 事件委派（避免 inline onclick 找不到 IIFE 內函式）----
+  ["ckBillsList","ckCoinsList"].forEach(function(cid){
+    var box = $(cid);
+    if (!box) return;
+    box.addEventListener("click", function(e){
+      var b = e.target.closest ? e.target.closest("button[data-act]") : null;
+      if (!b) return;
+      adj(Number(b.getAttribute("data-d")), Number(b.getAttribute("data-q")));
+    });
+    box.addEventListener("input", function(e){
+      var inp = e.target;
+      if (!inp || inp.tagName !== "INPUT") return;
+      var dv = Number(inp.getAttribute("data-d"));
+      counts[dv] = Math.max(0, parseInt(inp.value,10) || 0);
+      save(); recalc(); calcTotalRefresh();
+    });
+    box.addEventListener("keydown", function(e){
+      var inp = e.target;
+      if (!inp || inp.tagName !== "INPUT") return;
+      if (e.key === "Enter" || e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        var idx = Number(inp.getAttribute("data-idx"));
+        var next = e.key === "ArrowUp" ? (idx - 1 + D.length) % D.length : (idx + 1) % D.length;
+        var n = $("ckInput-" + D[next].v);
+        if (n) { n.focus(); n.select(); }
+      }
+    });
+  });
+
+  // ---- 計算機模式 ----
+  var buf = "", total = 0, tape = [], nCount = 0;
+  function calcState(){ return { total: total, n: nCount }; }
+  function comma(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function calcRender(){
+    var elIn = $("ckCalcInput"), elTot = $("ckCalcTotal"), elTape = $("ckCalcTape");
+    if (!elIn) return;
+    elIn.textContent = buf === "" ? "0" : comma(Number(buf));
+    if (elTot) elTot.textContent = "NT$ " + comma(total);
+    if (elTape) {
+      elTape.innerHTML = "";
+      tape.forEach(function(v){
+        var s = document.createElement("span");
+        s.textContent = "＋" + comma(v);
+        elTape.appendChild(s);
+      });
+      elTape.scrollTop = elTape.scrollHeight;
+      elTape.scrollLeft = elTape.scrollWidth;
+    }
+  }
+  function calcResize(){
+    var elIn = $("ckCalcInput");
+    if (!elIn) return;
+    var t = (buf === "" ? "0" : comma(Number(buf)));
+    elIn.style.fontSize = t.length > 9 ? "1.05rem" : "";
+  }
+  function calcReset(){ buf = ""; total = 0; tape = []; nCount = 0; calcRender(); calcResize(); }
+  function calcTotalRefresh(){ calcRender(); calcResize(); }
+  function pushDigit(d){
+    if (buf.length >= 9) return;
+    if (buf === "") buf = (d === "00" ? "0" : d);
+    else buf = buf + d;
+    buf = buf.replace(/^0+(?=\d)/, "");
+    calcRender(); calcResize();
+  }
+  function commit(){
+    var v = Number(buf || 0);
+    if (!v) return;
+    total += v; tape.push(v); nCount++; buf = "";
+    calcRender(); calcResize();
+  }
+  var keys = $("ckCalcKeys");
+  if (keys) {
+    keys.addEventListener("click", function(e){
+      var b = e.target.closest ? e.target.closest("button[data-k]") : null;
+      if (!b) return;
+      var k = b.getAttribute("data-k");
+      if (/^\d/.test(k) || k === "00") return pushDigit(k);
+      if (k === "PLUS" || k === "EQ") return commit();
+      if (k === "DEL") { buf = buf.slice(0,-1); calcRender(); calcResize(); return; }
+      if (k === "C") { calcReset(); return; }
+    });
+  }
+  var clr = $("ckCalcTapeClear");
+  if (clr) clr.addEventListener("click", function(){ tape = []; nCount = 0; calcRender(); });
+
+  var copyA = $("ckCopy"), copyB = $("ckCopy2"), resetB = $("ckReset");
+  if (copyA) copyA.addEventListener("click", copySummary);
+  if (copyB) copyB.addEventListener("click", copySummary);
+  if (resetB) resetB.addEventListener("click", resetAll);
+
+  // ---- 跟隨主題（白主題時切淺色樣式）----
+  function syncTheme(){
+    try {
+      var root = document.documentElement;
+      var light = (root.style.colorScheme === "light");
+      panel.classList.toggle("ck-light", !!light);
+    } catch(e) {}
+  }
+  syncTheme();
+  if (window.MutationObserver) {
+    try {
+      new MutationObserver(syncTheme).observe(document.documentElement, {attributes:true, attributeFilter:["style","class","data-theme"]});
+    } catch(e) {}
+  }
+
+  init();
+  calcRender();
+})();
+</script>
+
 
 
 
@@ -4255,6 +4654,7 @@ var EXITS = [["BL01","1",24.959327,121.418336],["BL01","2",24.95931,121.419],["B
         if(e.tagName==="CANVAS"||e.tagName==="IMG") continue;
         if(e.closest&&(e.closest("#thSheet")||e.closest(".notice"))) continue;
         if(e.closest&&e.closest(".nb-sw")) continue;
+        if(e.closest&&e.closest(".ckpanel")) continue;
         var cs; try{ cs=getComputedStyle(e); }catch(err){ continue; }
         var bg=cs.backgroundColor;
         var m=bg&&bg.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, ]+([\d.]+))?\)/);
